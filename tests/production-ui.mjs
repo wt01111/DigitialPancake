@@ -115,9 +115,12 @@ await admin.route("**/api/bootstrap", (r) =>
     },
   }),
 );
-await admin.route("**/api/admin/queue*", (r) =>
-  r.fulfill({ json: { items: [] } }),
-);
+let moderationDecision = null;
+await admin.route("**/api/admin/articles/*/decision", (r) => { moderationDecision = r.request().postDataJSON(); return r.fulfill({ json: { ok: true } }); });
+await admin.route("**/api/admin/queue*", (r) => {
+  const url = new URL(r.request().url());
+  return r.fulfill({ json: url.searchParams.get("type") === "articles" ? { items: [{ id: "published-1", title: "已通过的真实帖子", excerpt: "可由管理员搜索并直接下架", body: "## 正文", status: "approved", published: true }], total: 1, page: 1, pageSize: 20 } : { items: [] } });
+});
 let accountPatch = null;
 await admin.route("**/api/admin/accounts/**", async (r) => {
   accountPatch = r.request().postDataJSON();
@@ -159,6 +162,19 @@ await admin.route("**/api/admin/accounts*", async (r) => {
 await admin.goto(`${base}/admin`);
 await expect(admin.getByRole("heading", { name: "管理工作台" })).toBeVisible();
 await expect(admin.getByRole("button", { name: "文章" })).toHaveClass(/active/);
+await expect(admin.getByLabel("搜索帖子")).toBeVisible();
+await expect(admin.getByText("已通过的真实帖子")).toBeVisible();
+await expect(admin.getByRole("button", { name: "下架", exact: true })).toBeVisible();
+await expect(admin.locator(".markdown h2")).toHaveText("正文");
+await admin.getByRole("button", { name: "下架", exact: true }).click();
+await expect(admin.locator(".moderation-confirm")).toContainText("下架后公开页面将立即不可见");
+await admin.getByRole("button", { name: "取消", exact: true }).click();
+assert.equal(moderationDecision, null, "cancelling inline moderation must not submit");
+await admin.getByRole("button", { name: "下架", exact: true }).click();
+await admin.getByRole("button", { name: "确认下架", exact: true }).click();
+await expect.poll(() => moderationDecision?.decision).toBe("hidden");
+await expect(admin.getByText("已下架", { exact: true }).last()).toBeVisible();
+await admin.screenshot({ path: "test-results/new-features-ui/admin-article-search.png", fullPage: true });
 await admin.getByRole("button", { name: "账号" }).click();
 await expect(admin.getByText("Admin", { exact: true })).toBeVisible();
 await expect(admin.getByText("最高管理员", { exact: true })).toBeVisible();
@@ -176,10 +192,10 @@ await expect(
   admin.getByRole("dialog").getByText("member@example.test", { exact: true }),
 ).toBeVisible();
 await admin.getByLabel("角色").selectOption("admin");
-await admin.getByLabel("文章与赛题").check();
-await admin.getByRole("button", { name: "确认角色与权限" }).click();
+await expect(admin.getByText(/管理员可管理全部内容/)).toBeVisible();
+await admin.getByRole("button", { name: "确认角色" }).click();
 await expect.poll(() => accountPatch?.role).toBe("admin");
-assert.deepEqual(accountPatch.permissions, ["content"]);
+assert.equal("permissions" in accountPatch, false);
 await admin.screenshot({
   path: "work/qa/production-admin.png",
   fullPage: true,
@@ -204,5 +220,39 @@ await subordinate.route("**/api/admin/queue*", (r) =>
 );
 await subordinate.goto(`${base}/admin`);
 await expect(subordinate.getByRole("button", { name: "账号" })).toHaveCount(0);
+const authFlow = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: "zh-CN" });
+await authFlow.route("**/api/bootstrap", (r) => r.fulfill({ json: { user: null, config: { registrationEnabled: true, maxUploadBytes: 52428800 } } }));
+let codeRequests = 0, resetPayload = null;
+await authFlow.route("**/api/auth/request-code", async (r) => { codeRequests += 1; await new Promise((resolve) => setTimeout(resolve, 150)); return r.fulfill({ json: { ok: true, expiresIn: 60, cooldownSeconds: 60 } }); });
+await authFlow.route("**/api/auth/reset-password", (r) => { resetPayload = r.request().postDataJSON(); return r.fulfill({ json: { ok: true } }); });
+await authFlow.goto(`${base}/auth`);
+await authFlow.getByRole("button", { name: "注册" }).click();
+await authFlow.getByLabel("邮箱", { exact: true }).fill("cooldown@example.test");
+await authFlow.locator(".field-action button").click();
+await expect(authFlow.getByRole("button", { name: "发送中…" })).toBeDisabled();
+await expect.poll(() => codeRequests).toBe(1);
+await expect(authFlow.getByText("若该邮箱可用于此操作，验证码将发送，请在 1 分钟内完成验证。")).toBeVisible();
+await expect(authFlow.getByLabel("邮箱验证码")).toHaveAttribute("inputmode", "numeric");
+await authFlow.reload();
+await authFlow.getByRole("button", { name: "注册" }).click();
+await authFlow.getByLabel("邮箱", { exact: true }).fill("cooldown@example.test");
+await expect(authFlow.getByRole("button", { name: /秒后可重发/ })).toBeDisabled();
+await authFlow.getByRole("button", { name: "忘记密码" }).click();
+await expect(authFlow.getByRole("button", { name: /秒后可重发/ })).toBeDisabled();
+await authFlow.getByLabel("邮箱验证码").fill("123456");
+await expect(authFlow.getByLabel("邮箱验证码")).toHaveValue("123456");
+await authFlow.getByLabel("新密码").fill("new-password-123");
+await authFlow.getByLabel("确认密码").fill("different-password");
+await authFlow.getByRole("button", { name: "重置密码" }).click();
+await expect(authFlow.getByText("两次输入的密码不一致")).toBeVisible();
+assert.equal(resetPayload, null);
+await authFlow.getByLabel("确认密码").fill("new-password-123");
+await authFlow.getByRole("button", { name: "重置密码" }).click();
+await expect(authFlow.getByText("密码已重置，请使用新密码登录。")).toBeVisible();
+assert.equal(resetPayload.code, "123456");
+await authFlow.goto(`${base}/topics`);
+const topicNames = await authFlow.locator(".topic-card h2").allTextContents();
+assert.equal(topicNames[0], "电赛方案");
+assert.equal(topicNames.includes("控制与自动化"), false);
 await browser.close();
 console.log("Production UI checks passed.");

@@ -9,6 +9,7 @@
     "start": "node --env-file-if-exists=.env server/index.js",
     "init-owner": "node --env-file-if-exists=.env server/init-owner.js",
     "bind-owner-email": "node --env-file-if-exists=.env server/bind-owner-email.js",
+    "verify:smtp": "node --env-file-if-exists=.env server/verify-smtp.js",
     "build": "vite build",
     "validate:content": "node server/validate-content.js",
     "preview": "vite preview --host 127.0.0.1",

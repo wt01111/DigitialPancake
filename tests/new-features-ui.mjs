@@ -29,8 +29,11 @@ await page.route("**/api/shops/s1", (r) => r.fulfill({ json: { id: "s1", name: "
 let bookmarked = false;
 await page.route("**/api/me/bookmarks/shop/s1", (r) => { bookmarked = r.request().method() === "POST"; return r.fulfill({ json: { ok: true } }); });
 let reviewPatch = null;
-await page.route("**/api/reviews/r1/edit", (r) => r.fulfill({ json: { id: "r1", rating: 4, pros: "原优点", cons: "原不足", purchaseExperience: "原体验", status: "approved", published: true } }));
+let reviewWithdrawn = false;
+await page.route("**/api/reviews/r1/edit", (r) => r.fulfill({ json: { id: "r1", sentiment: "positive", content: "原评价内容", status: "approved", published: true } }));
 await page.route("**/api/reviews/r1", (r) => { reviewPatch = r.request().postDataJSON(); return r.fulfill({ json: { id: "r1", ...reviewPatch } }); });
+await page.route("**/api/reviews/r1/withdraw", (r) => { reviewWithdrawn = true; return r.fulfill({ json: { id: "r1", status: "draft", published: false } }); });
+await page.route("**/api/me/reviews", (r) => r.fulfill({ json: { items: [{ id: "r1", title: "真实评价", status: reviewWithdrawn ? "draft" : "approved", published: !reviewWithdrawn, editUrl: "/reviews/r1/edit" }] } }));
 await page.route("**/api/articles/drafts", (r) => r.fulfill({ json: { id: "d1" } }));
 let createdDraftReloads = 0;
 await page.route("**/api/articles/drafts/*", async (r) => {
@@ -87,10 +90,23 @@ await page.getByRole("button", { name: "收藏" }).click();
 await expect(page.getByRole("button", { name: "取消收藏" })).toBeVisible(); assert.equal(bookmarked, true);
 await page.goto(`${base}/reviews/r1/edit`);
 await expect(page.getByText(/审核期间继续展示旧版/)).toBeVisible();
-await page.getByLabel("优点").fill("修改后的优点");
+await page.screenshot({ path: "test-results/new-features-ui/review-three-levels.png", fullPage: true });
+await page.getByLabel("评价倾向").selectOption("neutral");
+await page.getByLabel("评价内容").fill("修改后的评价内容");
 await page.getByRole("button", { name: "保存修改" }).click();
-await expect.poll(() => reviewPatch?.pros).toBe("修改后的优点");
+await expect.poll(() => reviewPatch?.content).toBe("修改后的评价内容");
+assert.equal(reviewPatch.sentiment, "neutral");
 assert.equal(new URL(page.url()).pathname, "/reviews/r1/edit");
+await page.goto(`${base}/account?tab=reviews`);
+await page.getByRole("button", { name: "撤回为草稿" }).click();
+await expect(page.getByText(/立即下架/)).toBeVisible();
+await page.screenshot({ path: "test-results/new-features-ui/account-withdraw-confirm.png", fullPage: true });
+await page.getByRole("button", { name: "确认撤回" }).click();
+await expect.poll(() => reviewWithdrawn).toBe(true);
+await expect(page.getByText(/重新提交并审核通过后才会再次展示/)).toBeVisible();
+await page.goto(`${base}/topics`);
+await expect(page.locator(".topic-card h2").first()).toHaveText("电赛方案");
+await page.screenshot({ path: "test-results/new-features-ui/topics-desktop.png", fullPage: true });
 
 await page.goto(`${base}/write`);
 await expect(page.getByRole("heading", { name: "写文章" })).toBeVisible();

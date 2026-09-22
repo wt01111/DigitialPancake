@@ -19,7 +19,7 @@ process.env.PUBLIC_ORIGIN = base;
 process.env.DATABASE_PATH = join(temp, "site.sqlite");
 process.env.UPLOAD_DIR = join(temp, "uploads");
 process.env.MIN_FREE_BYTES = "0";
-const [{ app }, { run, db }, { hashPassword }] = await Promise.all([
+const [{ app }, { run, one, db }, { hashPassword }] = await Promise.all([
   import("../server/app.js"),
   import("../server/db.js"),
   import("../server/security.js"),
@@ -88,6 +88,7 @@ try {
   await expect(shopCard).toContainText("STM32 与测量模块");
   await expect(shopCard).toContainText("https://example.test/e2e-shop");
   await shopCard.getByRole("button", { name: "通过", exact: true }).click();
+  await shopCard.getByRole("button", { name: "确认通过" }).click();
   await page.getByRole("button", { name: "账号", exact: true }).click();
   await page.getByLabel("搜索用户").fill("member@e2e.local");
   await page.getByRole("button", { name: "搜索", exact: true }).click();
@@ -99,8 +100,7 @@ try {
     page.getByRole("heading", { name: "确认管理目标" }),
   ).toBeVisible();
   await page.getByLabel("角色").selectOption("admin");
-  await page.getByLabel("文章与赛题").check();
-  await page.getByRole("button", { name: "确认角色与权限" }).click();
+  await page.getByRole("button", { name: "确认角色" }).click();
   await expect(page.getByText(/已更新.*member@e2e\.local/)).toBeVisible();
   await logout();
   await page.goto(`${base}/shops`);
@@ -130,6 +130,7 @@ try {
   await expect(articleCard).toContainText("这段正文必须出现在审核页和公开详情");
   await expect(articleCard).toContainText("电路调试记录.pdf");
   await articleCard.getByRole("button", { name: "通过", exact: true }).click();
+  await articleCard.getByRole("button", { name: "确认通过" }).click();
   await logout();
   await login("member@e2e.local", "member-e2e-password-123");
   await page.goto(`${base}/articles`);
@@ -141,6 +142,57 @@ try {
   await page.getByRole("link", { name: /电路调试记录\.pdf/ }).click();
   const download = await downloadPromise;
   assert.equal(download.suggestedFilename(), "电路调试记录.pdf");
+
+  const publishedArticleId = one(
+    "SELECT id FROM articles WHERE title=?",
+    "端到端 Markdown 调试记录",
+  ).id;
+  run(
+    "INSERT INTO comments(id,user_id,target_type,target_id,parent_id,body,status,created_at) VALUES(?,?,?,?,NULL,?,'visible',?)",
+    "comment-e2e-moderation",
+    "owner-e2e",
+    "article",
+    publishedArticleId,
+    "需要管理员处理的评论",
+    new Date().toISOString(),
+  );
+  await page.reload();
+  const moderationComment = page
+    .locator(".comment")
+    .filter({ hasText: "需要管理员处理的评论" });
+  await expect(moderationComment.getByRole("button", { name: "管理删除" })).toBeVisible();
+  await moderationComment.getByRole("button", { name: "管理删除" }).click();
+  await moderationComment.getByRole("button", { name: "确认删除" }).click();
+  await expect(page.getByText("评论已删除", { exact: true })).toBeVisible();
+  assert.equal(
+    one("SELECT status FROM comments WHERE id='comment-e2e-moderation'").status,
+    "deleted",
+  );
+
+  await page.goto(`${base}/admin`);
+  await page.getByRole("button", { name: "文章", exact: true }).click();
+  await page.getByLabel("搜索帖子").fill("端到端 Markdown 调试记录");
+  await page.getByRole("button", { name: "搜索", exact: true }).click();
+  const publishedCard = page
+    .locator(".record-list article")
+    .filter({ hasText: "端到端 Markdown 调试记录" });
+  await expect(publishedCard).toBeVisible();
+  await publishedCard.getByRole("button", { name: "下架", exact: true }).click();
+  await expect(publishedCard.locator(".moderation-confirm")).toBeVisible();
+  await publishedCard.getByRole("button", { name: "确认下架" }).click();
+  await expect(publishedCard.locator(".status-hidden")).toContainText("已下架");
+
+  const anonymousDetail = await fetch(`${base}/api/articles/${publishedArticleId}`);
+  assert.equal(anonymousDetail.status, 404);
+  const anonymousList = await (await fetch(`${base}/api/articles`)).json();
+  assert.equal(
+    anonymousList.items.some((item) => item.id === publishedArticleId),
+    false,
+  );
+  assert.equal(
+    (await page.request.get(`${base}/api/admin/accounts`)).status(),
+    403,
+  );
   assert.deepEqual(errors, []);
   console.log(
     "PASS: real React + Express shop/article moderation and private attachment E2E",

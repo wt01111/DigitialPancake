@@ -86,7 +86,11 @@ export function rateLimiter({ windowMs, limit, key = (req) => req.ip }) {
     if (row.count > limit)
       return res
         .status(429)
-        .json({ error: "请求过于频繁，请稍后再试", code: "RATE_LIMITED" });
+        .json({
+          error: "请求过于频繁，请稍后再试",
+          code: "RATE_LIMITED",
+          retryAfter: Math.max(1, Math.ceil((row.reset - now) / 1000)),
+        });
     next();
   };
 }

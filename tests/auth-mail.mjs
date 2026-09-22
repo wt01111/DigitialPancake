@@ -105,6 +105,8 @@ function smtpSession(socket, secure = false) {
           smtpSession(encrypted, true);
         });
         return;
+      } else if (command === "RCPT" && /smtp-fail@/i.test(line)) {
+        socket.write("550 5.1.1 fixture rejection\r\n");
       } else if (
         command === "MAIL" ||
         command === "RCPT" ||
@@ -135,7 +137,6 @@ await new Promise((resolve, reject) => {
 const smtpPort = smtpServer.address().port;
 
 process.env.NODE_ENV = "test";
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 process.env.DATABASE_PATH = join(temp, "auth.sqlite");
 process.env.UPLOAD_DIR = join(temp, "uploads");
 process.env.PUBLIC_ORIGIN = "http://127.0.0.1:5173";
@@ -143,6 +144,7 @@ process.env.SESSION_SECRET = "auth-mail-test-session-secret-32-bytes-minimum";
 process.env.SMTP_HOST = "127.0.0.1";
 process.env.SMTP_PORT = String(smtpPort);
 process.env.SMTP_SECURE = "false";
+process.env.SMTP_TLS_REJECT_UNAUTHORIZED = "false";
 process.env.SMTP_FROM = "no-reply@example.test";
 
 let httpServer;
@@ -222,8 +224,18 @@ try {
       method: "POST",
       body: { email, purpose },
     });
-    assert.equal(response.status, 200, await response.text());
+    const payload = await response.json();
+    assert.equal(response.status, 200, JSON.stringify(payload));
+    assert.equal(payload.expiresIn, 60);
+    assert.equal(payload.cooldownSeconds, 60);
     return waitForCode(messageIndex);
+  }
+  function expireCooldown(email) {
+    database.run(
+      "UPDATE verification_codes SET created_at=? WHERE email=?",
+      new Date(Date.now() - 61_000).toISOString(),
+      email,
+    );
   }
   async function register(email, nickname, password, messageIndex) {
     const code = await issueCode(email, "register", messageIndex);
@@ -257,12 +269,25 @@ try {
   assert.equal(response.status, 400);
   assert.equal((await response.json()).code, "INVALID_CODE");
 
+  response = await request("/api/auth/request-code", {
+    method: "POST",
+    body: { email: firstEmail, purpose: "reset" },
+  });
+  assert.equal(response.status, 429);
+  let error = await response.json();
+  assert.equal(error.code, "CODE_COOLDOWN");
+  assert.ok(error.retryAfter >= 1 && error.retryAfter <= 60);
+  expireCooldown(firstEmail);
   const resetCode = await issueCode(firstEmail, "reset", 1);
   response = await request("/api/auth/reset-password", {
     method: "POST",
     body: { email: firstEmail, code: resetCode, newPassword },
   });
   assert.equal(response.status, 200, await response.text());
+  assert.equal(
+    (await request("/api/me", { cookie: result.cookie })).status,
+    401,
+  );
   assert.equal((await login(firstEmail, oldPassword)).response.status, 401);
   const firstLogin = await login(firstEmail, newPassword);
   assert.equal(
@@ -271,13 +296,126 @@ try {
     await firstLogin.response.text(),
   );
 
-  await register(secondEmail, "Mail Two", "second-account-password-123", 2);
+  const expiredCode = await issueCode(secondEmail, "register", 2);
+  database.run(
+    "UPDATE verification_codes SET expires_at=? WHERE email=?",
+    new Date(Date.now() - 1_000).toISOString(),
+    secondEmail,
+  );
+  response = await request("/api/auth/register", {
+    method: "POST",
+    body: {
+      email: secondEmail,
+      nickname: "Mail Two",
+      password: "second-account-password-123",
+      code: expiredCode,
+    },
+  });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).code, "INVALID_CODE");
+  expireCooldown(secondEmail);
+  await register(secondEmail, "Mail Two", "second-account-password-123", 3);
   const secondLogin = await login(secondEmail, "second-account-password-123");
   assert.equal(
     secondLogin.response.status,
     200,
     await secondLogin.response.text(),
   );
+
+  const concurrentEmail = "mail-concurrent@example.test";
+  const concurrent = await Promise.all([
+    request("/api/auth/request-code", {
+      method: "POST",
+      body: { email: concurrentEmail, purpose: "register" },
+    }),
+    request("/api/auth/request-code", {
+      method: "POST",
+      body: { email: concurrentEmail, purpose: "register" },
+    }),
+  ]);
+  assert.deepEqual(
+    concurrent.map((item) => item.status).sort(),
+    [200, 429],
+  );
+
+  const bruteEmail = "mail-brute@example.test";
+  const bruteCode = await issueCode(bruteEmail, "register", 5);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    response = await request("/api/auth/register", {
+      method: "POST",
+      body: {
+        email: bruteEmail,
+        nickname: "Brute",
+        password: "brute-test-password-123",
+        code: bruteCode === "000000" ? "111111" : "000000",
+      },
+    });
+    assert.equal(response.status, 400);
+  }
+  response = await request("/api/auth/register", {
+    method: "POST",
+    body: {
+      email: bruteEmail,
+      nickname: "Brute",
+      password: "brute-test-password-123",
+      code: bruteCode,
+    },
+  });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).code, "INVALID_CODE");
+
+  const resendEmail = "mail-resend@example.test";
+  const oldResendCode = await issueCode(resendEmail, "register", 6);
+  expireCooldown(resendEmail);
+  const newResendCode = await issueCode(resendEmail, "register", 7);
+  response = await request("/api/auth/register", {
+    method: "POST",
+    body: {
+      email: resendEmail,
+      nickname: "Resend",
+      password: "resend-test-password-123",
+      code: oldResendCode,
+    },
+  });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).code, "INVALID_CODE");
+  response = await request("/api/auth/register", {
+    method: "POST",
+    body: {
+      email: resendEmail,
+      nickname: "Resend",
+      password: "resend-test-password-123",
+      code: newResendCode,
+    },
+  });
+  assert.equal(response.status, 201, await response.text());
+
+  expireCooldown(firstEmail);
+  response = await request("/api/auth/request-code", {
+    method: "POST",
+    body: { email: firstEmail, purpose: "register" },
+  });
+  assert.equal(response.status, 200);
+  response = await request("/api/auth/request-code", {
+    method: "POST",
+    body: { email: "missing-reset@example.test", purpose: "reset" },
+  });
+  assert.equal(response.status, 200);
+
+  response = await request("/api/auth/request-code", {
+    method: "POST",
+    body: { email: "smtp-fail@example.test", purpose: "register" },
+  });
+  assert.equal(response.status, 503);
+  error = await response.json();
+  assert.equal(error.code, "SMTP_UNAVAILABLE");
+  assert.equal(error.error, "验证码邮件暂时无法发送，请稍后重试");
+  response = await request("/api/auth/request-code", {
+    method: "POST",
+    body: { email: "smtp-fail@example.test", purpose: "register" },
+  });
+  assert.equal(response.status, 429);
+  assert.equal((await response.json()).code, "CODE_COOLDOWN");
   const firstMe = await request("/api/me", { cookie: firstLogin.cookie });
   const secondMe = await request("/api/me", { cookie: secondLogin.cookie });
   assert.equal(firstMe.status, 200);

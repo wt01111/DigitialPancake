@@ -91,6 +91,13 @@ const mailer = smtpEnabled
       auth: process.env.SMTP_USER
         ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
         : undefined,
+      tls: {
+        rejectUnauthorized:
+          production || process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
+      },
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 15_000,
     })
   : null;
 const now = () => new Date().toISOString();
@@ -110,9 +117,10 @@ const parseCookies = (header = "") =>
   );
 const fail = (status, error, code) =>
   Object.assign(new Error(error), { status, code });
-const permissions = (u) => json(u?.permissions, "[]");
 const can = (u, p) =>
-  u?.role === "owner" || (u?.role === "admin" && permissions(u).includes(p));
+  u?.role === "owner" ||
+  (u?.role === "admin" &&
+    ["content", "shop_reviews", "reports"].includes(p));
 const audit = (actor, action, type, entity, detail = "") =>
   run(
     "INSERT INTO audit VALUES(?,?,?,?,?,?,?)",
@@ -192,7 +200,7 @@ const authEmailLimit = rateLimiter({
 });
 const submitLimit = rateLimiter({
   windowMs: 60 * 60e3,
-  limit: 30,
+  limit: Number(process.env.SUBMIT_RATE_LIMIT || 30),
   key: (r) => r.user?.id || r.ip,
 });
 const authIpLimit = rateLimiter({
@@ -325,7 +333,13 @@ async function consumeCode(email, purpose, code) {
     email,
     purpose,
   );
-  if (!row || row.used_at || row.expires_at <= now() || row.attempts >= 5)
+  if (
+    !/^\d{6}$/.test(code) ||
+    !row ||
+    row.used_at ||
+    row.expires_at <= now() ||
+    row.attempts >= 5
+  )
     throw fail(400, "验证码无效或已过期", "INVALID_CODE");
   run("UPDATE verification_codes SET attempts=attempts+1 WHERE id=?", row.id);
   if (codeDigest(email, purpose, code) !== row.code_hash)
@@ -355,18 +369,23 @@ app.post(
         !["register", "reset"].includes(purpose)
       )
         throw fail(400, "邮箱或用途无效", "INVALID_INPUT");
-      if (
-        purpose === "register" &&
-        one("SELECT id FROM users WHERE email=?", email)
-      )
-        throw fail(409, "该邮箱已注册", "EMAIL_EXISTS");
-      const code = String(randomInt(100000, 1000000));
-      run(
-        "UPDATE verification_codes SET used_at=? WHERE email=? AND purpose=? AND used_at IS NULL",
-        now(),
+      const previous = one(
+        "SELECT created_at FROM verification_codes WHERE email=? ORDER BY created_at DESC,id DESC LIMIT 1",
         email,
-        purpose,
       );
+      if (previous) {
+        const elapsed = Date.now() - Date.parse(previous.created_at),
+          retryAfter = Math.max(0, Math.ceil((60_000 - elapsed) / 1000));
+        if (retryAfter > 0)
+          throw Object.assign(
+            fail(429, "验证码发送过于频繁，请稍后再试", "CODE_COOLDOWN"),
+            { retryAfter },
+          );
+      }
+      const reservationCreatedAt = new Date(
+          Math.max(Date.now(), (Date.parse(previous?.created_at || "") || 0) + 1),
+        ).toISOString(),
+        code = String(randomInt(100000, 1000000));
       createdCodeId = id("code");
       run(
         "INSERT INTO verification_codes VALUES(?,?,?,?,?,?,?,?)",
@@ -374,25 +393,60 @@ app.post(
         email,
         purpose,
         codeDigest(email, purpose, code),
-        new Date(Date.now() + 10 * 60e3).toISOString(),
+        reservationCreatedAt,
         0,
         null,
-        now(),
+        reservationCreatedAt,
       );
-      await mailer.sendMail({
-        from: process.env.SMTP_FROM,
-        to: email,
-        subject:
-          purpose === "register"
-            ? "电子煎饼注册验证码"
-            : "电子煎饼密码重置验证码",
-        text: `验证码：${code}\n10 分钟内有效，请勿转发。`,
-      });
-      res.json({ ok: true });
+      const userExists = Boolean(
+        one("SELECT 1 FROM users WHERE email=?", email),
+      );
+      if (
+        (purpose === "register" && userExists) ||
+        (purpose === "reset" && !userExists)
+      ) {
+        run(
+          "UPDATE verification_codes SET used_at=? WHERE id=?",
+          now(),
+          createdCodeId,
+        );
+        return res.json({ ok: true, expiresIn: 60, cooldownSeconds: 60 });
+      }
+      try {
+        await mailer.sendMail({
+          from: process.env.SMTP_FROM,
+          to: email,
+          subject:
+            purpose === "register"
+              ? "电子煎饼注册验证码"
+              : "电子煎饼密码重置验证码",
+          text: `验证码：${code}\n1 分钟内有效，请勿转发。`,
+        });
+      } catch {
+        throw fail(503, "验证码邮件暂时无法发送，请稍后重试", "SMTP_UNAVAILABLE");
+      }
+      const latest = one(
+        "SELECT id FROM verification_codes WHERE email=? ORDER BY created_at DESC,id DESC LIMIT 1",
+        email,
+      );
+      if (latest?.id !== createdCodeId)
+        throw fail(409, "验证码请求已更新，请使用最新邮件", "CODE_SUPERSEDED");
+      run(
+        "UPDATE verification_codes SET used_at=? WHERE email=? AND id<>? AND used_at IS NULL",
+        now(),
+        email,
+        createdCodeId,
+      );
+      run(
+        "UPDATE verification_codes SET expires_at=? WHERE id=?",
+        new Date(Date.now() + 60_000).toISOString(),
+        createdCodeId,
+      );
+      res.json({ ok: true, expiresIn: 60, cooldownSeconds: 60 });
     } catch (e) {
       if (createdCodeId)
         run(
-          "UPDATE verification_codes SET used_at=? WHERE id=?",
+          "UPDATE verification_codes SET used_at=COALESCE(used_at,?) WHERE id=?",
           now(),
           createdCodeId,
         );
@@ -612,9 +666,9 @@ app.get("/api/me/reviews", auth, (req, res) =>
 app.get("/api/me/shops", auth, (req, res) =>
   res.json({
     items: all(
-      "SELECT id,name,platform,url,status,decision_reason decisionReason,created_at createdAt FROM shops WHERE submitter_id=? ORDER BY created_at DESC",
+      "SELECT * FROM shops WHERE submitter_id=? ORDER BY created_at DESC",
       req.user.id,
-    ),
+    ).map(shopDraftOut),
   }),
 );
 app.get("/api/me/submissions", auth, (req, res) =>
@@ -753,6 +807,7 @@ function reviewOut(r, published = false) {
           (rating >= 4 ? "positive" : rating <= 2 ? "negative" : "neutral"),
         pros: snapshot ? snapshot.pros : r.pros,
         cons: snapshot ? snapshot.cons : r.cons,
+        content: snapshot ? snapshot.content : r.review_content,
         purchaseExperience: snapshot
           ? snapshot.purchaseExperience
           : r.purchase_experience,
@@ -764,6 +819,8 @@ function reviewOut(r, published = false) {
           ? {
               decisionReason: r.decision_reason,
               updatedAt: r.updated_at,
+              draftId: r.id,
+              editUrl: `/reviews/${r.id}/edit`,
               proofFileId: r.proof_file_id,
               proofName: r.proof_name,
               proofMime: r.proof_mime,
@@ -912,6 +969,115 @@ app.post("/api/shops", auth, submitLimit, (req, res, next) => {
     next(e);
   }
 });
+function editableShop(req, next) {
+  const shop = one(
+    "SELECT * FROM shops WHERE id=? AND submitter_id=?",
+    req.params.id,
+    req.user.id,
+  );
+  if (!shop) next(fail(404, "店铺投稿不存在", "NOT_FOUND"));
+  return shop;
+}
+function shopDraftOut(shop) {
+  return {
+    ...shopOut(shop),
+    aliases: json(shop.aliases),
+    decisionReason: shop.decision_reason,
+    published: shop.status === "approved",
+    draftId: shop.id,
+    editUrl: `/shops/${shop.id}/edit`,
+    updatedAt: shop.updated_at,
+  };
+}
+app.get("/api/shops/:id/edit", auth, (req, res, next) => {
+  const shop = editableShop(req, next);
+  if (shop) res.json(shopDraftOut(shop));
+});
+app.patch("/api/shops/:id", auth, submitLimit, (req, res, next) => {
+  try {
+    const shop = editableShop(req, next);
+    if (!shop) return;
+    if (shop.status === "approved")
+      throw fail(409, "请先撤回公开店铺，再修改资料", "WITHDRAW_REQUIRED");
+    const name = String(req.body.name ?? shop.name).trim(),
+      url = String(req.body.url ?? shop.url ?? "").trim() || null;
+    if (!name || name.length > 120)
+      throw fail(400, "请填写有效的店铺名称", "INVALID_INPUT");
+    if (url) {
+      let parsed;
+      try {
+        parsed = new URL(url);
+      } catch {
+        throw fail(400, "店铺链接格式无效", "INVALID_URL");
+      }
+      if (!["http:", "https:"].includes(parsed.protocol))
+        throw fail(400, "店铺链接仅支持 HTTP 或 HTTPS", "INVALID_URL");
+    }
+    if (
+      one(
+        "SELECT 1 FROM shops WHERE id<>? AND (lower(name)=lower(?) OR (? IS NOT NULL AND url=?))",
+        shop.id,
+        name,
+        url,
+        url,
+      )
+    )
+      throw fail(409, "相同店铺已存在或正在审核", "SHOP_EXISTS");
+    run(
+      `UPDATE shops SET name=?,aliases=?,owner_ref=?,platform=?,url=?,condition_text=?,business_scope=?,
+       status='draft',decision_reason=NULL,updated_at=? WHERE id=?`,
+      name,
+      JSON.stringify(req.body.aliases ?? json(shop.aliases)),
+      req.body.ownerId ?? shop.owner_ref,
+      req.body.platform ?? shop.platform,
+      url,
+      req.body.condition ?? shop.condition_text,
+      req.body.businessScope ?? shop.business_scope,
+      nextUpdatedAt(shop.updated_at),
+      shop.id,
+    );
+    audit(req.user, "修改店铺投稿", "shop", shop.id);
+    res.json({ id: shop.id, status: "draft", published: false });
+  } catch (error) {
+    next(error);
+  }
+});
+app.post("/api/shops/:id/withdraw", auth, submitLimit, (req, res, next) => {
+  const shop = editableShop(req, next);
+  if (!shop) return;
+  if (shop.status !== "draft") {
+    run(
+      "UPDATE shops SET status='draft',decision_reason=NULL,updated_at=? WHERE id=?",
+      nextUpdatedAt(shop.updated_at),
+      shop.id,
+    );
+    audit(req.user, "撤回店铺投稿", "shop", shop.id);
+  }
+  res.json({ id: shop.id, status: "draft", published: false });
+});
+app.post("/api/shops/:id/submit", auth, submitLimit, (req, res, next) => {
+  const shop = editableShop(req, next);
+  if (!shop) return;
+  if (!shop.name.trim()) return next(fail(400, "店铺名称不能为空", "INVALID_INPUT"));
+  if (
+    one(
+      "SELECT 1 FROM shops WHERE id<>? AND (lower(name)=lower(?) OR (url IS NOT NULL AND url=?))",
+      shop.id,
+      shop.name,
+      shop.url,
+    )
+  )
+    return next(fail(409, "相同店铺已存在或正在审核", "SHOP_EXISTS"));
+  if (shop.status !== "pending") {
+    run(
+      "UPDATE shops SET status='pending',decision_reason=NULL,updated_at=? WHERE id=?",
+      nextUpdatedAt(shop.updated_at),
+      shop.id,
+    );
+    audit(req.user, "重新提交店铺", "shop", shop.id);
+  }
+  res.json({ id: shop.id, status: "pending", published: false });
+});
 app.post(
   "/api/shops/:id/reviews",
   auth,
@@ -930,20 +1096,20 @@ app.post(
         req.params.id,
       );
       if (!shop) throw fail(404, "店铺不存在", "NOT_FOUND");
-      const rating = Number(req.body.rating),
+      const sentiment = String(req.body.sentiment || ""),
+        content = String(req.body.content || "").trim(),
+        rating = { positive: 5, neutral: 3, negative: 1 }[sentiment],
         pros = String(req.body.pros || "").trim(),
         cons = String(req.body.cons || "").trim(),
         experience = String(req.body.purchaseExperience || "").trim();
       if (
-        !Number.isInteger(rating) ||
-        rating < 1 ||
-        rating > 5 ||
-        (!pros && !cons) ||
-        !experience
+        !rating ||
+        !content ||
+        content.length > 3000
       )
         throw fail(
           400,
-          "请完整填写评分、优点或缺点及购买经历",
+          "请选择好评、中评或差评，并填写评价内容",
           "INVALID_INPUT",
         );
       const rid = id("review"),
@@ -978,7 +1144,7 @@ app.post(
         );
       }
       run(
-        "INSERT INTO reviews(id,shop_id,user_id,source_type,rating,pros,cons,purchase_experience,purchased_at,order_platform,proof_file_id,status,created_at,updated_at) VALUES(?,?,?,'site',?,?,?,?,?,?,?,'pending',?,?)",
+        "INSERT INTO reviews(id,shop_id,user_id,source_type,rating,pros,cons,purchase_experience,purchased_at,order_platform,proof_file_id,status,created_at,updated_at,sentiment,review_content) VALUES(?,?,?,'site',?,?,?,?,?,?,?,'pending',?,?,?,?)",
         rid,
         shop.id,
         req.user.id,
@@ -991,6 +1157,8 @@ app.post(
         fid,
         t,
         t,
+        sentiment,
+        content,
       );
       audit(req.user, "提交店铺评价", "review", rid);
       res.status(201).json({ id: rid, status: "pending" });
@@ -1015,22 +1183,36 @@ function editableReview(req, next) {
   return review;
 }
 function validateReviewInput(body, current = {}) {
-  const rating = Number(body.rating ?? current.rating),
+  const sentiment = String(
+      body.sentiment ||
+        current.sentiment ||
+        (current.rating == null
+          ? ""
+          : current.rating >= 4
+            ? "positive"
+            : current.rating <= 2
+              ? "negative"
+              : "neutral"),
+    ),
+    rating = { positive: 5, neutral: 3, negative: 1 }[sentiment],
+    content = String(
+      body.content ??
+        current.review_content ??
+        [current.pros, current.cons, current.purchase_experience]
+          .filter(Boolean)
+          .join("\n"),
+    ).trim(),
     pros = String(body.pros ?? current.pros ?? "").trim(),
     cons = String(body.cons ?? current.cons ?? "").trim(),
     purchaseExperience = String(
       body.purchaseExperience ?? current.purchase_experience ?? "",
     ).trim();
-  if (
-    !Number.isInteger(rating) ||
-    rating < 1 ||
-    rating > 5 ||
-    (!pros && !cons) ||
-    !purchaseExperience
-  )
-    throw fail(400, "请完整填写评分、优点或缺点及购买经历", "INVALID_INPUT");
+  if (!rating || !content || content.length > 3000)
+    throw fail(400, "请选择好评、中评或差评，并填写评价内容", "INVALID_INPUT");
   return {
     rating,
+    sentiment,
+    content,
     pros,
     cons,
     purchaseExperience,
@@ -1049,9 +1231,11 @@ app.patch("/api/reviews/:id", auth, submitLimit, (req, res, next) => {
     if (!review) return;
     const input = validateReviewInput(req.body, review);
     run(
-      `UPDATE reviews SET rating=?,pros=?,cons=?,purchase_experience=?,purchased_at=?,order_platform=?,
+      `UPDATE reviews SET rating=?,sentiment=?,review_content=?,pros=?,cons=?,purchase_experience=?,purchased_at=?,order_platform=?,
        status='draft',decision_reason=NULL,updated_at=? WHERE id=?`,
       input.rating,
+      input.sentiment,
+      input.content,
       input.pros,
       input.cons,
       input.purchaseExperience,
@@ -1081,6 +1265,19 @@ app.post("/api/reviews/:id/submit", auth, submitLimit, (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+app.post("/api/reviews/:id/withdraw", auth, submitLimit, (req, res, next) => {
+  const review = editableReview(req, next);
+  if (!review) return;
+  if (review.status !== "draft" || review.published_visible) {
+    run(
+      "UPDATE reviews SET status='draft',published_visible=0,decision_reason=NULL,updated_at=? WHERE id=?",
+      nextUpdatedAt(review.updated_at),
+      review.id,
+    );
+    audit(req.user, "撤回店铺评价", "review", review.id);
+  }
+  res.json({ id: review.id, status: "draft", published: false });
 });
 
 function articleOut(a, published = false) {
@@ -1368,6 +1565,28 @@ app.post(
     res.json({ ok: true, status: "pending" });
   },
 );
+app.post(
+  "/api/articles/drafts/:id/withdraw",
+  auth,
+  submitLimit,
+  (req, res, next) => {
+    const article = one(
+      "SELECT * FROM articles WHERE id=? AND user_id=?",
+      req.params.id,
+      req.user.id,
+    );
+    if (!article) return next(fail(404, "文章不存在", "NOT_FOUND"));
+    if (article.status !== "draft" || article.published_visible) {
+      run(
+        "UPDATE articles SET status='draft',published_visible=0,decision_reason=NULL,updated_at=? WHERE id=?",
+        nextUpdatedAt(article.updated_at),
+        article.id,
+      );
+      audit(req.user, "撤回文章", "article", article.id);
+    }
+    res.json({ id: article.id, status: "draft", published: false });
+  },
+);
 const problemCategories = new Set(["signal", "control", "power", "other"]);
 const problemCompetitionTypes = new Set(["national", "provincial"]);
 function problemFields(input, current = {}) {
@@ -1647,6 +1866,13 @@ app.get("/api/comments", (req, res, next) => {
         Boolean(
           req.user && (req.user.id === row.userId || can(req.user, "reports")),
         ),
+      canModerateDelete:
+        !deleted &&
+        Boolean(
+          req.user &&
+            req.user.id !== row.userId &&
+            can(req.user, "reports"),
+        ),
       canReply: !deleted && Boolean(req.user),
     });
     for (const child of (byParent.get(row.id) || [])
@@ -1897,7 +2123,7 @@ app.get("/api/official-files/:id", auth, (req, res, next) => {
 
 app.get("/api/admin/queue", auth, (req, res, next) => {
   const type = req.query.type;
-  const status = ["pending", "approved", "rejected", "hidden", "all"].includes(
+  const status = ["draft", "pending", "approved", "rejected", "hidden", "all"].includes(
     req.query.status,
   )
     ? req.query.status
@@ -1925,16 +2151,41 @@ app.get("/api/admin/queue", auth, (req, res, next) => {
         ...params,
       ).map((r) => ({ ...reviewOut(r), shopName: r.shop_name })),
     });
-  if (type === "articles" && can(req.user, "content"))
+  if (type === "articles" && can(req.user, "content")) {
+    const q = String(req.query.q || "").trim(),
+      like = `%${q.replace(/[\\%_]/g, "\\$&")}%`,
+      page = Math.max(1, Number.parseInt(req.query.page, 10) || 1),
+      pageSize = Math.min(
+        100,
+        Math.max(1, Number.parseInt(req.query.pageSize, 10) || 20),
+      ),
+      search = q
+        ? " AND (a.title LIKE ? ESCAPE '\\' OR a.body LIKE ? ESCAPE '\\' OR COALESCE(a.excerpt,'') LIKE ? ESCAPE '\\' OR COALESCE(a.published_payload,'') LIKE ? ESCAPE '\\')"
+        : "",
+      searchParams = q ? [like, like, like, like] : [],
+      total = Number(
+        one(
+          `SELECT COUNT(*) count FROM articles a WHERE ${where("a")}${search}`,
+          ...params,
+          ...searchParams,
+        ).count,
+      );
     return res.json({
       items: all(
-        `SELECT a.*,u.nickname FROM articles a JOIN users u ON u.id=a.user_id WHERE ${where("a")} ORDER BY a.updated_at`,
+        `SELECT a.*,u.nickname FROM articles a JOIN users u ON u.id=a.user_id WHERE ${where("a")}${search} ORDER BY a.updated_at DESC,a.id LIMIT ? OFFSET ?`,
         ...params,
+        ...searchParams,
+        pageSize,
+        (page - 1) * pageSize,
       ).map((a) => ({
         ...articleOut(a),
         author: { id: a.user_id, nickname: a.nickname },
       })),
+      total,
+      page,
+      pageSize,
     });
+  }
   if (type === "reports" && can(req.user, "reports"))
     return res.json({
       items: all(
@@ -1970,7 +2221,9 @@ function decisionRoute(table, permission) {
           const payload = JSON.stringify({
             rating,
             sentiment:
-              rating >= 4 ? "positive" : rating <= 2 ? "negative" : "neutral",
+              row.sentiment ||
+              (rating >= 4 ? "positive" : rating <= 2 ? "negative" : "neutral"),
+            content: row.review_content,
             pros: row.pros,
             cons: row.cons,
             purchaseExperience: row.purchase_experience,
@@ -2390,5 +2643,8 @@ app.use((err, _req, res, _next) => {
   res.status(err.status || 500).json({
     error: err.status ? err.message : "服务器内部错误",
     code: err.code || "INTERNAL_ERROR",
+    ...(Number.isInteger(err.retryAfter)
+      ? { retryAfter: err.retryAfter }
+      : {}),
   });
 });

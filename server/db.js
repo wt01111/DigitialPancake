@@ -43,6 +43,7 @@ for (const sql of [
   "ALTER TABLE articles ADD COLUMN cover_image_id TEXT",
   "ALTER TABLE reviews ADD COLUMN published_payload TEXT",
   "ALTER TABLE reviews ADD COLUMN published_visible INTEGER NOT NULL DEFAULT 0",
+  "ALTER TABLE reviews ADD COLUMN review_content TEXT",
 ]) {
   try {
     db.exec(sql);

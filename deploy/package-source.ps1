@@ -16,11 +16,12 @@ $files = @(
     '.env.example', '.gitattributes', '.gitignore', 'index.html', 'package.json', 'package-lock.json',
     'vite.config.js', 'README.md', 'SHOP-REVIEW-DESIGN.md', 'PHOTO-CREDITS.md',
     '上线配置清单.md', '服务器开站流程.md', 'start-preview.ps1', '启动本地预览.cmd',
-    'src\App.jsx', 'src\data.js', 'src\main.jsx', 'src\Markdown.jsx',
+    'src\App.jsx', 'src\data.js', 'src\main.jsx', 'src\Markdown.jsx', 'src\PdfViewer.jsx',
     'src\photo-data.json', 'src\photography.css', 'src\Photos.jsx',
     'src\store.jsx', 'src\styles.css',
     'server\API.md', 'server\app.js', 'server\content-manifest.js', 'server\validate-content.js', 'server\db.js', 'server\index.js',
-    'server\init-owner.js', 'server\security.js', 'server\seed\shop-seed.json',
+    'server\init-owner.js', 'server\bind-owner-email.js', 'server\verify-smtp.js',
+    'server\security.js', 'server\seed\shop-seed.json',
     'server\seed\problems-official.json', 'server\seed\problems-official-files\README.md',
     'scripts\import-national-problems.mjs',
     'public\favicon.svg', 'public\photos\credits.json',
@@ -30,17 +31,23 @@ $files = @(
     'public\photos\stm32-1200.webp', 'public\photos\stm32-640.webp',
     'tests\api.mjs', 'tests\auth-mail.mjs', 'tests\production-ui.mjs',
     'tests\production-integration.mjs', 'tests\production-e2e.mjs',
+    'tests\community-e2e.mjs', 'tests\new-features-ui.mjs',
+    'tests\persistence.mjs', 'tests\persistence-child.mjs', 'tests\real-data-ui.mjs',
+    'tests\deployment-smoke.sh',
     'deploy\app.env.example', 'deploy\backup.sh',
     'deploy\electronic-pancake-backup.service',
     'deploy\electronic-pancake-backup.timer', 'deploy\electronic-pancake.service',
     'deploy\install-node24.sh', 'deploy\logrotate.conf',
-    'deploy\nginx\electronic-pancake.conf', 'deploy\restore.sh',
+    'deploy\nginx\electronic-pancake.conf',
+    'deploy\nginx\electronic-pancake-staging.conf',
+    'deploy\nginx\electronic-pancake-domain.conf', 'deploy\nginx\electronic-pancake-tls.conf',
+    'deploy\quick-install.sh', 'deploy\enable-https.sh', 'deploy\restore.sh',
     'deploy\package-source.ps1'
 )
 
 # dist contains only the final Vite output. Its hashed filenames change on each
 # build, so the directory is enumerated only after strict path/extension checks.
-$allowedDistExtensions = @('.html', '.js', '.css', '.svg', '.json', '.webp', '.woff', '.woff2', '.ttf')
+$allowedDistExtensions = @('.html', '.js', '.mjs', '.css', '.svg', '.json', '.webp', '.woff', '.woff2', '.ttf')
 $distFiles = Get-ChildItem -LiteralPath (Join-Path $projectRoot 'dist') -File -Recurse
 if (-not ($distFiles | Where-Object Name -EQ 'index.html')) {
     throw 'dist/index.html is missing. Run and verify the final build first.'
@@ -91,7 +98,7 @@ try {
     $textExtensions = @('.js', '.mjs', '.json', '.md', '.ps1', '.sh', '.service', '.timer', '.conf', '.example', '.html', '.css', '.cmd')
     $unexpectedSecrets = Get-ChildItem -LiteralPath $stagingRoot -File -Recurse |
         Where-Object { $textExtensions -contains $_.Extension.ToLowerInvariant() } |
-        Select-String -Pattern 'OWNER_PASSWORD[ \t]*=[ \t]*\S+|SMTP_PASS[ \t]*=[ \t]*\S+' -List
+        Select-String -Pattern '^[ \t]*(?:OWNER_PASSWORD|SMTP_PASS)[ \t]*=[ \t]*(?![$%])(?!(?:replace-|<))\S+' -List
     if ($unexpectedSecrets) {
         throw "A credential-like assignment was found in staged source: $($unexpectedSecrets.Path -join ', ')"
     }

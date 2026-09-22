@@ -7,7 +7,7 @@ export async function api(path, options = {}) {
   const response = await fetch(`/api${path}`, { credentials: "include", ...options, headers, body: options.body && !isForm && typeof options.body !== "string" ? JSON.stringify(options.body) : options.body });
   const type = response.headers.get("content-type") || "";
   const payload = type.includes("application/json") ? await response.json() : await response.text();
-  if (!response.ok) { const error = new Error(payload?.error || `请求失败（${response.status}）`); error.code = payload?.code; error.status = response.status; throw error; }
+  if (!response.ok) { const error = new Error(payload?.error || `请求失败（${response.status}）`); error.code = payload?.code; error.status = response.status; error.retryAfter = Number(payload?.retryAfter) || 0; throw error; }
   return payload;
 }
 export function asItems(payload) { return Array.isArray(payload) ? payload : payload?.items || []; }

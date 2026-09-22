@@ -5,7 +5,7 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 ## Session and profile
 
 - `GET /api/bootstrap` → `{user,config:{registrationEnabled,maxUploadBytes}}`; user fields: `id,email,nickname,role,permissions`.
-- `POST /api/auth/request-code` `{email,purpose:"register"|"reset"}`.
+- `POST /api/auth/request-code` `{email,purpose:"register"|"reset"}` returns `{ok:true,expiresIn:60,cooldownSeconds:60}`. Codes are six digits, become valid only after SMTP accepts the message, expire after 60 seconds, allow at most five incorrect attempts, and are consumed once. Register and reset share a per-email 60-second send cooldown; cooldown responses are 429 `{error,code:"CODE_COOLDOWN",retryAfter}` with `retryAfter` in seconds. General request limiting uses `RATE_LIMITED` with the same field. SMTP delivery failures return 503 `SMTP_UNAVAILABLE` without exposing provider details.
 - `POST /api/auth/register` `{email,code,password,nickname}`.
 - `POST /api/auth/login` `{email,password}`. All users, including the owner, log in with a verified email address.
 - `POST /api/auth/logout`; `POST /api/auth/change-password` `{currentPassword,newPassword}`; `POST /api/auth/reset-password` `{email,code,newPassword}`.
@@ -18,9 +18,10 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 
 - `GET /api/shops?q=keyword` → `{items}`; blank query always returns `[]`. Shop list fields: `id,name,aliases,ownerId,platform,url,condition,businessScope,positiveCount,negativeCount,neutralCount,siteAverage,siteReviewCount`.
 - `GET /api/shops/:id` → shop plus `reviews`; only approved reviews are public. Workbook reviews include `sourceType,sentiment,reason,notes,supplements,questions,date,sourceSheet,sourceRow`. Site reviews include `author,rating,pros,cons,purchaseExperience,purchasedAt,orderPlatform,date`; no proof metadata is public.
-- `POST /api/shops` JSON `{name,aliases?:string[],ownerId?,platform?,url?,condition?,businessScope}` → pending shop.
-- `POST /api/shops/:id/reviews` multipart fields `rating,pros?,cons?,purchaseExperience,purchasedAt?,orderPlatform?,proof?`. `proof` accepts PNG/JPEG/WebP/PDF up to 50 MiB.
-- `GET /api/reviews/:id/edit` returns the author's editable site review and private proof metadata. `PATCH /api/reviews/:id` accepts `{rating,pros?,cons?,purchaseExperience,purchasedAt?,orderPlatform?}` and preserves the existing proof; `POST /api/reviews/:id/submit` sends that same review ID back to moderation. Workbook reviews cannot be edited. An approved revision stays public from its immutable snapshot until the new revision is approved; proof metadata is never copied into that snapshot.
+- `POST /api/shops` JSON `{name,aliases?:string[],ownerId?,platform?,url?,condition?,businessScope}` → pending shop; only `name` is required. Authors use `GET /api/shops/:id/edit`, `PATCH /api/shops/:id`, and `POST /api/shops/:id/submit`. A public shop must first be withdrawn before editing, and duplicate name/URL checks apply again on edit and submit.
+- `POST /api/shops/:id/reviews` multipart fields `sentiment:"positive"|"neutral"|"negative",content,pros?,cons?,purchaseExperience?,purchasedAt?,orderPlatform?,proof?`. The three sentiments map to internal ratings 5/3/1. `proof` accepts PNG/JPEG/WebP/PDF up to 50 MiB.
+- `GET /api/reviews/:id/edit` returns the author's editable site review and private proof metadata. `PATCH /api/reviews/:id` accepts the same review fields and preserves the existing proof; `POST /api/reviews/:id/submit` sends that same review ID back to moderation. Workbook reviews cannot be edited. An approved revision stays public from its immutable snapshot until the new revision is approved; proof metadata is never copied into that snapshot.
+- Authors may immediately unpublish their own content with `POST /api/articles/drafts/:id/withdraw`, `POST /api/shops/:id/withdraw`, or `POST /api/reviews/:id/withdraw`. Each returns `{id,status:"draft",published:false}`, is idempotent, retains the prior snapshot for audit, invalidates stale moderation versions, and requires a fresh submission and approval before anything becomes public again.
 - `GET /api/files/:id` returns a private attachment only to its owner or a currently authorized reviewer.
 
 ## Articles, problems, comments
@@ -36,13 +37,13 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 
 ## Administration
 
-- `GET /api/admin/queue?type=shops|reviews|articles|reports&status=pending|approved|rejected|hidden|all` (status defaults to pending).
+- `GET /api/admin/queue?type=shops|reviews|articles|reports&status=draft|pending|approved|rejected|hidden|all` (status defaults to pending). Article queues additionally accept `q,page,pageSize`; the private search matches both current drafts and the published snapshot and returns `{items,total,page,pageSize}`.
 - `POST /api/admin/shops/:id/decision`, `/reviews/:id/decision`, `/articles/:id/decision` with `{decision:"approved"|"rejected"|"hidden",reason?,expectedUpdatedAt?}`. Approval and rejection require the exact `updatedAt` from the queue item; stale or non-pending content returns 409 so an older moderation page can never approve a newer draft. Hiding an already public item does not require a version.
 - `POST /api/admin/reports/:id/decision` `{decision:"dismissed"|"removed",reason?}`.
 - `POST /api/admin/problems` `{title,...metadata}`.
 - `POST /api/admin/problems/:id/attachments` multipart field `file`.
 - Content permission: `GET /api/admin/problems?q=&status=all|published|hidden&year=&category=&group=&competitionType=&page=&pageSize=` and `PATCH /api/admin/problems/:id` with the editable problem fields plus `status`.
-- Owner only: `GET /api/admin/accounts?q=&page=&pageSize=` returns all users and pagination metadata; `PATCH /api/admin/accounts/:id` accepts `{role?:"member"|"admin",enabled?,permissions?}`. Only verified users may be promoted. Owner accounts are immutable and every change revokes the target's sessions. `POST /api/admin/accounts` returns 405 because administrators must be promoted from registered users.
+- Every enabled `admin` and the owner can review, search, publish or hide articles, shops and reviews, process reports, and moderate comments. Account administration remains owner-only: `GET /api/admin/accounts?q=&page=&pageSize=` returns all users and pagination metadata; `PATCH /api/admin/accounts/:id` accepts `{role?:"member"|"admin",enabled?,permissions?}`. Only verified users may be promoted. Owner accounts are immutable and every change revokes the target's sessions. `POST /api/admin/accounts` returns 405 because administrators must be promoted from registered users.
 - `GET /api/admin/audit` → `id,actorId,action,entityType,entityId,detail,createdAt`.
 
 `GET /healthz` checks process and database. In production `npm start` serves `/dist` and the API on `PORT` (default 3001). `DATABASE_PATH` and `UPLOAD_DIR` accept absolute paths. SMTP missing means `registrationEnabled:false` and code requests return 503. `npm run init-owner` reads `OWNER_PASSWORD` or hidden stdin and never prints it.

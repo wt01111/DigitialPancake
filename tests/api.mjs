@@ -9,6 +9,7 @@ process.env.NODE_ENV = "test";
 process.env.DATABASE_PATH = join(temp, "test.sqlite");
 process.env.UPLOAD_DIR = join(temp, "uploads");
 process.env.PUBLIC_ORIGIN = "http://127.0.0.1:5173";
+process.env.SUBMIT_RATE_LIMIT = "200";
 const [{ app }, { run, one, db }, { hashPassword }] = await Promise.all([
   import("../server/app.js"),
   import("../server/db.js"),
@@ -187,7 +188,8 @@ try {
   const seeded = (await (await request("/api/shops?q=汕头华扬")).json())
       .items[0],
     form = new FormData();
-  form.set("rating", "5");
+  form.set("sentiment", "positive");
+  form.set("content", "authentic components and a smooth purchase");
   form.set("pros", "authentic");
   form.set("purchaseExperience", "private proof test");
   form.set(
@@ -493,7 +495,8 @@ try {
     method: "PATCH",
     cookie: member,
     body: {
-      rating: 2,
+      sentiment: "negative",
+      content: "revision pending",
       pros: "",
       cons: "revision pending",
       purchaseExperience: "updated private experience",
@@ -538,7 +541,8 @@ try {
     method: "PATCH",
     cookie: member,
     body: {
-      rating: 2,
+      sentiment: "negative",
+      content: "revision pending",
       pros: "",
       cons: "revision pending",
       purchaseExperience: "updated private experience",
@@ -736,10 +740,185 @@ try {
     ).status,
     403,
   );
+
+  // Owners can withdraw any of their three submission types. Withdrawal is
+  // immediately private, invalidates stale moderation state, and keeps the
+  // same identifier for resubmission.
+  assert.equal(
+    (
+      await request(`/api/reviews/${reviewId}/withdraw`, {
+        method: "POST",
+        cookie: outsider,
+        body: {},
+      })
+    ).status,
+    404,
+  );
+  await request(`/api/reviews/${reviewId}/withdraw`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.equal(
+    (await (await request(`/api/shops/${seeded.id}`)).json()).reviews.some(
+      (item) => item.id === reviewId,
+    ),
+    false,
+  );
+  await request(`/api/reviews/${reviewId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  const staleReviewTime = one(
+    "SELECT updated_at FROM reviews WHERE id=?",
+    reviewId,
+  ).updated_at;
+  await request(`/api/reviews/${reviewId}/withdraw`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.equal(
+    (
+      await request(`/api/admin/reviews/${reviewId}/decision`, {
+        method: "POST",
+        cookie: owner,
+        body: { decision: "approved", expectedUpdatedAt: staleReviewTime },
+      })
+    ).status,
+    409,
+  );
+  await request(`/api/reviews/${reviewId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/reviews/${reviewId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("reviews", reviewId, "approved"),
+  });
+
+  assert.equal(
+    (
+      await request(`/api/shops/${shopId}/withdraw`, {
+        method: "POST",
+        cookie: outsider,
+        body: {},
+      })
+    ).status,
+    404,
+  );
+  await request(`/api/shops/${shopId}/withdraw`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.equal(
+    (await (await request("/api/shops?q=API Test Shop")).json()).items.length,
+    0,
+  );
+  r = await request(`/api/shops/${shopId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: { name: "API Test Shop Revised" },
+  });
+  assert.equal(r.status, 200, await r.text());
+  await request(`/api/shops/${shopId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  const staleShopTime = one(
+    "SELECT updated_at FROM shops WHERE id=?",
+    shopId,
+  ).updated_at;
+  await request(`/api/shops/${shopId}/withdraw`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.equal(
+    (
+      await request(`/api/admin/shops/${shopId}/decision`, {
+        method: "POST",
+        cookie: owner,
+        body: { decision: "approved", expectedUpdatedAt: staleShopTime },
+      })
+    ).status,
+    409,
+  );
+  await request(`/api/shops/${shopId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/shops/${shopId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("shops", shopId, "approved"),
+  });
+
+  r = await request("/api/articles/drafts", {
+    method: "POST",
+    cookie: member,
+    body: {
+      title: "Withdraw searchable article",
+      body: "published searchable body",
+    },
+  });
+  const withdrawArticleId = (await r.json()).id;
+  await request(`/api/articles/drafts/${withdrawArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/articles/${withdrawArticleId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("articles", withdrawArticleId, "approved"),
+  });
+  await request(`/api/articles/drafts/${withdrawArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  const staleArticleTime = one(
+    "SELECT updated_at FROM articles WHERE id=?",
+    withdrawArticleId,
+  ).updated_at;
+  await request(`/api/articles/drafts/${withdrawArticleId}/withdraw`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.equal((await request(`/api/articles/${withdrawArticleId}`)).status, 404);
+  assert.equal(
+    (
+      await request(`/api/admin/articles/${withdrawArticleId}/decision`, {
+        method: "POST",
+        cookie: owner,
+        body: { decision: "approved", expectedUpdatedAt: staleArticleTime },
+      })
+    ).status,
+    409,
+  );
+  await request(`/api/articles/drafts/${withdrawArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/articles/${withdrawArticleId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("articles", withdrawArticleId, "approved"),
+  });
+
   r = await request(`/api/admin/accounts/${outsiderId}`, {
     method: "PATCH",
     cookie: owner,
-    body: { role: "admin", permissions: ["reports"] },
+    body: { role: "admin", permissions: [] },
   });
   assert.equal(r.status, 200);
   assert.equal(
@@ -747,6 +926,61 @@ try {
     "admin",
   );
   assert.equal((await request("/api/me", { cookie: outsider })).status, 401);
+  const unrestrictedAdmin = await login(
+    "outsider@test.local",
+    "outsider-test-password-123",
+  );
+  const articleSearch = await (
+    await request(
+      "/api/admin/queue?type=articles&status=all&q=published%20searchable&page=1&pageSize=5",
+      { cookie: unrestrictedAdmin },
+    )
+  ).json();
+  assert.equal(articleSearch.total, 1);
+  assert.equal(articleSearch.items[0].id, withdrawArticleId);
+  assert.equal(
+    (await request("/api/admin/accounts", { cookie: unrestrictedAdmin })).status,
+    403,
+  );
+  r = await request("/api/comments", {
+    method: "POST",
+    cookie: owner,
+    body: {
+      targetType: "article",
+      targetId: withdrawArticleId,
+      body: "admin removes this comment",
+    },
+  });
+  const moderatedCommentPayload = await r.json();
+  assert.equal(r.status, 201, JSON.stringify(moderatedCommentPayload));
+  const moderatedComment = moderatedCommentPayload.id;
+  comments = await (
+    await request(
+      `/api/comments?targetType=article&targetId=${withdrawArticleId}&sort=latest`,
+      { cookie: unrestrictedAdmin },
+    )
+  ).json();
+  assert.equal(
+    comments.items.find((item) => item.id === moderatedComment)
+      .canModerateDelete,
+    true,
+  );
+  assert.equal(
+    (
+      await request(`/api/comments/${moderatedComment}`, {
+        method: "DELETE",
+        cookie: unrestrictedAdmin,
+        body: {},
+      })
+    ).status,
+    200,
+  );
+  await request(`/api/admin/articles/${withdrawArticleId}/decision`, {
+    method: "POST",
+    cookie: unrestrictedAdmin,
+    body: { decision: "hidden" },
+  });
+  assert.equal((await request(`/api/articles/${withdrawArticleId}`)).status, 404);
   assert.equal(
     (
       await request(`/api/admin/accounts/${memberId}`, {

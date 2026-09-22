@@ -31,8 +31,8 @@ function child(args) {
   });
 }
 try {
-  const { reviewId } = JSON.parse(await child(["write"]));
-  await child(["check", reviewId]);
+  const { reviewId, shopId } = JSON.parse(await child(["write"]));
+  await child(["check", reviewId, shopId]);
   console.log(
     "PASS: hidden seed records and soft-deleted comments persist across restart",
   );

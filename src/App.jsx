@@ -49,8 +49,9 @@ const fileSize = (value) => {
         ? `${Math.round(n / 1024)} KiB`
         : `${n} B`;
 };
-const permit = (u, p) => u?.role === "owner" || u?.permissions?.includes(p);
+const permit = (u, p) => u?.role === "owner" || u?.role === "admin" || u?.permissions?.includes(p);
 const downloadableFiles = (files = []) => files.filter((f) => !f.publicImage && !f.isCover && f.kind !== "article-image" && f.kind !== "cover");
+const statusLabel = (status) => ({ approved: "已通过", pending: "待审核", draft: "草稿", hidden: "已下架", rejected: "已退回", published: "已发布" }[status] || status || "");
 function Loading() {
   return (
     <div className="state" aria-live="polite">
@@ -899,6 +900,10 @@ function Comments({ type, id, contentAuthorId }) {
       setError(x.message);
     } finally { setBusy(""); }
   }
+  function chooseMode(next) {
+    setMode(next); setError(""); setSuccess(""); setSent(false);
+    setF((current) => ({ ...current, code: "", confirmPassword: "" }));
+  }
   async function sendInline(e, commentId, kind) {
     e.preventDefault();
     if (!inline.trim()) return;
@@ -966,10 +971,10 @@ function Comments({ type, id, contentAuthorId }) {
                 {!c.deleted && (c.author?.id || c.authorId) !== user.id && <button className="text-button" onClick={() => { setActive({ id: c.id, kind: "report" }); setInline(""); setError(""); }}>
                   举报
                 </button>}
-                {!c.deleted && c.canDelete && <button className="text-button danger" onClick={() => setActive({ id: c.id, kind: "delete" })}>删除</button>}
+                {!c.deleted && c.canDelete && <button className="text-button danger" onClick={() => setActive({ id: c.id, kind: "delete" })}>{c.canModerateDelete ? "管理删除" : "删除"}</button>}
               </>
             )}</div>
-            {active?.id === c.id && active.kind === "delete" && <div className="delete-confirm" role="alert"><p>删除后原文不会恢复；若已有回复，这里会保留删除占位。</p><div className="inline-actions"><button className="button danger-button small" disabled={busy === `delete-${c.id}`} onClick={() => remove(c.id)}>确认删除</button><button className="button secondary small" onClick={() => setActive(null)}>取消</button></div></div>}
+            {active?.id === c.id && active.kind === "delete" && <div className="delete-confirm" role="alert"><p>{c.canModerateDelete ? "确认以管理员身份删除这条评论？" : "确认删除自己的评论？"} 删除后原文不会恢复；若已有回复，这里会保留删除占位。</p><div className="inline-actions"><button className="button danger-button small" disabled={busy === `delete-${c.id}`} onClick={() => remove(c.id)}>确认删除</button><button className="button secondary small" onClick={() => setActive(null)}>取消</button></div></div>}
             {active?.id === c.id && active.kind !== "delete" && (
               <form className="comment-inline-form" onSubmit={(e) => sendInline(e, c.id, active.kind)}>
                 <label>
@@ -1188,15 +1193,9 @@ function ShopDetail() {
               </strong>
               {x.rating && (
                 <>
-                  <p>
-                    <b>优点：</b>
-                    {x.pros || "未填写"}
-                  </p>
-                  <p>
-                    <b>不足：</b>
-                    {x.cons || "未填写"}
-                  </p>
-                  <p>{x.purchaseExperience}</p>
+                  {x.pros && <p><b>优点：</b>{x.pros}</p>}
+                  {x.cons && <p><b>不足：</b>{x.cons}</p>}
+                  <p>{x.content || x.purchaseExperience}</p>
                 </>
               )}
               {x.reason && (
@@ -1239,16 +1238,13 @@ function ShopDetail() {
 function ReviewForm({ id, reload }) {
   const { user } = useSite();
   const [f, setF] = useState({
-      rating: 5,
-      pros: "",
-      cons: "",
-      purchaseExperience: "",
-      purchasedAt: "",
-      orderPlatform: "",
+      sentiment: "positive",
+      content: "",
     }),
     [proof, setProof] = useState(),
     [error, setError] = useState(""),
-    [done, setDone] = useState(false);
+    [done, setDone] = useState(false),
+    [busy, setBusy] = useState(false);
   if (!user)
     return (
       <p>
@@ -1257,6 +1253,8 @@ function ReviewForm({ id, reload }) {
     );
   async function submit(e) {
     e.preventDefault();
+    if (busy) return;
+    setBusy(true); setError("");
     const fd = new FormData();
     Object.entries(f).forEach(([k, v]) => fd.append(k, v));
     if (proof) fd.append("proof", proof);
@@ -1266,6 +1264,8 @@ function ReviewForm({ id, reload }) {
       reload();
     } catch (x) {
       setError(x.message);
+    } finally {
+      setBusy(false);
     }
   }
   return (
@@ -1279,32 +1279,14 @@ function ReviewForm({ id, reload }) {
         </div>
       ) : (
         <form className="form-grid" onSubmit={submit}>
-          {[
-            ["rating", "评分", "number"],
-            ["purchasedAt", "购买日期", "date"],
-            ["orderPlatform", "订单平台", "text"],
-            ["pros", "优点", "textarea"],
-            ["cons", "不足", "textarea"],
-            ["purchaseExperience", "购买体验", "textarea"],
-          ].map(([k, l, t]) => (
-            <label key={k}>
-              {l}
-              {t === "textarea" ? (
-                <textarea
-                  value={f[k]}
-                  onChange={(e) => setF({ ...f, [k]: e.target.value })}
-                />
-              ) : (
-                <input
-                  type={t}
-                  min="1"
-                  max="5"
-                  value={f[k]}
-                  onChange={(e) => setF({ ...f, [k]: e.target.value })}
-                />
-              )}
-            </label>
-          ))}
+          <label>评价倾向
+            <select value={f.sentiment} onChange={(e) => setF({ ...f, sentiment: e.target.value })}>
+              <option value="positive">好评</option><option value="neutral">中评</option><option value="negative">差评</option>
+            </select>
+          </label>
+          <label className="span-2">评价内容
+            <textarea required minLength="2" value={f.content} onChange={(e) => setF({ ...f, content: e.target.value })} placeholder="写下真实购买与使用体验" />
+          </label>
           <label>
             购买凭证（可选）
             <input
@@ -1314,7 +1296,7 @@ function ReviewForm({ id, reload }) {
             />
           </label>
           <Err error={error} />
-          <button className="button primary">提交审核</button>
+          <button className="button primary" disabled={busy}>{busy ? "提交中…" : "提交审核"}</button>
         </form>
       )}
     </section>
@@ -1328,12 +1310,12 @@ function ReviewEdit() {
   const [loaded, setLoaded] = useState(null), [error, setError] = useState(""), [saved, setSaved] = useState(""), [busy, setBusy] = useState(false);
   const f = loaded?.id === id ? loaded.data : null;
   const setF = (next) => setLoaded((current) => ({ id, data: typeof next === "function" ? next(current?.id === id ? current.data : {}) : next }));
-  useEffect(() => { if (r.data) setLoaded({ id, data: { rating: r.data.rating || 5, pros: r.data.pros || "", cons: r.data.cons || "", purchaseExperience: r.data.purchaseExperience || "", purchasedAt: r.data.purchasedAt || "", orderPlatform: r.data.orderPlatform || "" } }); }, [id, r.data]);
+  useEffect(() => { if (r.data) setLoaded({ id, data: { sentiment: r.data.sentiment || (r.data.rating >= 4 ? "positive" : r.data.rating <= 2 ? "negative" : "neutral"), content: r.data.content || r.data.purchaseExperience || [r.data.pros, r.data.cons].filter(Boolean).join("\n") } }); }, [id, r.data]);
   if (!user) return <Navigate to="/auth" />;
   if (r.loading || !f && !r.error) return <Loading />;
   if (r.error) return <div className="container page"><Err error={r.error} retry={r.reload} /></div>;
   async function save(submit) { if (busy) return; setBusy(true); setError(""); setSaved(""); try { await api(`/reviews/${id}`, { method: "PATCH", body: f }); if (submit) { await api(`/reviews/${id}/submit`, { method: "POST" }); nav("/account?tab=reviews"); } else setSaved("评价修改已保存，提交审核前不会替换公开版本"); } catch (x) { setError(x.message); } finally { setBusy(false); } }
-  return <div className="container page review-edit"><Link className="back-link" to="/account?tab=reviews">← 返回我的评价</Link><h1>编辑店铺评价</h1><p className="lead">已公开评价在修改审核期间继续展示旧版；审核通过后以同一条评价更新。</p><p className="muted">原购买凭证会继续保留，仅本人和有权限的审核员可见。</p>{r.data?.status === "pending" && <div className="status status-pending">修改正在审核中</div>}<Err error={error} />{saved && <div className="success-box"><Check />{saved}</div>}<div className="panel form-stack"><label>评分<select value={f.rating} onChange={(e) => setF({ ...f, rating: Number(e.target.value) })}>{[5,4,3,2,1].map((n) => <option key={n} value={n}>{n} 分</option>)}</select></label><label>优点<textarea required value={f.pros} onChange={(e) => setF({ ...f, pros: e.target.value })} /></label><label>不足<textarea required value={f.cons} onChange={(e) => setF({ ...f, cons: e.target.value })} /></label><label>购买体验<textarea required value={f.purchaseExperience} onChange={(e) => setF({ ...f, purchaseExperience: e.target.value })} /></label><label>购买日期<input type="date" value={f.purchasedAt || ""} onChange={(e) => setF({ ...f, purchasedAt: e.target.value })} /></label><label>下单平台<input value={f.orderPlatform} onChange={(e) => setF({ ...f, orderPlatform: e.target.value })} /></label><div className="action-row"><button className="button secondary" disabled={busy} onClick={() => save(false)}>保存修改</button><button className="button primary" disabled={busy} onClick={() => save(true)}>{busy ? "处理中…" : "提交重新审核"}</button></div></div></div>;
+  return <div className="container page review-edit"><Link className="back-link" to="/account?tab=reviews">← 返回我的评价</Link><h1>编辑店铺评价</h1><p className="lead">已公开评价在普通修改审核期间继续展示旧版；审核通过后以同一条评价更新。</p><p className="muted">原购买凭证会继续保留，仅本人和有权限的审核员可见。</p>{r.data?.status === "pending" && <div className="status status-pending">修改正在审核中</div>}<Err error={error} />{saved && <div className="success-box"><Check />{saved}</div>}<div className="panel form-stack"><label>评价倾向<select value={f.sentiment} onChange={(e) => setF({ ...f, sentiment: e.target.value })}><option value="positive">好评</option><option value="neutral">中评</option><option value="negative">差评</option></select></label><label>评价内容<textarea required minLength="2" value={f.content} onChange={(e) => setF({ ...f, content: e.target.value })} /></label><div className="action-row"><button className="button secondary" disabled={busy} onClick={() => save(false)}>保存修改</button><button className="button primary" disabled={busy} onClick={() => save(true)}>{busy ? "处理中…" : "提交重新审核"}</button></div></div></div>;
 }
 function ShopSubmit() {
   const { user } = useSite();
@@ -1347,10 +1329,11 @@ function ShopSubmit() {
       businessScope: "",
     }),
     [error, setError] = useState(""),
-    [done, setDone] = useState(false);
+    [done, setDone] = useState(false), [busy, setBusy] = useState(false);
   if (!user) return <Navigate to="/auth" />;
   async function submit(e) {
     e.preventDefault();
+    if (busy) return; setBusy(true); setError("");
     try {
       await api("/shops", {
         method: "POST",
@@ -1365,6 +1348,8 @@ function ShopSubmit() {
       setDone(true);
     } catch (x) {
       setError(x.message);
+    } finally {
+      setBusy(false);
     }
   }
   return (
@@ -1402,11 +1387,37 @@ function ShopSubmit() {
             </label>
           ))}
           <Err error={error} />
-          <button className="button primary">提交审核</button>
+          <button className="button primary" disabled={busy}>{busy ? "提交中…" : "提交审核"}</button>
         </form>
       )}
     </div>
   );
+}
+function ShopEdit() {
+  const { user } = useSite();
+  const { id } = useParams();
+  const nav = useNavigate();
+  const r = useLoad(`/shops/${id}/edit`, [id]);
+  const [loaded, setLoaded] = useState(null), [busy, setBusy] = useState(false), [error, setError] = useState(""), [saved, setSaved] = useState("");
+  const f = loaded?.id === id ? loaded.data : null;
+  useEffect(() => {
+    if (!r.data) return;
+    setLoaded({ id, data: { name: r.data.name || "", aliases: Array.isArray(r.data.aliases) ? r.data.aliases.join("，") : r.data.aliases || "", ownerId: r.data.ownerId || "", platform: r.data.platform || "", url: r.data.url || "", condition: r.data.condition || "", businessScope: r.data.businessScope || "" } });
+  }, [id, r.data]);
+  if (!user) return <Navigate to="/auth" />;
+  if (r.loading || (!f && !r.error)) return <Loading />;
+  if (r.error) return <div className="container page"><Err error={r.error} retry={r.reload} /></div>;
+  if (r.data?.published) return <div className="container narrow page"><Link className="back-link" to="/account?tab=shops">← 返回我的店铺</Link><h1>编辑店铺</h1><div className="notice">已公开店铺需先在“我的店铺”中确认撤回。撤回会立即下架店铺，相关评价暂不可公开访问但仍会保留；修改后可重新提交审核。</div></div>;
+  const change = (key, value) => setLoaded((current) => ({ id, data: { ...(current?.id === id ? current.data : f), [key]: value } }));
+  async function save(submit) {
+    if (busy) return; setBusy(true); setError(""); setSaved("");
+    try {
+      await api(`/shops/${id}`, { method: "PATCH", body: { ...f, aliases: f.aliases.split(/[，,]/).map((x) => x.trim()).filter(Boolean) } });
+      if (submit) { await api(`/shops/${id}/submit`, { method: "POST" }); nav("/account?tab=shops"); }
+      else setSaved("店铺修改已保存，提交审核前不会更新公开信息");
+    } catch (x) { setError(x.message); } finally { setBusy(false); }
+  }
+  return <div className="container narrow page"><Link className="back-link" to="/account?tab=shops">← 返回我的店铺</Link><h1>编辑店铺</h1><p className="lead">名称为必填项，其余信息可按实际情况补充；保存后可重新提交审核。</p><Err error={error} />{saved && <div className="success-box"><Check />{saved}</div>}<div className="panel form-stack">{Object.entries({ name: "店铺名称", aliases: "别名（逗号分隔）", ownerId: "店主标识", platform: "所在平台", url: "店铺链接", condition: "经营状态", businessScope: "经营范围" }).map(([key, label]) => <label key={key}>{label}<input type={key === "url" ? "url" : "text"} required={key === "name"} value={f[key]} onChange={(e) => change(key, e.target.value)} /></label>)}<div className="action-row"><button type="button" className="button secondary" disabled={busy} onClick={() => save(false)}>保存修改</button><button type="button" className="button primary" disabled={busy} onClick={() => save(true)}>{busy ? "处理中…" : "提交重新审核"}</button></div></div></div>;
 }
 function Auth() {
   const { user, config, refresh } = useSite();
@@ -1417,40 +1428,86 @@ function Auth() {
       nickname: "",
       code: "",
       newPassword: "",
+      confirmPassword: "",
     }),
     [error, setError] = useState(""),
-    [sent, setSent] = useState(false);
+    [sent, setSent] = useState(false),
+    [cooldown, setCooldown] = useState(0),
+    [cooldownUntil, setCooldownUntil] = useState(0),
+    [codeBusy, setCodeBusy] = useState(false),
+    [submitBusy, setSubmitBusy] = useState(false),
+    [success, setSuccess] = useState("");
   const nav = useNavigate(),
     [sp] = useSearchParams();
-  if (user) return <Navigate to={sp.get("next") || "/account"} />;
-  async function code() {
+  const normalizedEmail = f.email.trim().toLowerCase();
+  useEffect(() => {
+    if (!normalizedEmail) { setCooldown(0); return; }
     try {
-      await api("/auth/request-code", {
+      const until = Number(localStorage.getItem(`auth-code-until:${normalizedEmail}`)) || 0;
+      setCooldownUntil(until);
+      setCooldown(Math.max(0, Math.ceil((until - Date.now()) / 1000)));
+    } catch { setCooldownUntil(0); setCooldown(0); }
+  }, [normalizedEmail]);
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) return;
+    const update = () => setCooldown(Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000)));
+    update();
+    const timer = setInterval(update, 500);
+    return () => clearInterval(timer);
+  }, [cooldownUntil]);
+  if (user) return <Navigate to={sp.get("next") || "/account"} />;
+  function chooseMode(next) {
+    if (codeBusy || submitBusy) return;
+    setMode(next); setError(""); setSuccess(""); setSent(false);
+    setF((current) => ({ ...current, code: "", confirmPassword: "" }));
+  }
+  async function code() {
+    if (codeBusy || cooldown > 0 || !normalizedEmail) return;
+    setCodeBusy(true); setError(""); setSuccess("");
+    try {
+      const result = await api("/auth/request-code", {
         method: "POST",
         body: {
-          email: f.email,
+          email: normalizedEmail,
           purpose: mode === "reset" ? "reset" : "register",
         },
       });
       setSent(true);
+      const seconds = Number(result.cooldownSeconds || result.retryAfter) || 60;
+      const until = Date.now() + seconds * 1000;
+      setCooldownUntil(until);
+      setCooldown(seconds);
+      try { localStorage.setItem(`auth-code-until:${normalizedEmail}`, String(until)); } catch {}
+      setSuccess("若该邮箱可用于此操作，验证码将发送，请在 1 分钟内完成验证。");
     } catch (x) {
       setError(x.message);
+      if (x.retryAfter > 0) {
+        const until = Date.now() + x.retryAfter * 1000;
+        setCooldownUntil(until); setCooldown(x.retryAfter);
+        try { localStorage.setItem(`auth-code-until:${normalizedEmail}`, String(until)); } catch {}
+      }
+    } finally {
+      setCodeBusy(false);
     }
   }
   async function submit(e) {
     e.preventDefault();
-    setError("");
+    if (submitBusy) return;
+    setError(""); setSuccess("");
+    if (mode !== "login" && !/^\d{6}$/.test(f.code)) { setError("请输入 6 位数字验证码"); return; }
+    if (mode !== "login" && (mode === "reset" ? f.newPassword : f.password) !== f.confirmPassword) { setError("两次输入的密码不一致"); return; }
+    setSubmitBusy(true);
     try {
       if (mode === "login")
         await api("/auth/login", {
           method: "POST",
-          body: { email: f.email, password: f.password },
+          body: { email: normalizedEmail, password: f.password },
         });
       else if (mode === "register")
         await api("/auth/register", {
           method: "POST",
           body: {
-            email: f.email,
+            email: normalizedEmail,
             code: f.code,
             password: f.password,
             nickname: f.nickname,
@@ -1459,17 +1516,21 @@ function Auth() {
       else
         await api("/auth/reset-password", {
           method: "POST",
-          body: { email: f.email, code: f.code, newPassword: f.newPassword },
+          body: { email: normalizedEmail, code: f.code, newPassword: f.newPassword },
         });
       if (mode === "reset") {
         setMode("login");
         setSent(false);
+        setF((current) => ({ ...current, code: "", password: "", newPassword: "", confirmPassword: "" }));
+        setSuccess("密码已重置，请使用新密码登录。");
       } else {
         await refresh();
         nav(sp.get("next") || "/account");
       }
     } catch (x) {
       setError(x.message);
+    } finally {
+      setSubmitBusy(false);
     }
   }
   return (
@@ -1487,16 +1548,18 @@ function Auth() {
               : "找回密码"}
         </h1>
         <div className="tabs">
-          <button onClick={() => setMode("login")}>登录</button>
+          <button type="button" disabled={codeBusy || submitBusy} className={mode === "login" ? "active" : ""} onClick={() => chooseMode("login")}>登录</button>
           <button
-            disabled={!config.registrationEnabled}
-            onClick={() => setMode("register")}
+            disabled={!config.registrationEnabled || codeBusy || submitBusy}
+            className={mode === "register" ? "active" : ""}
+            onClick={() => chooseMode("register")}
           >
             注册
           </button>
           <button
-            disabled={!config.registrationEnabled}
-            onClick={() => setMode("reset")}
+            disabled={!config.registrationEnabled || codeBusy || submitBusy}
+            className={mode === "reset" ? "active" : ""}
+            onClick={() => chooseMode("reset")}
           >
             忘记密码
           </button>
@@ -1509,7 +1572,9 @@ function Auth() {
             邮箱
             <input
               type="email"
+              autoComplete="email"
               value={f.email}
+              disabled={codeBusy || submitBusy}
               onChange={(e) => setF({ ...f, email: e.target.value })}
               required
             />
@@ -1530,24 +1595,31 @@ function Auth() {
               <div className="field-action">
                 <input
                   value={f.code}
-                  onChange={(e) => setF({ ...f, code: e.target.value })}
+                  onChange={(e) => setF({ ...f, code: e.target.value.replace(/\D/g, "").slice(0, 6) })}
+                  inputMode="numeric"
+                  pattern="[0-9]{6}"
+                  maxLength="6"
+                  autoComplete="one-time-code"
+                  aria-describedby="code-help"
                   required
                 />
                 <button
                   type="button"
                   className="button secondary"
                   onClick={code}
-                  disabled={!f.email}
+                  disabled={!normalizedEmail || codeBusy || cooldown > 0}
                 >
-                  {sent ? "重新发送" : "发送验证码"}
+                  {codeBusy ? "发送中…" : cooldown > 0 ? `${cooldown} 秒后可重发` : sent ? "重新发送" : "发送验证码"}
                 </button>
               </div>
+              <small id="code-help">验证码为 6 位数字，发送后 1 分钟内有效。</small>
             </label>
           )}
           <label>
             {mode === "reset" ? "新密码" : "密码"}
             <input
               type="password"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
               minLength={mode === "login" ? undefined : 10}
               value={mode === "reset" ? f.newPassword : f.password}
               onChange={(e) =>
@@ -1560,9 +1632,16 @@ function Auth() {
               required
             />
           </label>
+          {mode !== "login" && (
+            <label>
+              确认密码
+              <input type="password" minLength="10" autoComplete="new-password" value={f.confirmPassword} onChange={(e) => setF({ ...f, confirmPassword: e.target.value })} required />
+            </label>
+          )}
+          {success && <div className="success-box" role="status"><Check />{success}</div>}
           <Err error={error} />
-          <button className="button primary full">
-            {mode === "login"
+          <button className="button primary full" disabled={submitBusy}>
+            {submitBusy ? "处理中…" : mode === "login"
               ? "登录"
               : mode === "register"
                 ? "注册"
@@ -1779,6 +1858,9 @@ function Write() {
             value={f.category}
             onChange={(e) => setF({ ...f, category: e.target.value })}
           >
+            {f.category && !topics.some((t) => t.name === f.category) && (
+              <option value={f.category} disabled>{f.category}（旧分类，仅保留）</option>
+            )}
             {topics.map((t) => (
               <option key={t.name}>{t.name}</option>
             ))}
@@ -1969,13 +2051,26 @@ function PublicUser() {
       <section><h2>公开评论与互动</h2>
         {u.comments?.length ? <div className="record-list">{u.comments.map((c) => <article key={c.id}><strong>{c.targetTitle || "内容讨论"}</strong><p>{c.body}</p><small>{fmt(c.createdAt)}</small>{c.href && <Link to={c.href}>回到原内容</Link>}</article>)}</div> : <Empty title="还没有公开评论" text="公开内容下可见的评论会显示在这里。" />}
       </section>
-      {u.reviews?.length > 0 && <section><h2>已审核店铺评价</h2><div className="record-list">{u.reviews.map((x) => <article key={x.id}><strong>{x.shopName || "店铺评价"}{x.rating ? ` · ${x.rating} / 5` : ""}</strong><p>{x.pros || x.purchaseExperience || x.reason}</p><small>{fmt(x.createdAt || x.date)}</small>{x.shopId && <Link to={`/shops/${x.shopId}`}>查看店铺</Link>}</article>)}</div></section>}
+      {u.reviews?.length > 0 && <section><h2>已审核店铺评价</h2><div className="record-list">{u.reviews.map((x) => <article key={x.id}><strong>{x.shopName || "店铺评价"}{x.sentiment ? ` · ${{ positive: "好评", neutral: "中评", negative: "差评" }[x.sentiment]}` : x.rating ? ` · ${x.rating} / 5` : ""}</strong><p>{x.content || x.pros || x.purchaseExperience || x.reason}</p><small>{fmt(x.createdAt || x.date)}</small>{x.shopId && <Link to={`/shops/${x.shopId}`}>查看店铺</Link>}</article>)}</div></section>}
     </div>
   );
 }
 function Mine({ tab }) {
   const r = useLoad(`/me/${tab}`, [tab]);
   const nav = useNavigate();
+  const [confirmWithdraw, setConfirmWithdraw] = useState(null), [withdrawBusy, setWithdrawBusy] = useState(""), [actionError, setActionError] = useState(""), [actionDone, setActionDone] = useState("");
+  const withdrawType = tab === "submissions" ? "articles/drafts" : tab;
+  async function withdraw(x) {
+    const id = x.draftId || x.id;
+    if (!id || withdrawBusy) return;
+    setWithdrawBusy(String(id)); setActionError(""); setActionDone("");
+    try {
+      await api(`/${withdrawType}/${id}/withdraw`, { method: "POST" });
+      setConfirmWithdraw(null);
+      setActionDone("已撤回为草稿；原公开版本已立即下架，重新提交并审核通过后才会再次展示。");
+      await r.reload();
+    } catch (e) { setActionError(e.message); } finally { setWithdrawBusy(""); }
+  }
   async function markRead() {
     try {
       await api("/me/notifications/read", { method: "POST" });
@@ -2001,6 +2096,7 @@ function Mine({ tab }) {
             submissions: "我的投稿",
             drafts: "草稿",
             reviews: "我的评价",
+            shops: "我的店铺",
             bookmarks: "我的收藏",
             notifications: "站内通知",
           }[tab]
@@ -2011,6 +2107,8 @@ function Mine({ tab }) {
           全部标为已读
         </button>
       )}
+      {actionDone && <div className="success-box" role="status"><Check />{actionDone}</div>}
+      <Err error={actionError} />
       {r.loading ? (
         <Loading />
       ) : r.error ? (
@@ -2024,14 +2122,17 @@ function Mine({ tab }) {
               </strong>
               <p>{x.excerpt || x.reason || ""}</p>
               <span className={`status status-${x.status}`}>
-                {x.status || fmt(x.createdAt)}
+                {statusLabel(x.status) || fmt(x.createdAt)}
               </span>
               {tab === "drafts" && (
                 <Link to={`/write?draft=${x.id}`}>继续编辑</Link>
               )}
               {tab === "submissions" && (x.editUrl || x.draftId || x.id) && <Link to={x.editUrl || `/write?draft=${x.draftId || x.id}`}>{x.published ? "编辑已发表文章" : "编辑投稿"}</Link>}
-              {tab === "reviews" && x.id && <Link to={`/reviews/${x.id}/edit`}>编辑评价</Link>}
-              {tab === "shops" && <Link to={`/shops/${x.id}`}>查看店铺</Link>}
+              {tab === "reviews" && x.id && <Link to={x.editUrl || `/reviews/${x.id}/edit`}>编辑评价</Link>}
+              {tab === "shops" && <><Link to={`/shops/${x.id}`}>查看店铺</Link><Link to={x.editUrl || `/shops/${x.id}/edit`}>编辑店铺</Link></>}
+              {["submissions", "reviews", "shops"].includes(tab) && x.status !== "draft" && (
+                confirmWithdraw === (x.draftId || x.id) ? <div className="withdraw-confirm"><p><strong>确认撤回？</strong> 内容会立即下架，重新提交并审核通过后才会再次展示。{tab === "shops" && "店铺下架后，其他用户对该店铺的评价也会暂时隐藏。"}</p><div className="action-row"><button type="button" className="button danger small" disabled={!!withdrawBusy} onClick={() => withdraw(x)}>{withdrawBusy ? "撤回中…" : "确认撤回"}</button><button type="button" className="button secondary small" disabled={!!withdrawBusy} onClick={() => setConfirmWithdraw(null)}>取消</button></div></div> : <button type="button" className="text-button danger" onClick={() => { setActionError(""); setConfirmWithdraw(x.draftId || x.id); }}>撤回为草稿</button>
+              )}
               {tab === "bookmarks" && (
                 <Link
                   to={`/${x.type === "shop" ? "shops" : `${x.type}s`}/${x.targetId || x.id}`}
@@ -2106,28 +2207,33 @@ function Admin() {
   );
 }
 function Moderation({ type }) {
-  const [status, setStatus] = useState("pending");
-  const [moderationError, setModerationError] = useState("");
-  const r = useLoad(`/admin/queue?type=${type}&status=${status}`, [
+  const [status, setStatus] = useState(type === "articles" ? "all" : "pending");
+  const [query, setQuery] = useState(""), [submittedQuery, setSubmittedQuery] = useState(""), [page, setPage] = useState(1);
+  const [moderationError, setModerationError] = useState(""), [moderationDone, setModerationDone] = useState(""), [pendingAction, setPendingAction] = useState(null), [reason, setReason] = useState(""), [decisionBusy, setDecisionBusy] = useState(false);
+  const r = useLoad(`/admin/queue?type=${type}&status=${status}&q=${encodeURIComponent(type === "articles" ? submittedQuery : "")}&page=${page}&pageSize=20`, [
     type,
     status,
+    submittedQuery,
+    page,
   ]);
+  useEffect(() => { setStatus(type === "articles" ? "all" : "pending"); setPage(1); setQuery(""); setSubmittedQuery(""); setPendingAction(null); setModerationDone(""); }, [type]);
   async function decide(item, decision) {
-    const reason =
-      decision === "approved" || decision === "dismissed"
-        ? ""
-        : prompt("请填写原因") || "";
+    if (decisionBusy) return;
+    setDecisionBusy(true);
     try {
-      setModerationError("");
+      setModerationError(""); setModerationDone("");
       await api(`/admin/${type}/${item.id}/decision`, {
         method: "POST",
-        body: { decision, reason, ...(decision !== "hidden" && item.updatedAt ? { expectedUpdatedAt: item.updatedAt } : {}) },
+        body: { decision, reason: reason.trim(), ...(decision !== "hidden" && item.updatedAt ? { expectedUpdatedAt: item.updatedAt } : {}) },
       });
-      r.reload();
+      setPendingAction(null); setReason("");
+      setModerationDone({ approved: "已通过", rejected: "已退回", hidden: "已下架", dismissed: "已驳回举报", removed: "已移除被举报内容" }[decision] || "操作已完成");
+      await r.reload();
     } catch (x) {
       setModerationError(x.code === "STALE_REVIEW" || x.status === 409 ? "该内容已被作者更新，请刷新队列并重新审核，当前决定未提交。" : x.message);
-    }
+    } finally { setDecisionBusy(false); }
   }
+  function ask(item, decision) { setModerationError(""); setModerationDone(""); setReason(""); setPendingAction({ item, decision }); }
   return (
     <>
       <h1>
@@ -2139,12 +2245,14 @@ function Moderation({ type }) {
         }
       </h1>
       <Err error={moderationError} retry={() => { setModerationError(""); r.reload(); }} />
+      {moderationDone && <div className="success-box" role="status"><Check />{moderationDone}</div>}
+      {type === "articles" && <form className="search-bar" onSubmit={(e) => { e.preventDefault(); setPage(1); setSubmittedQuery(query.trim()); }}><input aria-label="搜索帖子" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="搜索标题、摘要或正文" /><button className="button primary">搜索</button></form>}
       <div className="chips">
-        {["pending", "approved", "rejected", "hidden", "all"].map((s) => (
+        {["pending", "approved", "rejected", "hidden", ...(type === "articles" ? ["draft"] : []), "all"].map((s) => (
           <button
             key={s}
             className={status === s ? "selected" : ""}
-            onClick={() => setStatus(s)}
+            onClick={() => { setStatus(s); setPage(1); }}
           >
             {
               {
@@ -2152,6 +2260,7 @@ function Moderation({ type }) {
                 approved: "已通过",
                 rejected: "已拒绝",
                 hidden: "已下架",
+                draft: "草稿",
                 all: "全部",
               }[s]
             }
@@ -2169,6 +2278,7 @@ function Moderation({ type }) {
               <strong>
                 {x.title || x.name || x.body || x.reason || `#${x.id}`}
               </strong>
+              {x.status && <span className={`status status-${x.status}`}>{statusLabel(x.status)}</span>}
               <p>{x.excerpt || x.description || ""}</p>
               {x.body && <MD>{x.body}</MD>}
               {type === "articles" && downloadableFiles(x.attachments).length > 0 && (
@@ -2187,14 +2297,15 @@ function Moderation({ type }) {
                   </p>
                   <p>
                     <b>评分：</b>
-                    {x.rating
-                      ? `${x.rating} / 5`
-                      : { positive: "好评", neutral: "中评", negative: "差评" }[
+                    {{ positive: "好评", neutral: "中评", negative: "差评" }[
                           x.sentiment
-                        ] ||
+                        ] || (x.rating
+                      ? `${x.rating} / 5`
+                      :
                         x.sentiment ||
-                        "未填写"}
+                        "未填写")}
                   </p>
+                  {x.content && <p><b>评价内容：</b>{x.content}</p>}
                   <p>
                     <b>优点：</b>
                     {x.pros || "未填写"}
@@ -2270,36 +2381,38 @@ function Moderation({ type }) {
                   </p>
                 </div>
               )}
-              <button
+              {(type === "reports" || x.status === "pending") && <button
                 className="button primary small"
                 onClick={() =>
-                  decide(x, type === "reports" ? "dismissed" : "approved")
+                  ask(x, type === "reports" ? "dismissed" : "approved")
                 }
               >
                 {type === "reports" ? "驳回举报" : "通过"}
-              </button>
-              <button
+              </button>}
+              {(type === "reports" || x.status === "pending") && <button
                 className="button secondary small"
                 onClick={() =>
-                  decide(x, type === "reports" ? "removed" : "rejected")
+                  ask(x, type === "reports" ? "removed" : "rejected")
                 }
               >
                 {type === "reports" ? "移除内容" : "拒绝"}
-              </button>
-              {type !== "reports" && status !== "hidden" && (
+              </button>}
+              {type !== "reports" && (x.published || x.status === "approved") && x.status !== "hidden" && (
                 <button
                   className="button secondary small"
-                  onClick={() => decide(x, "hidden")}
+                  onClick={() => ask(x, "hidden")}
                 >
                   下架
                 </button>
               )}
+              {pendingAction?.item.id === x.id && <form className="moderation-confirm" onSubmit={(e) => { e.preventDefault(); decide(x, pendingAction.decision); }}><p><strong>确认{({ approved: "通过", rejected: "退回", hidden: "下架", dismissed: "驳回举报", removed: "移除内容" })[pendingAction.decision]}“{x.title || x.name || `#${x.id}`}”？</strong>{pendingAction.decision === "hidden" && " 下架后公开页面将立即不可见。"}</p><label>处理说明（可选）<textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength="500" /></label><div className="action-row"><button className="button danger small" disabled={decisionBusy}>{decisionBusy ? "处理中…" : `确认${({ approved: "通过", rejected: "退回", hidden: "下架", dismissed: "驳回举报", removed: "移除内容" })[pendingAction.decision]}`}</button><button type="button" className="button secondary small" disabled={decisionBusy} onClick={() => { setPendingAction(null); setReason(""); }}>取消</button></div></form>}
             </article>
           ))}
         </div>
       ) : (
         <Empty title="当前筛选暂无记录" text="切换审核状态后可查看其他记录。" />
       )}
+      {!r.loading && !r.error && Number(r.data?.total) > Number(r.data?.pageSize || 20) && <div className="pagination"><button disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>上一页</button><span>第 {page} / {Math.ceil(r.data.total / (r.data.pageSize || 20))} 页</span><button disabled={page >= Math.ceil(r.data.total / (r.data.pageSize || 20))} onClick={() => setPage((value) => value + 1)}>下一页</button></div>}
     </>
   );
 }
@@ -2343,7 +2456,7 @@ function Accounts() {
     <>
       <h1>用户与管理员</h1>
       <p>
-        从已验证邮箱用户中选择管理员并分配职责。任何变更都会让该用户的现有登录失效。
+        从已验证邮箱用户中选择管理员。管理员可管理全部内容，只有最高管理员可管理账号；任何变更都会让该用户的现有登录失效。
       </p>
       <form
         className="account-search"
@@ -2460,32 +2573,7 @@ function Accounts() {
                 </option>
               </select>
             </label>
-            {selected.role === "admin" && (
-              <fieldset>
-                <legend>分工授权</legend>
-                {[
-                  ["content", "文章与赛题"],
-                  ["shop_reviews", "店铺与评价"],
-                  ["reports", "举报处理"],
-                ].map(([p, l]) => (
-                  <label key={p}>
-                    <input
-                      type="checkbox"
-                      checked={selected.permissions.includes(p)}
-                      onChange={(e) =>
-                        setSelected({
-                          ...selected,
-                          permissions: e.target.checked
-                            ? [...selected.permissions, p]
-                            : selected.permissions.filter((x) => x !== p),
-                        })
-                      }
-                    />
-                    {l}
-                  </label>
-                ))}
-              </fieldset>
-            )}
+            {selected.role === "admin" && <div className="notice">管理员可审核、下架文章、店铺和评价，并处理举报与评论；账号管理仍仅限最高管理员。</div>}
             <div className="dialog-actions">
               <button
                 className="button secondary"
@@ -2502,12 +2590,11 @@ function Accounts() {
                 onClick={() =>
                   save({
                     role: selected.role,
-                    permissions: selected.permissions,
                     enabled: selected.enabled,
                   })
                 }
               >
-                {busy ? "正在保存…" : "确认角色与权限"}
+                {busy ? "正在保存…" : "确认角色"}
               </button>
               <button
                 className="button danger"
@@ -2567,6 +2654,7 @@ function ProblemCreate() {
     [editing, setEditing] = useState(null),
     [attachment, setAttachment] = useState(),
     [busy, setBusy] = useState(false),
+    [statusAction, setStatusAction] = useState(null),
     [message, setMessage] = useState(""),
     [error, setError] = useState("");
   const r = useLoad(
@@ -2609,8 +2697,7 @@ function ProblemCreate() {
   }
   async function toggle(item) {
     const next = item.status === "published" ? "hidden" : "published";
-    if (!confirm(`确认${next === "hidden" ? "下架" : "发布"}“${item.title}”？`))
-      return;
+    if (busy) return;
     setBusy(true);
     setError("");
     try {
@@ -2619,7 +2706,8 @@ function ProblemCreate() {
         body: { status: next },
       });
       setMessage(`已${next === "hidden" ? "下架" : "发布"}：${item.title}`);
-      r.reload();
+      setStatusAction(null);
+      await r.reload();
     } catch (x) {
       setError(x.message);
     } finally {
@@ -2736,12 +2824,13 @@ function ProblemCreate() {
                   <button
                     className="button secondary small"
                     disabled={busy}
-                    onClick={() => toggle(item)}
+                    onClick={() => { setError(""); setMessage(""); setStatusAction(item); }}
                   >
                     {item.status === "published" ? "下架" : "发布"}
                   </button>
                 </div>
               </div>
+              {statusAction?.id === item.id && <div className="moderation-confirm"><p><strong>确认{item.status === "published" ? "下架" : "发布"}“{item.title}”？</strong>{item.status === "published" && " 下架后将立即从公开题库移除。"}</p><div className="action-row"><button type="button" className="button danger small" disabled={busy} onClick={() => toggle(item)}>{busy ? "处理中…" : `确认${item.status === "published" ? "下架" : "发布"}`}</button><button type="button" className="button secondary small" disabled={busy} onClick={() => setStatusAction(null)}>取消</button></div></div>}
             </article>
           ))}
         </div>
@@ -2942,6 +3031,7 @@ function SearchPage() {
   );
 }
 function Topics() {
+  const topicPhotos = ["soldering", "stm32", "oscilloscope", "pcb", "oscilloscope", "pcb"];
   return (
     <div className="container page">
       <div className="page-heading">
@@ -2950,12 +3040,13 @@ function Topics() {
         <p>按方向查找已审核文章，建立自己的知识路径。</p>
       </div>
       <div className="topic-grid">
-        {topics.map((t) => (
+        {topics.map((t, index) => (
           <Link
             className="topic-card"
             to={`/articles?category=${encodeURIComponent(t.name)}`}
             key={t.name}
           >
+            <Photo id={topicPhotos[index % topicPhotos.length]} decorative />
             <h2>{t.name}</h2>
             <p>{t.desc}</p>
             <span>
@@ -3000,6 +3091,7 @@ function RoutesView() {
         <Route path="/topics" element={<Topics />} />
         <Route path="/shops" element={<Shops />} />
         <Route path="/shops/submit" element={<ShopSubmit />} />
+        <Route path="/shops/:id/edit" element={<ShopEdit />} />
         <Route path="/shops/:id" element={<ShopDetail />} />
         <Route path="/reviews/:id/edit" element={<ReviewEdit />} />
         <Route path="/write" element={<Write />} />
