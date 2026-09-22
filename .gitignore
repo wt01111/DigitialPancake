@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env*
+!.env.example
+test-results/
+work/
+.sites-runtime/
+server/data/
+server/private-uploads/

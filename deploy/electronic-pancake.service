@@ -1,0 +1,48 @@
+[Unit]
+Description=Electronic Pancake API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=electronic-pancake
+Group=electronic-pancake
+WorkingDirectory=/opt/electronic-pancake/current
+EnvironmentFile=/etc/electronic-pancake/app.env
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+ExecStart=/usr/local/bin/node server/index.js
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+UMask=0077
+
+# The API needs write access only to its state directory.
+StateDirectory=electronic-pancake
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/electronic-pancake
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+# SQLite is intentionally a single-writer, single-process deployment.
+MemoryHigh=3G
+MemoryMax=3500M
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target

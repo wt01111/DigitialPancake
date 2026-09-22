@@ -1,0 +1,54 @@
+[
+  {
+    "id": "soldering",
+    "title": "焊接工作台",
+    "author": "Blaz Erzetic",
+    "source": "https://unsplash.com/photos/man-soldering-wires-rP30_20fDpw",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "url": "https://images.unsplash.com/photo-1562941995-17dc31eaaf6d?auto=format&fit=max&w=1600&q=85",
+    "alt": "双手在电子工作台上使用电烙铁焊接，周围摆放着工具与电路元件",
+    "width": 1600,
+    "height": 1067,
+    "changes": "缩小尺寸、转换为 WebP；页面中按容器裁切显示。CC BY-SA 图片及其衍生版本继续采用原许可证。"
+  },
+  {
+    "id": "pcb",
+    "title": "PCB 铜箔与焊盘特写",
+    "author": "Vishnu Mohanan",
+    "source": "https://unsplash.com/photos/close-up-of-dark-blue-circuit-board-pfR18JNEMv8",
+    "license": "Unsplash License",
+    "licenseUrl": "https://unsplash.com/license",
+    "url": "https://images.unsplash.com/photo-1592659762303-90081d34b277?auto=format&fit=max&w=1600&q=85",
+    "alt": "深蓝色印刷电路板上金色焊盘与铜箔走线的实物特写",
+    "width": 1600,
+    "height": 1201,
+    "changes": "缩小尺寸、转换为 WebP；页面中按容器裁切显示。CC BY-SA 图片及其衍生版本继续采用原许可证。"
+  },
+  {
+    "id": "oscilloscope",
+    "title": "实验室示波器与测量仪器",
+    "author": "Radarvector",
+    "source": "https://commons.wikimedia.org/wiki/File:Keysight_InfiniiVision_DSOX_4024A_and_digital_multimeter_and_power_supply_in_laboratory_use.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/0/09/Keysight_InfiniiVision_DSOX_4024A_and_digital_multimeter_and_power_supply_in_laboratory_use.jpg",
+    "alt": "实验台上正在显示波形的 Keysight 四通道示波器、数字万用表与电源",
+    "width": 2278,
+    "height": 1872,
+    "changes": "缩小尺寸、转换为 WebP；页面中按容器裁切显示。CC BY-SA 图片及其衍生版本继续采用原许可证。"
+  },
+  {
+    "id": "stm32",
+    "title": "STM32F4 Discovery 开发板背面",
+    "author": "Teardown Central",
+    "source": "https://commons.wikimedia.org/wiki/File:STM32F4_Discovery_(9067299045).jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/9/9b/STM32F4_Discovery_%289067299045%29.jpg",
+    "alt": "STM32F4 Discovery 开发板背面的绿色阻焊层、铜箔走线与两侧排针焊点",
+    "width": 501,
+    "height": 720,
+    "changes": "缩小尺寸、转换为 WebP；页面中按容器裁切显示。CC BY-SA 图片及其衍生版本继续采用原许可证。"
+  }
+]

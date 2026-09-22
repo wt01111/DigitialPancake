@@ -1,0 +1,2757 @@
+{
+  "schemaVersion": 1,
+  "retrievedAt": "2026-09-22T09:15:30.818Z",
+  "sources": [
+    {
+      "year": 2017,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "name": "2-1FPZK447.rar",
+      "sha256": "af54353621cb5aca0725f0be7e6052fcf095bf4377a9cc3267ffdc61c536e6b0",
+      "size": 2672376,
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2019,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "name": "2-1ZPFJ213.zip",
+      "sha256": "df46dd3c7435c9927f0a7f69dfb4aa8ff7d28c112afb73acb7783198d644a1ff",
+      "size": 2662390,
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2021,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "name": "2-2111040J048.rar",
+      "sha256": "733f07cfbf1969a04d8894237ad0b9b8b3aad679633234185a56af83d096f461",
+      "size": 5052530,
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2021,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J135.rar",
+      "name": "2-2111040J135.rar",
+      "sha256": "1e1568920108b9fb3dc80362d6c6f9abd6a89051199847c2731c5be7eee024eb",
+      "size": 1788006,
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2023,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "name": "2-230P3094519.zip",
+      "sha256": "81dbad42dca2984526b1805e75b712d3eec1d0cb839e9b7a0562758590052d4e",
+      "size": 2645662,
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2025,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "name": "2_0741338441.rar",
+      "sha256": "bc68f44d5599ac25b9b0494e4fc97b8fdea0b2d56c919b0a3d6072740ddab847",
+      "size": 5829714,
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2025,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0742232691.rar",
+      "name": "2_0742232691.rar",
+      "sha256": "321c7372afed64941e8d20864ebc76513b83e176bd3d1519ea2bd496f575ca38",
+      "size": 109367608,
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2025,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0744507171.rar",
+      "name": "2_0744507171.rar",
+      "sha256": "a3958ca27be027efd2065a79642371e5c6f07426fa84f58134b6caced367c7dd",
+      "size": 2467363,
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2025,
+      "page": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/250731/2_0929077871.rar",
+      "name": "2_0929077871.rar",
+      "sha256": "96949802ecf5e0283534905cca0e3cd5857c94d00d7943fb608829012b5349e2",
+      "size": 1812,
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛"
+    },
+    {
+      "year": 2018,
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "page": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "name": "2-1PH00K610.zip",
+      "sha256": "dfdc326f6f5691e0afb0c6b8cd77c865be748dc2edabefc91893f63723dc18c6",
+      "size": 1439495
+    },
+    {
+      "year": 2020,
+      "competitionType": "provincial",
+      "competitionName": "2020年陕西省第七届TI杯模拟及模数混合电路应用设计竞赛",
+      "page": "https://nuedc.xidian.edu.cn/html/news/2020/1009/441.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+      "name": "2-201009221213.zip",
+      "sha256": "7c7591b5e392c5a04f2df859907dab0b07dc970ca45d1052683afc672a64aa5f",
+      "size": 2184970
+    },
+    {
+      "year": 2022,
+      "competitionType": "provincial",
+      "competitionName": "2022年陕西省TI杯大学生电子设计竞赛",
+      "page": "https://nuedc.xidian.edu.cn/html/news/2022/0727/476.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+      "name": "2-220HFJ458.zip",
+      "sha256": "d77a09e64368fb06e9d8c07f7f7e2c7fa537dcf6e80f9c54c2e77e6cd69f30e1",
+      "size": 475872
+    },
+    {
+      "year": 2024,
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "page": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "name": "2-240HZJ217.zip",
+      "sha256": "688d78ed0ea1fa0498e0ec57593a1946cd5776c901180f44b71015604b9027ea",
+      "size": 2827087
+    },
+    {
+      "year": 2026,
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "page": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "url": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "name": "2_0713202601.rar",
+      "sha256": "e02c3f703d07d6341e6161a078f7148f2cdfef5838a8824caf89cce1e1fa54a4",
+      "size": 3215223
+    }
+  ],
+  "problems": [
+    {
+      "id": "nuedc-national-2017-undergraduate-a",
+      "title": "微电网模拟系统",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "A",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“微电网模拟系统”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/A.pdf",
+          "name": "微电网模拟系统（A题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "212d7277ff15d2fc0fa05888be2d01b018d58ebe8a4d5260a4805baad261d6f2",
+          "size": 386408,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-undergraduate-b",
+      "title": "滚球控制系统",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "B",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“滚球控制系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/B.pdf",
+          "name": "滚球控制系统（B题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "e901d44b5e54f4995ea7a826d463046a5065603b7830fd9b76a1e160a472a965",
+          "size": 336362,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-undergraduate-c",
+      "title": "四旋翼自主飞行器探测跟踪系统",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "C",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“四旋翼自主飞行器探测跟踪系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/C.pdf",
+          "name": "四旋翼自主飞行器探测跟踪系统（C题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "6d836475b21e6dd439a5ed2a6793f78ed17741ba4d3b065989b0c7f3d2a57993",
+          "size": 256395,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-undergraduate-e",
+      "title": "自适应滤波器",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "E",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“自适应滤波器”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/E.pdf",
+          "name": "自适应滤波器（E题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "751b5d9e848ef115dc525350338e5eb38aa65883ad82d54f5cf0962845401548",
+          "size": 212604,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-undergraduate-f",
+      "title": "调幅信号处理实验电路",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "F",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“调幅信号处理实验电路”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/F.pdf",
+          "name": "调幅信号处理实验电路（F题).pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "82062c2e50eaa45c1992004e197369770ac5812c3f8ac225501f3366c6ee67ca",
+          "size": 217712,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-undergraduate-h",
+      "title": "远程幅频特性测试装置",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "H",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“远程幅频特性测试装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2017/0811/365.html",
+          "note": "H 题补充说明：发挥部分要求使用 5V 单电源，且不得使用 DC-DC 模块。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/H.pdf",
+          "name": "远程幅频特性测试装置（H题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "4398b1d437bbbe1c4f0e008dc4b7dcf8ade069e5470a52499e0e878f1b1aa966",
+          "size": 172319,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-undergraduate-i",
+      "title": "可见光室内定位装置",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "I",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“可见光室内定位装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/I.pdf",
+          "name": "可见光室内定位装置（I题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "9b315ed2111c86e603958973fd1a71ecd419756f8a3a729406693acf278917e9",
+          "size": 344779,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-undergraduate-k",
+      "title": "单相用电器分析监测装置",
+      "year": 2017,
+      "group": "undergraduate",
+      "problemCode": "K",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“单相用电器分析监测装置”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/undergraduate/K.pdf",
+          "name": "单相用电器分析监测装置（K题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "7b3fb25d1f7b49e2a31f57d2aa859341ca5ef1da503bbac0857b2060a354be95",
+          "size": 213214,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-vocational-l",
+      "title": "自动泊车系统",
+      "year": 2017,
+      "group": "vocational",
+      "problemCode": "L",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“自动泊车系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/vocational/L.pdf",
+          "name": "自动泊车系统（L题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "345115f695ff0177ae51a2714feb5f6e786cb65c523b09f0e5e826406148483d",
+          "size": 168968,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-vocational-m",
+      "title": "管道内钢珠运动测量装置",
+      "year": 2017,
+      "group": "vocational",
+      "problemCode": "M",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“管道内钢珠运动测量装置”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/vocational/M.pdf",
+          "name": "管道内钢珠运动测量装置（M题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "04b464a4a73b2b303f27359e3e8a97f3427fd2ed873495a50232d370aa0ae48a",
+          "size": 231071,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-vocational-o",
+      "title": "直流电动机测速装置",
+      "year": 2017,
+      "group": "vocational",
+      "problemCode": "O",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“直流电动机测速装置”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/vocational/O.pdf",
+          "name": "直流电动机测速装置（O题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "bb021bd2907fabec54eada1792145d75d19e3d2c1a7eca00a8f18800bd2857a4",
+          "size": 150572,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2017-vocational-p",
+      "title": "简易水情检测系统",
+      "year": 2017,
+      "group": "vocational",
+      "problemCode": "P",
+      "category": "other",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2017/0809/364.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易水情检测系统”以综合感知、显示或场景化电子系统为核心，归入 other。",
+      "competitionType": "national",
+      "competitionName": "2017年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2017/vocational/P.pdf",
+          "name": "简易水情检测系统（P题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/170809/2-1FPZK447.rar",
+          "sha256": "7c1e8ce1e5daf697ab8f2476e43ec3ec3abd44924c1477562c356aaff40ea01e",
+          "size": 294780,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-a",
+      "title": "电流信号检测装置",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "A",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“电流信号检测装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/A.docx",
+          "name": "2018年TI杯大学生电子设计竞赛题A-电流信号检测装置.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "4e90cfb63e4da64836dadc67f21b085a07c58b8b4240771fd4163981baeab912",
+          "size": 395102
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-b",
+      "title": "灭火飞行器",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "B",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“灭火飞行器”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/B.docx",
+          "name": "2018年TI杯大学生电子设计竞赛题B-灭火飞行器.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "035ba8a0b9a270e04c083a31e468421f8a2ba1339c318d214b3cc683ad955343",
+          "size": 678291
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-c",
+      "title": "无线充电电动小车",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "C",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“无线充电电动小车”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/C.docx",
+          "name": "2018年TI杯大学生电子设计竞赛题C-无线充电电动小车.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "ee26703231794c4cd429e428b90a1111ce604b9a417430f82ef3df39ab3dbd87",
+          "size": 24763
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-d",
+      "title": "手势识别",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "D",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“手势识别”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/D.docx",
+          "name": "2018年TI杯大学生电子设计竞赛题D-手势识别.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "d9a627a9c148856801855d5790bf284d3a7d65ba577570deaba275e06ac479d6",
+          "size": 236782
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-e",
+      "title": "能量回收装置",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "E",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“能量回收装置”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/E.docx",
+          "name": "2018年TI杯大学生电子设计竞赛题E-能量回收装置.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "bd7a9664b8779d7169c39adbf4ca33207bbb50390297b1de8381bf8eb759f866",
+          "size": 81071
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-f",
+      "title": "无线话筒扩音系统",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "F",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“无线话筒扩音系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/F.docx",
+          "name": "2018年TI杯大学生电子设计竞赛题F-无线话筒扩音系统.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "6b74f29cee3e9c70d22daba7e4d2e96e31a0f3388a0c3ca7ad9347d929cc7a79",
+          "size": 20678
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-g",
+      "title": "简易数字信号时序分析装置",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "G",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易数字信号时序分析装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/G.doc",
+          "name": "2018年TI杯大学生电子设计竞赛题G-简易数字信号时序分析装置.doc",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "d235f668b72ca0cf4b45c4b837248cf00bf2f75f23c97fe4d1ac881fda9abe51",
+          "size": 59392
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2018-all-h",
+      "title": "简易功率测量装置",
+      "year": 2018,
+      "group": "all",
+      "problemCode": "H",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "2018年陕西省TI杯竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2018/0720/390.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易功率测量装置”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2018/all/H.docx",
+          "name": "2018年TI杯大学生电子设计竞赛题H-简易功率测量装置.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
+          "sha256": "a4270e118649d2b21c1631a4211a56a0cdf8fe2dab587834c2cabacb86c08eab",
+          "size": 50144
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-a",
+      "title": "电动小车动态无线充电系统",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "A",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“电动小车动态无线充电系统”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/A.pdf",
+          "name": "A题_电动小车动态无线充电系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "e4c4120187a946437213b96ce04aeb09368f801933bb35b4d1aa02484fdd7ad7",
+          "size": 255650,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-b",
+      "title": "巡线机器人",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "B",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“巡线机器人”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/B.pdf",
+          "name": "B题_巡线机器人.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "fe0509701a7bc6bc195cb20af55ad359befb9fed521b1d234a4c79210862c714",
+          "size": 473304,
+          "mime": "application/pdf"
+        },
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/B-diagram-1.jpg",
+          "name": "B题_巡线机器人_附图_场地铺设.jpg",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "3a31d477c161685618fd48e3c86fd34a14d20f22c44d15104d08bfc9665e5569",
+          "size": 288935,
+          "mime": "image/jpeg"
+        },
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/B-diagram-2.jpg",
+          "name": "B题_巡线机器人_附图_悬停同心圆.jpg",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "44e4d3efeb033a3f7fd7a0511b337b19bc6796fbc535978c4434ae47d79cc3a4",
+          "size": 107442,
+          "mime": "image/jpeg"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-c",
+      "title": "线路负载及故障检测装置",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "C",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“线路负载及故障检测装置”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/C.pdf",
+          "name": "C题_线路负载及故障检测装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "0c0369d93a3ac0ed721dc2f3850314f5c758f7e84a6f98bbd09eba0c64238901",
+          "size": 227401,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-d",
+      "title": "简易电路特性测试仪",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "D",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易电路特性测试仪”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/D.pdf",
+          "name": "D题_简易电路特性测试仪.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "b1f197476bdbc57c9722885df6af0d599855c868fe4e1028cc7abdbb20b07100",
+          "size": 204802,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-e",
+      "title": "基于互联网的信号传输系统",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "E",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“基于互联网的信号传输系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/E.pdf",
+          "name": "E题_基于互联网的信号传输系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "1a64a3c439b37f52b0b77c044718560475104805b264a394da40fb9fc0e3ff02",
+          "size": 251106,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-f",
+      "title": "纸张计数显示装置",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "F",
+      "category": "other",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“纸张计数显示装置”以综合感知、显示或场景化电子系统为核心，归入 other。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/F.pdf",
+          "name": "F题_纸张计数显示装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "a64c58b72fe5f7bc6afa1800e4d84896cb8a14f134e0cf3af69a590a34dcdaf3",
+          "size": 189409,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-g",
+      "title": "双路语音同传的无线收发系统",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "G",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“双路语音同传的无线收发系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/G.pdf",
+          "name": "G题_双路语音同传的无线收发系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "577236ce93e8be63df9931d197db4932412f60e2b526e701448427af909bc1d1",
+          "size": 195039,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-undergraduate-h",
+      "title": "模拟电磁曲射炮",
+      "year": 2019,
+      "group": "undergraduate",
+      "problemCode": "H",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“模拟电磁曲射炮”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/undergraduate/H.pdf",
+          "name": "H题_模拟电磁曲射炮.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "b36a574ef918a2f82e67f86b63fa0f083274127d4df871debca102f1b35505ad",
+          "size": 231174,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-vocational-i",
+      "title": "LED线阵显示装置",
+      "year": 2019,
+      "group": "vocational",
+      "problemCode": "I",
+      "category": "other",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“LED线阵显示装置”以综合感知、显示或场景化电子系统为核心，归入 other。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/vocational/I.pdf",
+          "name": "I题_LED线阵显示装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "a3459f6d5d6eea16e97cc96b817b7dc1448a606b58c738a0f670623139014692",
+          "size": 244662,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-vocational-j",
+      "title": "模拟电磁曲射炮",
+      "year": 2019,
+      "group": "vocational",
+      "problemCode": "J",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“模拟电磁曲射炮”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/vocational/J.pdf",
+          "name": "J题_模拟电磁曲射炮.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "06c07481ba02be30c98ae674ff8255c335650114a4c3c08cc6fc892d1ec823c8",
+          "size": 228151,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2019-vocational-k",
+      "title": "简易多功能液体容器",
+      "year": 2019,
+      "group": "vocational",
+      "problemCode": "K",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2019/0807/416.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易多功能液体容器”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2019年全国大学生电子设计竞赛",
+      "relatedNotices": [
+        {
+          "url": "https://nuedc.xidian.edu.cn/html/news/2019/0808/418.html",
+          "note": "2019 年竞赛问题汇总；用于核对正式题目的统一说明。"
+        }
+      ],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2019/vocational/K.pdf",
+          "name": "K题_简易多功能液体容器.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/190807/2-1ZPFJ213.zip",
+          "sha256": "dc237a5ee3e69d0cb37bbd152b188ec4763e60f74ab36e8ebf81b046cae5dc72",
+          "size": 185777,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2020-all-a",
+      "title": "无线运动传感器节点设计",
+      "year": 2020,
+      "group": "all",
+      "problemCode": "A",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2020年陕西省第七届TI杯模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2020/1009/441.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“无线运动传感器节点设计”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2020/all/A.pdf",
+          "name": "file202010099976.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+          "sha256": "c9e4192dab84c8e5ea29d7c11be49832c5d4575957fc3cf5975c1cd833916363",
+          "size": 288512,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2020-all-b",
+      "title": "单相在线式不间断电源",
+      "year": 2020,
+      "group": "all",
+      "problemCode": "B",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "2020年陕西省第七届TI杯模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2020/1009/441.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“单相在线式不间断电源”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2020/all/B.pdf",
+          "name": "file202010098684.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+          "sha256": "ee59a2fa73b9bd51ee6ca3eb0c6142585d267073f14c0191101894e4065fd793",
+          "size": 420839,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2020-all-c",
+      "title": "坡道行驶电动小车",
+      "year": 2020,
+      "group": "all",
+      "problemCode": "C",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "2020年陕西省第七届TI杯模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2020/1009/441.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“坡道行驶电动小车”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2020/all/C.pdf",
+          "name": "file202010099685.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+          "sha256": "6b5be574ca32398af0d4cef56b0f84b582dfa2ef7f156e8c9109046a331e215f",
+          "size": 743408,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2020-all-d",
+      "title": "绕障飞行器",
+      "year": 2020,
+      "group": "all",
+      "problemCode": "D",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "2020年陕西省第七届TI杯模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2020/1009/441.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“绕障飞行器”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2020/all/D.pdf",
+          "name": "file202010093130.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+          "sha256": "ce8351c0590b1e1bf1bd23bf4a537aec47df8ef27687c390c8d0d20c1b14c987",
+          "size": 401068,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2020-all-e",
+      "title": "放大器非线性失真研究装置",
+      "year": 2020,
+      "group": "all",
+      "problemCode": "E",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2020年陕西省第七届TI杯模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2020/1009/441.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“放大器非线性失真研究装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2020/all/E.pdf",
+          "name": "file202010095197.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/201009/2-201009221213.zip",
+          "sha256": "d6dfc2afe45e21ad189efb4a4021dece7589b7ef40c3c6a71cf124252c4e92b8",
+          "size": 457457,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-a",
+      "title": "信号失真度测量装置",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "A",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“信号失真度测量装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/A.pdf",
+          "name": "信号失真度测量装置（A题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "595a9d584f447ecd346e038b2fd37a74fe1811a785d0e537c348793060a48b62",
+          "size": 911164,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-b",
+      "title": "三相AC-DC变换电路",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "B",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“三相AC-DC变换电路”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/B.pdf",
+          "name": "三相AC-DC变换电路（B题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "d1ddf038414df93718c096169a6f6607b12ae8f24838fdac7fd950b1946577d9",
+          "size": 858601,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-c",
+      "title": "三端口DC-DC变换器",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "C",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“三端口DC-DC变换器”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/C.pdf",
+          "name": "三端口DC-DC变换器（C题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "eb8d669b8d5e34d934113418a33b56736f6b9648d2821522593f26450aa52533",
+          "size": 506962,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-d",
+      "title": "基于互联网的摄像测量系统",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "D",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“基于互联网的摄像测量系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/D.pdf",
+          "name": "基于互联网的摄像测量系统（D题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "d8e98470ce34e10884810e91e6c079f9243ff16e254c8a1e39a257915fb7fa22",
+          "size": 845438,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-e",
+      "title": "数字-模拟信号混合传输收发机",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "E",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“数字-模拟信号混合传输收发机”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/E.pdf",
+          "name": "数字-模拟信号混合传输收发机（E题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "718a718d730ada1ddf0500a1715f34db2bd5fb994f803fd595f3052b46118d17",
+          "size": 601128,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-f",
+      "title": "智能送药小车",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "F",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“智能送药小车”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/F.pdf",
+          "name": "智能送药小车（F题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "177bdab50a982ff80a93314df19394970a6ba603e4bda60bea797c114641cf5c",
+          "size": 610023,
+          "mime": "application/pdf"
+        },
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/F-font-template.pdf",
+          "name": "智能送药小车（F题）数字字模.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "f9197e1d67b774b6a95c3ba386c5af03d6669938d9ce58496a4348ef50b3f2d9",
+          "size": 7372,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-g",
+      "title": "植保飞行器",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "G",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“植保飞行器”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/G.pdf",
+          "name": "植保飞行器（G题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "ea87f130601e9c86913636d818af3cc0f2ccea16238835bd493ac0c4a6044553",
+          "size": 789096,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-undergraduate-h",
+      "title": "用电器分析识别装置",
+      "year": 2021,
+      "group": "undergraduate",
+      "problemCode": "H",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“用电器分析识别装置”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/undergraduate/H.pdf",
+          "name": "用电器分析识别装置（H题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J048.rar",
+          "sha256": "3f18242cd8e217f9c89b30c16be3398877a81b44ee5d7c24e902f2b065660c52",
+          "size": 322784,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-vocational-i",
+      "title": "具有发电功能的储能小车",
+      "year": 2021,
+      "group": "vocational",
+      "problemCode": "I",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J135.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“具有发电功能的储能小车”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/vocational/I.pdf",
+          "name": "具有发电功能的储能小车(I题).pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J135.rar",
+          "sha256": "d9d95f3d81abe7c45182f4902e249a8ca1353a1c5e7226a9caa8d6159b0de2c4",
+          "size": 758843,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-vocational-j",
+      "title": "周期信号波形识别及参数测量装置",
+      "year": 2021,
+      "group": "vocational",
+      "problemCode": "J",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J135.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“周期信号波形识别及参数测量装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/vocational/J.pdf",
+          "name": "周期信号波形识别及参数测量装置（J题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J135.rar",
+          "sha256": "97d6656c0f8f6f64b260adf4dee4dbf74a310e4fbd04cd2f7bcfe95f318686cb",
+          "size": 620167,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2021-vocational-k",
+      "title": "照度稳定可调LED台灯",
+      "year": 2021,
+      "group": "vocational",
+      "problemCode": "K",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2021/1104/458.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J135.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“照度稳定可调LED台灯”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2021年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2021/vocational/K.pdf",
+          "name": "照度稳定可调LED台灯（K题）.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/211104/2-2111040J135.rar",
+          "sha256": "c0275acba3f9b9f04d8e71df2bb1358e1abd6bdeb6efbab014ac6f718d0515f4",
+          "size": 499993,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2022-all-a",
+      "title": "单相交流电子负载",
+      "year": 2022,
+      "group": "all",
+      "problemCode": "A",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "2022年陕西省TI杯大学生电子设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2022/0727/476.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“单相交流电子负载”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2022/all/A.doc",
+          "name": "A题-单相交流电子负载.doc",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+          "sha256": "f592d7312be5cf5fe2fea44c6de902ab873d14b0957719e414cb44377f1b287c",
+          "size": 151040
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2022-all-b",
+      "title": "送货无人机",
+      "year": 2022,
+      "group": "all",
+      "problemCode": "B",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "2022年陕西省TI杯大学生电子设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2022/0727/476.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“送货无人机”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2022/all/B.docx",
+          "name": "B题-送货无人机.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+          "sha256": "d3c7c351dc2ad346657e906a229d025a9fb47766845bf9669dddabacda7fc0f1",
+          "size": 154577
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2022-all-c",
+      "title": "小车跟随行驶系统",
+      "year": 2022,
+      "group": "all",
+      "problemCode": "C",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "2022年陕西省TI杯大学生电子设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2022/0727/476.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“小车跟随行驶系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2022/all/C.docx",
+          "name": "C题-小车跟随行驶系统.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+          "sha256": "930ee95e04bf056634215e3e046d0ff899c0f85e7129bfbc926bc2bfb5a3f5de",
+          "size": 95882
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2022-all-d",
+      "title": "混沌信号发生器",
+      "year": 2022,
+      "group": "all",
+      "problemCode": "D",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2022年陕西省TI杯大学生电子设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2022/0727/476.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“混沌信号发生器”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2022/all/D.docx",
+          "name": "D题-混沌信号发生器.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+          "sha256": "e7d1af1524422a999104d6ddfc8b07bdf410f232b2b72a92f98755b556054644",
+          "size": 84075
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2022-all-e",
+      "title": "声源定位跟踪系统",
+      "year": 2022,
+      "group": "all",
+      "problemCode": "E",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2022年陕西省TI杯大学生电子设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2022/0727/476.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“声源定位跟踪系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2022/all/E.docx",
+          "name": "E题-声源定位跟踪系统.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+          "sha256": "6f4f2a2ece854ae6c9a6484c7c93104d3b16a01e4ce8ced8338413e765feca24",
+          "size": 72180
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2022-all-f",
+      "title": "信号调制度测量装置",
+      "year": 2022,
+      "group": "all",
+      "problemCode": "F",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "2022年陕西省TI杯大学生电子设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2022/0727/476.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“信号调制度测量装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2022/all/F.docx",
+          "name": "F题-信号调制度测量装置.docx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
+          "sha256": "677cec4fd2997f579f3901b37f549035c8bd1df497af8ab30468d3d8e21bd4e2",
+          "size": 53719
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-a",
+      "title": "单相逆变器并联运行系统",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "A",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“单相逆变器并联运行系统”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/A.pdf",
+          "name": "A题_单相逆变器并联运行系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "3b6029706be231b774528b47a29c9f3979e8f5750cc5d424e2864b008b2c5267",
+          "size": 283257,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-b",
+      "title": "同轴电缆长度与终端负载检测装置",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "B",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“同轴电缆长度与终端负载检测装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/B.pdf",
+          "name": "B题_同轴电缆长度与终端负载检测装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "b6a06fa5338500a82af45436e4ff733e5d212cfe72060251f40afa36e6aeb172",
+          "size": 304209,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-c",
+      "title": "电感电容测量装置",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "C",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“电感电容测量装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/C.pdf",
+          "name": "C题_电感电容测量装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "fc07c8bc68e9dc260a1171ffc6ac61a6e130d77ba62542393a02f2c5b1fa0366",
+          "size": 239101,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-d",
+      "title": "信号调制方式识别与参数估计装置",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "D",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“信号调制方式识别与参数估计装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/D.pdf",
+          "name": "D题_信号调制方式识别与参数估计装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "994e4feef040910668e22f77bdc1ee9cfb9dd79a1bbfe5232c286bd8293419b9",
+          "size": 334064,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-e",
+      "title": "运动目标控制与自动追踪系统",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "E",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“运动目标控制与自动追踪系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/E.pdf",
+          "name": "E题_运动目标控制与自动追踪系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "6aa29c45410623ebb21d8c962296a86de1a57fe9389871065f873d83877c0799",
+          "size": 230727,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-f",
+      "title": "基于声传播的智能定位系统",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "F",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“基于声传播的智能定位系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/F.pdf",
+          "name": "F题_基于声传播的智能定位系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "42a7c7376d02a0a396617d1c90f8734edfd23dc98d877508f2918395a7763fb2",
+          "size": 290029,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-g",
+      "title": "空地协同智能消防系统",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "G",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“空地协同智能消防系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/G.pdf",
+          "name": "G题_空地协同智能消防系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "0c27147275b05aa09f6ef3df4de1cbfadaa439e261aa498786ef61b9f3d3de13",
+          "size": 284600,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-undergraduate-h",
+      "title": "信号分离装置",
+      "year": 2023,
+      "group": "undergraduate",
+      "problemCode": "H",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“信号分离装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/undergraduate/H.pdf",
+          "name": "H题_信号分离装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "720e23c66d7f21ff2cde817e6934afbd63b275d5a7bbeeaeb2d75b83ca53a91a",
+          "size": 250705,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-vocational-i",
+      "title": "气垫悬浮车",
+      "year": 2023,
+      "group": "vocational",
+      "problemCode": "I",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“气垫悬浮车”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/vocational/I.pdf",
+          "name": "I题_气垫悬浮车.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "7b5424d0f95bafe0b7f769d09f7b39582170f2de1453052ea3d9c00ebd1cb208",
+          "size": 249802,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-vocational-j",
+      "title": "线路故障自动检测系统",
+      "year": 2023,
+      "group": "vocational",
+      "problemCode": "J",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“线路故障自动检测系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/vocational/J.pdf",
+          "name": "J题_线路故障自动检测系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "6eef71ab91fcc0616c47a4e11d2a58b32a994ec21019be43532feb165368c646",
+          "size": 292991,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2023-vocational-k",
+      "title": "辨音识键奏乐系统",
+      "year": 2023,
+      "group": "vocational",
+      "problemCode": "K",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2023/0802/487.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“辨音识键奏乐系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2023年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2023/vocational/K.pdf",
+          "name": "K题_辨音识键奏乐系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/230803/2-230P3094519.zip",
+          "sha256": "8a79911ec34d75f12c63cca67f46db6106c148335c57b36637832f8e848a8e6f",
+          "size": 177787,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-a",
+      "title": "AC-AC变换电路并联运行",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "A",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“AC-AC变换电路并联运行”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/A.pdf",
+          "name": "A题_AC-AC变换电路并联运行.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "a191122dc2b89dfbf759778bded3e9b4e350b4ccc6ee3a48fcb440c68e5d8274",
+          "size": 765102,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-b",
+      "title": "单相功率分析仪",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "B",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“单相功率分析仪”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/B.pdf",
+          "name": "B题_单相功率分析仪.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "e86fed670bc9fe766f637d1f2d0c1d096c1dc27a7c9aebe4ac3a3654561adbc6",
+          "size": 243207,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-c",
+      "title": "无线传输信号模拟系统",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "C",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“无线传输信号模拟系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/C.pdf",
+          "name": "C题_无线传输信号模拟系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "24900c61b4684f27ac9b7f0173f8f7eab7115da2e20e3633f31b00347284a23f",
+          "size": 831951,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-d",
+      "title": "立体货架盘点无人机系统",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "D",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“立体货架盘点无人机系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/D.pdf",
+          "name": "D题_立体货架盘点无人机系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "652755f80cd140d53a3086b476f6e0592550a4a32f8f0c5031f52bcb32fcbe1d",
+          "size": 297975,
+          "mime": "application/pdf"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-01.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 01.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "f4668ab2e24d9b3dc89de92e04fed046007c4777ad2e58e7b28e944b69028f02",
+          "size": 1193,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-02.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 02.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "bbcd19ced157f6f6497a0f351d4ffbb6dfff15633a399a0d0eee7459d3a039e8",
+          "size": 1170,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-03.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 03.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "fa71f8b8294b75b6b0c51d9c49b455e865c2bfcb50d00818a277dfaab09902aa",
+          "size": 1205,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-04.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 04.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "3b36b42b86ef16e312a4e294e762597d0457daa87c347dc1c4bc3608c0c08f99",
+          "size": 1172,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-05.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 05.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "4f10d2f53c2392880adea17f68ab451597022aafc40502b64979f14eb3eae7bf",
+          "size": 1185,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-06.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 06.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "16f6214bd6be182bf19a6719e40f9e1401085adfa987104d457059eed3e63e9f",
+          "size": 1196,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-07.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 07.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "f62b868fa7b776ee8a578efbc4ff842b34639ef8f1190b27f97ba3c6e87ea4f3",
+          "size": 1174,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-08.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 08.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "72b6367a853b047abddef11e5c0391813690df75817b54d7079ac59f1318468c",
+          "size": 1228,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-09.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 09.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "0627c73ef4f34ffe13086638a36f7a41b0122bed6281c069aaf21368cbda17a9",
+          "size": 1190,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-10.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 10.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "681a12b9f2d1f026d4771de9a139642d7edb7e01c62a92713fca86b4146c264b",
+          "size": 1199,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-11.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 11.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "67d5dc7f037d1de7d3a0a92d4b37ab480b7ce259093e07254ab83f5dc1faf314",
+          "size": 1187,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-12.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 12.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "ea9ca843145be07f15f8af3c8763f9620877bf44d807d37c64db339dc98c1775",
+          "size": 1169,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-13.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 13.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "bf945c4a89c5857414d96f71c9d66dc298b44c35a40204b2fd571e5cc1345dc6",
+          "size": 1184,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-14.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 14.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "3b6ac35f3b6842d5d3332a46dbdb70808b06efc2fc9fa5b072195b144f60532c",
+          "size": 1190,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-15.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 15.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "47de16fc4468631e03022cfc49ca99233e490e13f63e013169263dc9855628fb",
+          "size": 1210,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-16.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 16.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "1d059ade30967577f321644a9edeab2e989263a988a4cfea5b0b47c39fdeb963",
+          "size": 1155,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-17.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 17.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "736c3d07168c02e2626907ec9c70311a1de77c619f26e0f4d23e882b205c653e",
+          "size": 1199,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-18.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 18.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "300c446b8048cd09afb4ef35f22c1eadf5f6dd7020c1b1facb67b50dcc30e082",
+          "size": 1173,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-19.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 19.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "e85fbb268bc14c6de696e69e89f95b382941efb234801300d3b98c32f6fc2060",
+          "size": 1163,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-20.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 20.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "01ba3e1a73aca0c0c7990f91cf36e83b359d0a9faa8e993834bb1efb028a986e",
+          "size": 1185,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-21.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 21.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "5b5ae2a59d373e9ca614bb48530dba7b21606c5fdd64a2bec593cb93a92946fe",
+          "size": 1185,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-22.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 22.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "51e414d6f645e06766b8fce7194e86d208435292fae6722c7a362c7e51371b52",
+          "size": 1155,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-23.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 23.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "7a75f9b865fb798f8ebb0749201eb7cf6df868f4347eb7557ccbc800704fb418",
+          "size": 1178,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-24.png",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 24.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "6af93357faabd141290a901c902cae1a9594eb02fd6a08e49639a175631c4b6d",
+          "size": 1170,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2024/all/D-support-25.pptx",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 25.pptx",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "a15348832d0c13f729286fab992577d7600fead4876b41e966c2bf674fe635e4",
+          "size": 51057,
+          "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-e",
+      "title": "三子棋游戏装置",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "E",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“三子棋游戏装置”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/E.pdf",
+          "name": "E题_三子棋游戏装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "710d955f8d6270bdb6a6b72078ebde0f95fc889c00b9e482d560da61c9b1f806",
+          "size": 164676,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-f",
+      "title": "磁悬浮实验装置",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "F",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“磁悬浮实验装置”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/F.pdf",
+          "name": "F题_磁悬浮实验装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "d20ed3f8fd4febcb4ae214c0f4adcf2f69fe2435c8fdf88b91c675cf433e12f9",
+          "size": 190835,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-g",
+      "title": "简易录音屏蔽系统",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "G",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易录音屏蔽系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/G.pdf",
+          "name": "G题_简易录音屏蔽系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "51f96427090fc6df17484971e8e219058b79173fe5e88d161a8e636c4dfe66e3",
+          "size": 210891,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2024-all-h",
+      "title": "自动行驶小车",
+      "year": 2024,
+      "group": "all",
+      "problemCode": "H",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第九届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2024/0729/503.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“自动行驶小车”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2024/all/H.pdf",
+          "name": "H题_自动行驶小车.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
+          "sha256": "a0a4617d1c7b0f698a25c41bde16b97dd93c89cc425a65d840326faa0e58e2c5",
+          "size": 159980,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-a",
+      "title": "能量回馈的变流器负载试验装置",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "A",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“能量回馈的变流器负载试验装置”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/A.pdf",
+          "name": "A题_能量回馈的变流器负载试验装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "c43e00a4c6313177a16b2048969df6d980c892b7aecf31b44832dd535c6551aa",
+          "size": 761507,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-b",
+      "title": "单相有源电力滤波实验装置",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "B",
+      "category": "power",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“单相有源电力滤波实验装置”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/B.pdf",
+          "name": "B题_单相有源电力滤波实验装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "9d2dec1aedd353d2adb38a74f5c3d95da03fb4d7162346d101919cd7e5c3952b",
+          "size": 770634,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-c",
+      "title": "基于单目视觉的目标物测量装置",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "C",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“基于单目视觉的目标物测量装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/C.pdf",
+          "name": "C题_基于单目视觉的目标物测量装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "388c204bf489abc6f15976e9526cbaeccb8e4eb678250cb28d0ac46edaa3e722",
+          "size": 796463,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-d",
+      "title": "简易以太网双绞线测试仪",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "D",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易以太网双绞线测试仪”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/D.pdf",
+          "name": "D题_简易以太网双绞线测试仪.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "728edee8d3e2691f7ad0aea8051ae12e7d8c22325e0411edbf2f8c3a0f8bae89",
+          "size": 629696,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-e",
+      "title": "简易自行瞄准装置",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "E",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易自行瞄准装置”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/E.pdf",
+          "name": "E题_简易自行瞄准装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "893aee9644ce3367780ae32fc5658043382fa28ab9118c450f00ad4f71ad939c",
+          "size": 834451,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-f",
+      "title": "简易自动接收机",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "F",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“简易自动接收机”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/F.pdf",
+          "name": "F题_简易自动接收机.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "13345c5da97868e2369026095f426a87b100d9d13b32ae26ebcc948113d41d05",
+          "size": 648395,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-g",
+      "title": "电路模型探究装置",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "G",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“电路模型探究装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/G.pdf",
+          "name": "G题_电路模型探究装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "e12e1fafc1be88b06817ec3e91597a41809d92f070f9af0f933114741c3efc8a",
+          "size": 557862,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-undergraduate-h",
+      "title": "野生动物巡查系统",
+      "year": 2025,
+      "group": "undergraduate",
+      "problemCode": "H",
+      "category": "other",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“野生动物巡查系统”以综合感知、显示或场景化电子系统为核心，归入 other。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/undergraduate/H.pdf",
+          "name": "H题_野生动物巡查系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0741338441.rar",
+          "sha256": "f17233ba31dfd7ed4ae4ea63fe2d9e642318bf2ad357360b92db6e6f3fe7bd4b",
+          "size": 1165586,
+          "mime": "application/pdf"
+        }
+      ],
+      "externalFiles": [
+        {
+          "originalName": "动物体态 .png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0742232691.rar",
+          "sha256": "245ac02103cafd4d86f42a15e66dab780e28760abd3365d24a00010897b6c595",
+          "size": 17809840,
+          "mime": "image/png",
+          "note": "按站点容量策略未收入本站；请从官方 H 题附图原包下载并核对 SHA-256。"
+        },
+        {
+          "originalName": "地貌图.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0742232691.rar",
+          "sha256": "1166c21e6378a497ba8950f59c830c58a8892a92e662c16c6fe6098c803de8d1",
+          "size": 91894531,
+          "mime": "image/png",
+          "note": "按站点容量策略未收入本站；请从官方 H 题附图原包下载并核对 SHA-256。"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-vocational-i",
+      "title": "非接触式控制盘",
+      "year": 2025,
+      "group": "vocational",
+      "problemCode": "I",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0744507171.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“非接触式控制盘”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/vocational/I.pdf",
+          "name": "I题_非接触式控制盘.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0744507171.rar",
+          "sha256": "247741617b94b2f58e14632938928d43aa761c6252d39d1f181b313a0e6af715",
+          "size": 1420725,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-vocational-j",
+      "title": "超声信标定位系统",
+      "year": 2025,
+      "group": "vocational",
+      "problemCode": "J",
+      "category": "signal",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0744507171.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“超声信标定位系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/vocational/J.pdf",
+          "name": "J题_超声信标定位系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0744507171.rar",
+          "sha256": "69e718c11900dd5838169d0313dcf65c5b59d11a69b392e3fe6f612459ece7b4",
+          "size": 596061,
+          "mime": "application/pdf"
+        },
+        {
+          "relativePath": "problems-official-files/2025/vocational/J-diagram.svg",
+          "name": "J题_超声信标定位系统_附图.svg",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250731/2_0929077871.rar",
+          "sha256": "1d059b67a81abf95c2aaf8dc2f7173e7e194b5c47fe370d359551f93c1ec99b7",
+          "size": 12614,
+          "mime": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-national-2025-vocational-k",
+      "title": "自动避障小车",
+      "year": 2025,
+      "group": "vocational",
+      "problemCode": "K",
+      "category": "control",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2025/0730/513.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0744507171.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“自动避障小车”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "competitionType": "national",
+      "competitionName": "2025年全国大学生电子设计竞赛",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2025/vocational/K.pdf",
+          "name": "K题_自动避障小车.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/250730/2_0744507171.rar",
+          "sha256": "c765cce608cd070996686833d7b93311157bd27c1337830740c7aad06f359628",
+          "size": 598230,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-a",
+      "title": "AC-AC变换电路",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "A",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“AC-AC变换电路”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/A.pdf",
+          "name": "A题_AC-AC变换电路.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "5c62df100817b0b14665063ff00ee90fc9817115d64f541aaf4c0d5f4235b7b0",
+          "size": 215910,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-b",
+      "title": "“无源”交流电流表及无线读表器",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "B",
+      "category": "power",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，““无源”交流电流表及无线读表器”以电能变换、供电、储能或用电特性为核心，归入 power。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/B.pdf",
+          "name": "B题_“无源”交流电流表及无线读表器.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "e6759b499ca8298a0f30caa435cf37ea598d356ecfc40e75d85ec2b7f454eb48",
+          "size": 231024,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-c",
+      "title": "基于无线通信的数字钥匙实验系统",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "C",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“基于无线通信的数字钥匙实验系统”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/C.pdf",
+          "name": "C题_基于无线通信的数字钥匙实验系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "fd9f7e8021ff562acf79122d0f899403c1b703b2a42ae9822d64c3bc360e3d58",
+          "size": 792060,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-d",
+      "title": "陆空协同无人机系统",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "D",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“陆空协同无人机系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/D.pdf",
+          "name": "D题_陆空协同无人机系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "5feec6a51ec7075c84d243207a8c387d6ae16dd8e68701a0f916b7134479e8f4",
+          "size": 242856,
+          "mime": "application/pdf"
+        },
+        {
+          "relativePath": "problems-official-files/2026/all/D-support-01.png",
+          "name": "2026 D题 陆空协同无人机系统 附件 01.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "bf750114c26258ba3203af51f68765919ee41e6c5974198afb419835d7b82626",
+          "size": 14229,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2026/all/D-support-02.png",
+          "name": "2026 D题 陆空协同无人机系统 附件 02.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "e3a8af6f524ea2f01da8557c063b8b764e6d04f65e825e6ab504115571ef546f",
+          "size": 28119,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2026/all/D-support-03.png",
+          "name": "2026 D题 陆空协同无人机系统 附件 03.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "d8d04acb52f79f3fe7fb6f103940d5a4ff559a2a0eac84dae1b07ddfd2c419fb",
+          "size": 2181,
+          "mime": "image/png"
+        },
+        {
+          "relativePath": "problems-official-files/2026/all/D-support-04.png",
+          "name": "2026 D题 陆空协同无人机系统 附件 04.png",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "27ad11d8d333537967e0c294015deef950e66c4732c348e4b4fa7b6839ffd139",
+          "size": 5289,
+          "mime": "image/png"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-e",
+      "title": "拼图装置",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "E",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“拼图装置”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/E.pdf",
+          "name": "E题_拼图装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "1230aa018fa86a98ba3b2e73d55935e4065a990e2e9c230a560da1514d5d3f8e",
+          "size": 585722,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-f",
+      "title": "李萨如图形显示控制装置",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "F",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“李萨如图形显示控制装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/F.pdf",
+          "name": "F题_李萨如图形显示控制装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "5a94b454cbbf6c2e70179acaac5e8c6ce14786bae2ecb7520321182e47eb8baf",
+          "size": 721552,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-g",
+      "title": "周期信号测量分析装置",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "G",
+      "category": "signal",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“周期信号测量分析装置”以信号产生、传输、检测、测量或处理为核心，归入 signal。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/G.pdf",
+          "name": "G题_周期信号测量分析装置.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "0058142ad484f92a0df2020dafa18bbe8c3e12816dccc8e4e212d4724733773f",
+          "size": 215269,
+          "mime": "application/pdf"
+        }
+      ]
+    },
+    {
+      "id": "nuedc-shaanxi-ti-2026-all-h",
+      "title": "车载平衡滚球运动控制系统",
+      "year": 2026,
+      "group": "all",
+      "problemCode": "H",
+      "category": "control",
+      "competitionType": "provincial",
+      "competitionName": "陕西省第十届大学生（TI杯）模拟及模数混合电路应用设计竞赛",
+      "sourcePage": "https://nuedc.xidian.edu.cn/html/news/2026/0729/526.html",
+      "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+      "retrievedAt": "2026-09-22T09:15:30.818Z",
+      "classificationReason": "依据官方题目正文的设计任务与指标，“车载平衡滚球运动控制系统”以执行机构、运动对象或闭环自动控制为核心，归入 control。",
+      "relatedNotices": [],
+      "files": [
+        {
+          "relativePath": "problems-official-files/2026/all/H.pdf",
+          "name": "H题_车载平衡滚球运动控制系统.pdf",
+          "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/260729/2_0713202601.rar",
+          "sha256": "93e2c83dea40d158cb38710b067447de99b2502b18c3aaaa9e284390f0b622a8",
+          "size": 493976,
+          "mime": "application/pdf"
+        }
+      ]
+    }
+  ]
+}

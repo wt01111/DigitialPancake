@@ -1,0 +1,6 @@
+[Unit]
+Description=Back up Electronic Pancake
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /opt/electronic-pancake/current/deploy/backup.sh

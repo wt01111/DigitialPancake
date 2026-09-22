@@ -1,0 +1,2231 @@
+{
+  "source": {
+    "fileName": "【补档】【封神榜】电子元件商家网店封神榜.xlsx",
+    "sheet": "电子元件网店红黑榜",
+    "importedAt": "2026-09-21",
+    "recordCount": 82,
+    "shopCount": 76,
+    "notice": "说明：仅供参考，不得转发其他群或发布在其他平台。自行填写，内容仅代表填写人意见，不代表本群意见。使用者请自行判断，不作为评判店铺依据，不作为任何佐证材料。定期锁定已填写内容，补充区和提问区不锁定。店铺名称、掌柜ID查询方法如图。",
+    "approvalBatch": "historical-approved-20260921"
+  },
+  "shops": [
+    {
+      "id": "shop-4",
+      "name": "（深圳）汕头华扬电子",
+      "aliases": [],
+      "ownerId": "汕头华扬电子",
+      "platform": "淘宝",
+      "url": "https://shop58559233.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "模拟IC、精密电阻等",
+      "sourceRows": [4],
+      "historicalReviews": [
+        {
+          "id": "historical-4",
+          "sourceRow": 4,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "Edward",
+          "date": "2022-03-06 00:00:00",
+          "reason": "器件保真",
+          "notes": "就是传说中的JS",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-5",
+      "name": "『普源RIGOL』特卖店",
+      "aliases": ["普源旗舰店"],
+      "ownerId": "过客良驹",
+      "platform": "淘宝",
+      "url": "https://shop33228927.taobao.com/",
+      "condition": "全新",
+      "businessScope": "普源仪器",
+      "sourceRows": [5],
+      "historicalReviews": [
+        {
+          "id": "historical-5",
+          "sourceRow": 5,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "Edward",
+          "date": "2022-03-06 00:00:00",
+          "reason": "优惠多，还有你懂",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-6",
+      "name": "深圳市义胜电子网店",
+      "aliases": ["义胜电子"],
+      "ownerId": "深圳市义胜电子有限公司",
+      "platform": "淘宝",
+      "url": "https://shop106187923.taobao.com/",
+      "condition": "全新",
+      "businessScope": "IC 三极管",
+      "sourceRows": [6, 46],
+      "historicalReviews": [
+        {
+          "id": "historical-6",
+          "sourceRow": 6,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "GND",
+          "date": "2022-03-06 00:00:00",
+          "reason": "基本全假货打磨翻新",
+          "notes": "假的很离谱直接用不了",
+          "supplements": "#Bread: 确实是垃圾，买的flash速度方差极大，个别直接不能用",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        },
+        {
+          "id": "historical-46",
+          "sourceRow": 46,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "A_s_",
+          "date": "2022-07-10 00:00:00",
+          "reason": "假货一大半！德仪的cmos芯片是国产ttl打标，ip5306两个全坏，就算在这买国产新洁能的mos，内阻比正品大一倍！类似的事还有很多...",
+          "notes": "也只有少数芯片和不关乎假货的东西可以在这买，毕竟便宜包邮",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-7",
+      "name": "深圳市优信电子科技有限公司",
+      "aliases": ["优信电子"],
+      "ownerId": "优信电子企业店",
+      "platform": "淘宝",
+      "url": "https://shop131282813.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各类电子元件",
+      "sourceRows": [7],
+      "historicalReviews": [
+        {
+          "id": "historical-7",
+          "sourceRow": 7,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "Edward",
+          "date": "2022-03-06 00:00:00",
+          "reason": "能用，原装国产分类较为清晰",
+          "notes": "能用就行了，存在一定假货，注意避坑",
+          "supplements": "#空银1997：130减速电机单个价格2.2米，多拍涨价，单独一个单一个单下。2022年7月6日 \n#唐僧的肉：拍下三天不发货，因为一款电阻没货。建议批量购买可以问清楚啥时候能发货。\n#民科:服务态度较好，又一次发错货，两个月后才发现，也全额仅退款了",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-8",
+      "name": "美时龙旗舰店",
+      "aliases": ["美时龙"],
+      "ownerId": "美时龙旗舰店",
+      "platform": "天猫",
+      "url": "https://meishilong.tmall.com/",
+      "condition": "全新",
+      "businessScope": "MCU、FPGA、CPLD等",
+      "sourceRows": [8],
+      "historicalReviews": [
+        {
+          "id": "historical-8",
+          "sourceRow": 8,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "氢气球",
+          "date": "2022-03-06 00:00:00",
+          "reason": "器件保真",
+          "notes": "可以做合同，对公交易",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-9",
+      "name": "深圳市华源芯电子有限公司",
+      "aliases": ["华源芯电子"],
+      "ownerId": "深圳市华源芯电子有限公司",
+      "platform": "淘宝",
+      "url": "https://shop474791141.taobao.com/",
+      "condition": "全新",
+      "businessScope": "开关、集成IC、元件包",
+      "sourceRows": [9],
+      "historicalReviews": [
+        {
+          "id": "historical-9",
+          "sourceRow": 9,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "武汉刘哥",
+          "date": "2022-03-06 00:00:00",
+          "reason": "以次充好，良品率低于60%",
+          "notes": "集成IC做假，开关质量差",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-10",
+      "name": "华富联电子",
+      "aliases": ["华富联"],
+      "ownerId": "华富联",
+      "platform": "淘宝",
+      "url": "https://shop112125784.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "各类拆机芯片",
+      "sourceRows": [10],
+      "historicalReviews": [
+        {
+          "id": "historical-10",
+          "sourceRow": 10,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "氢气球",
+          "date": "2022-03-06 00:00:00",
+          "reason": "器件保真",
+          "notes": "胖次：发票1000起开\r\n氢气球：500以上包邮",
+          "supplements": "#桃之夭夭：在这家买了很多模拟器件，都很好用，原拆机，不做翻新",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-11",
+      "name": "蚂蚁比特旗舰店",
+      "aliases": ["蚂蚁比特"],
+      "ownerId": "蚂蚁比特旗舰店",
+      "platform": "天猫",
+      "url": "https://mayibite.tmall.com/",
+      "condition": "全新",
+      "businessScope": "FPGA、DSP等 IC配单",
+      "sourceRows": [11],
+      "historicalReviews": [
+        {
+          "id": "historical-11",
+          "sourceRow": 11,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "陶心云",
+          "date": "2022-03-06 00:00:00",
+          "reason": "器件保真",
+          "notes": "可对私可对公",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-12",
+      "name": "卡邦利旗舰店",
+      "aliases": ["卡邦利"],
+      "ownerId": "卡邦利旗舰店",
+      "platform": "天猫",
+      "url": "https://kabangli.tmall.com/",
+      "condition": "全新",
+      "businessScope": "IC配单",
+      "sourceRows": [12],
+      "historicalReviews": [
+        {
+          "id": "historical-12",
+          "sourceRow": 12,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "陶心云",
+          "date": "2022-03-06 00:00:00",
+          "reason": "以次充好，翻新说全新；",
+          "notes": "特别注意：原装、全新原装、全新原装进口、xx品牌全新原装进口的区别",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-13",
+      "name": "优翔电子",
+      "aliases": [],
+      "ownerId": "xie'zuo'zhou",
+      "platform": "淘宝",
+      "url": "https://youxiangdz.taobao.com/",
+      "condition": "全新",
+      "businessScope": "直插电阻",
+      "sourceRows": [13],
+      "historicalReviews": [
+        {
+          "id": "historical-13",
+          "sourceRow": 13,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "Crysty",
+          "date": "2022-03-06 00:00:00",
+          "reason": "台产铜脚电阻，价格便宜",
+          "notes": "便宜，能用，质量还行",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-14",
+      "name": "广州得信电子",
+      "aliases": [],
+      "ownerId": "lkkzsw",
+      "platform": "淘宝",
+      "url": "https://shop106091410.taobao.com/",
+      "condition": "全新",
+      "businessScope": "晶体管，各种元器件",
+      "sourceRows": [14],
+      "historicalReviews": [
+        {
+          "id": "historical-14",
+          "sourceRow": 14,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "Crysty",
+          "date": "2022-03-06 00:00:00",
+          "reason": "种类多，质量还行",
+          "notes": "进口，便宜",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-15",
+      "name": "Joland乔兰多",
+      "aliases": ["乔兰多"],
+      "ownerId": "jolandc",
+      "platform": "淘宝",
+      "url": "https://shop304102432.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各种线材",
+      "sourceRows": [15],
+      "historicalReviews": [
+        {
+          "id": "historical-15",
+          "sourceRow": 15,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "氢气球",
+          "date": "2022-03-06 00:00:00",
+          "reason": "质量挺好",
+          "notes": "种类不多",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-16",
+      "name": "深圳市亨源电子商行",
+      "aliases": ["亨源电子"],
+      "ownerId": "亨源电子",
+      "platform": "淘宝",
+      "url": "https://shop68825564.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "各种IC",
+      "sourceRows": [16, 23],
+      "historicalReviews": [
+        {
+          "id": "historical-16",
+          "sourceRow": 16,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "无胖次不生活",
+          "date": "2022-03-06 00:00:00",
+          "reason": "标全新，实际都是拆机翻新，良率不定",
+          "notes": "卖家很实诚，只要你问是不是全新的，他就会告诉你都是拆机翻新的",
+          "supplements": "复议;\n#XYWZ：打磨片居多，个人感觉良率还行，综合性价比较高【个人DIY使用】。",
+          "questions": "#桃之夭夭：买过一批spx3819全是假货，stm8s003有50%坏的，老板都不知道货的来源",
+          "status": "approved",
+          "sourceType": "workbook"
+        },
+        {
+          "id": "historical-23",
+          "sourceRow": 23,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "OliverKung",
+          "date": "2022-03-06 00:00:00",
+          "reason": "虽然就是说这个价格他一定是拆机的,但是暂时个人遇到的不能用/不对的片子还挺少的",
+          "notes": "",
+          "supplements": "#胖次：带OTP的芯片不要买，必翻车；其他芯片留备用，买来可能有坏的\n#牧师妹酱：购买的10片CP2104，OTP区全部被写过；MP9447良率不到75%；TPS53355是其他型号改丝印冒充的；",
+          "questions": "#氢气球：OTP芯片不都是一次性的吗？这也能拆机？\n#胖次：有些芯片除了主要功能以外里面还有OTP的EEPROM，可以配置也可以不配置，但是如果配过了这种的买了以后就没法自己配置了\n#OliverKung：好像现在变得坑起来了",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-17",
+      "name": "深圳立辉电子",
+      "aliases": ["立辉电子"],
+      "ownerId": "夕阳之翼3",
+      "platform": "淘宝",
+      "url": "https://shop114470520.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "大多为射频器件，功率放大器和小信号放大器都有，另外他家还出好像是自己做的VCO之类的",
+      "sourceRows": [17],
+      "historicalReviews": [
+        {
+          "id": "historical-17",
+          "sourceRow": 17,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "无胖次不生活",
+          "date": "2022-03-06 00:00:00",
+          "reason": "器件保真",
+          "notes": "注意拆机和翻新的都有，买时看好",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-18",
+      "name": "深圳天微科技有限公司",
+      "aliases": ["天微科技"],
+      "ownerId": "深圳天微科技有限公司",
+      "platform": "淘宝",
+      "url": "https://shop265475651.taobao.com/",
+      "condition": "全新",
+      "businessScope": "IC 单片机",
+      "sourceRows": [18],
+      "historicalReviews": [
+        {
+          "id": "historical-18",
+          "sourceRow": 18,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "无胖次不生活",
+          "date": "2022-03-06 00:00:00",
+          "reason": "器件保真，价格合适，开发票方便",
+          "notes": "有时候没货显示的价格是虚拟价格",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-19",
+      "name": "创客风暴",
+      "aliases": [],
+      "ownerId": "创客风暴",
+      "platform": "淘宝",
+      "url": "https://shop468430569.taobao.com/",
+      "condition": "全新",
+      "businessScope": "淘宝爆款电子模块",
+      "sourceRows": [19],
+      "historicalReviews": [
+        {
+          "id": "historical-19",
+          "sourceRow": 19,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "无胖次不生活",
+          "date": "2022-03-06 00:00:00",
+          "reason": "服务态度不好，买模块没资料",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-20",
+      "name": "科天微数码专营店",
+      "aliases": ["科天微、桥田"],
+      "ownerId": "科天微数码专营店",
+      "platform": "天猫",
+      "url": "https://ketianweism.tmall.com/",
+      "condition": "全新",
+      "businessScope": "各类电子元件和模块",
+      "sourceRows": [20],
+      "historicalReviews": [
+        {
+          "id": "historical-20",
+          "sourceRow": 20,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "无胖次不生活",
+          "date": "2022-03-06 00:00:00",
+          "reason": "桥 田 半 导 体\n用 过 都 说 好\n花最多的钱炸最多的管",
+          "notes": "卖国产烂货可以接受，但是国产货和别家原装进口的一个价格就不能接受了",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-21",
+      "name": "上迈科技",
+      "aliases": [],
+      "ownerId": "绿缘饰品",
+      "platform": "淘宝",
+      "url": "https://shop65679165.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各种直流电机",
+      "sourceRows": [21],
+      "historicalReviews": [
+        {
+          "id": "historical-21",
+          "sourceRow": 21,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "无胖次不生活",
+          "date": "2022-03-06 00:00:00",
+          "reason": "店铺应该是个代理商，没有技术支持，给的图纸对不上实物，服务态度差",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-22",
+      "name": "灿维尔电子",
+      "aliases": [],
+      "ownerId": "初出茅庐小灿",
+      "platform": "淘宝",
+      "url": "https://canweier.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各类电子元件，淘宝爆款国产元件",
+      "sourceRows": [22],
+      "historicalReviews": [
+        {
+          "id": "historical-22",
+          "sourceRow": 22,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "无胖次不生活",
+          "date": "2022-03-06 00:00:00",
+          "reason": "卖国产普通质量元件但是价格比较合适，处理了一次发错货，服务态度很好",
+          "notes": "需要买国产元件的可以去，东西就那样但胜在卖家还算靠谱",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-24",
+      "name": "诺瑞尔企业店",
+      "aliases": [],
+      "ownerId": "fashion丶乐淘",
+      "platform": "淘宝",
+      "url": "https://shop70269382.taobao.com/",
+      "condition": "全新",
+      "businessScope": "IC,配单",
+      "sourceRows": [24],
+      "historicalReviews": [
+        {
+          "id": "historical-24",
+          "sourceRow": 24,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "50HZ",
+          "date": "2022-03-09 00:00:00",
+          "reason": "芯片保真，有拆机测好，价格略贵",
+          "notes": "LC元件太贵的时候，找芯片可以去看看，种类全，企业店铺认证",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-25",
+      "name": "d[s199559529]",
+      "aliases": [],
+      "ownerId": "傲娇的柠檬97",
+      "platform": "淘宝",
+      "url": "https://shop199559529.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各种插头插座",
+      "sourceRows": [25],
+      "historicalReviews": [
+        {
+          "id": "historical-25",
+          "sourceRow": 25,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "50HZ",
+          "date": "2022-03-09 00:00:00",
+          "reason": "全部包邮，但是数量少，用的少的购买还是划算的",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-26",
+      "name": "奕盛电子",
+      "aliases": ["奕盛电子 批发与零售"],
+      "ownerId": "caiymamy",
+      "platform": "淘宝",
+      "url": "https://yishengdiz.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "家电配件，拆机管",
+      "sourceRows": [26],
+      "historicalReviews": [
+        {
+          "id": "historical-26",
+          "sourceRow": 26,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "50HZ",
+          "date": "2022-03-09 00:00:00",
+          "reason": "进口管子拆机保真",
+          "notes": "IRFP250,460和其他劲大管可以购买，性价比高",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-27",
+      "name": "WMTEC威铭",
+      "aliases": [],
+      "ownerId": "威铭科技01",
+      "platform": "淘宝",
+      "url": "https://shop116675663.taobao.com/",
+      "condition": "全新",
+      "businessScope": "光电隔离器，接口转换模块",
+      "sourceRows": [27],
+      "historicalReviews": [
+        {
+          "id": "historical-27",
+          "sourceRow": 27,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "50HZ",
+          "date": "2022-03-09 00:00:00",
+          "reason": "买过，性价比可以",
+          "notes": "陶老师推荐，企业店铺认证",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-28",
+      "name": "火星星数码",
+      "aliases": [],
+      "ownerId": "神探苍井",
+      "platform": "闲鱼",
+      "url": "https://market.m.taobao.com/app/idleFish-F2e/fish-pc/web/detail.html?id=656787490513&_u=ggjnr7ecaa",
+      "condition": "拆机",
+      "businessScope": "快克861DW",
+      "sourceRows": [28],
+      "historicalReviews": [
+        {
+          "id": "historical-28",
+          "sourceRow": 28,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "太阳",
+          "date": "2022-03-16 00:00:00",
+          "reason": "谈好价后变卦，主动关闭交易",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-29",
+      "name": "华富联电子商行",
+      "aliases": [],
+      "ownerId": "华富饭联电子商行",
+      "platform": "淘宝",
+      "url": "https://shop68298525.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "电子元件",
+      "sourceRows": [29],
+      "historicalReviews": [
+        {
+          "id": "historical-29",
+          "sourceRow": 29,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "太阳",
+          "date": "2022-04-16 00:00:00",
+          "reason": "不问价直拍，就发货，一问价格就涨价",
+          "notes": "买之前不要交谈，直接拍！",
+          "supplements": "#政成：还真是，每次一问就成倍价格上涨\n#Loop_Unrolling: 有次估计是价格标低了，先忽悠是发不了，退了又涨价了。。。",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-30",
+      "name": "贤合信电子",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "https://shop205195539.taobao.com/",
+      "condition": "全新",
+      "businessScope": "国产芯片代理商",
+      "sourceRows": [30],
+      "historicalReviews": [
+        {
+          "id": "historical-30",
+          "sourceRow": 30,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "牧师妹酱",
+          "date": "2022-05-08 00:00:00",
+          "reason": "wch产品线全 价格实惠",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-31",
+      "name": "少爷电子",
+      "aliases": [],
+      "ownerId": "少爷电子",
+      "platform": "淘宝",
+      "url": "https://shop114115626.taobao.com/",
+      "condition": "全新",
+      "businessScope": "芯片库存/尾货经销商",
+      "sourceRows": [31],
+      "historicalReviews": [
+        {
+          "id": "historical-31",
+          "sourceRow": 31,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "牧师妹酱",
+          "date": "2022-05-08 00:00:00",
+          "reason": "大部分是尾货 数量不多 需要问清楚库存",
+          "notes": "偶尔有拆机料 拆机和尾货老板会说明情况",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-32",
+      "name": "酷米仕科技官方店",
+      "aliases": [],
+      "ownerId": "酷米仕科技coomiss",
+      "platform": "淘宝",
+      "url": "https://shop137818172.taobao.com/",
+      "condition": "全新",
+      "businessScope": "电子元件",
+      "sourceRows": [32],
+      "historicalReviews": [
+        {
+          "id": "historical-32",
+          "sourceRow": 32,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "牧师妹酱",
+          "date": "2022-05-08 00:00:00",
+          "reason": "正品代理 价格昂贵",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-33",
+      "name": "深圳市创典科技企业店",
+      "aliases": [],
+      "ownerId": "创典电子连接器件",
+      "platform": "淘宝",
+      "url": "https://shop241785633.taobao.com/",
+      "condition": "全新",
+      "businessScope": "高速连接器",
+      "sourceRows": [33],
+      "historicalReviews": [
+        {
+          "id": "historical-33",
+          "sourceRow": 33,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "牧师妹酱",
+          "date": "2022-05-08 00:00:00",
+          "reason": "Lotes等台系接插件代理商",
+          "notes": "态度很好，提供料号可以订货，量大有优惠",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-34",
+      "name": "XINGSF兴盛发电子官方店",
+      "aliases": [],
+      "ownerId": "肖灿生产",
+      "platform": "淘宝",
+      "url": "https://xsf666.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "电子元件",
+      "sourceRows": [34],
+      "historicalReviews": [
+        {
+          "id": "historical-34",
+          "sourceRow": 34,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "牧师妹酱",
+          "date": "2022-05-08 00:00:00",
+          "reason": "存在全新和拆机混卖的情况，应该是华强北拿货的，转手贸易。这家一般不会造假丝印，但是存在重新编带的物料，需要仔细检查芯片丝印，如果丝印不是一批的建议退货。",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-35",
+      "name": "华北芯城",
+      "aliases": [],
+      "ownerId": "华北芯城",
+      "platform": "淘宝",
+      "url": "https://shop103327386.taobao.com/",
+      "condition": "全新",
+      "businessScope": "单片机",
+      "sourceRows": [35],
+      "historicalReviews": [
+        {
+          "id": "historical-35",
+          "sourceRow": 35,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "牧师妹酱",
+          "date": "2022-05-08 00:00:00",
+          "reason": "AT32产品齐全 价格合适",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-36",
+      "name": "欧必诺电子科技有限公司",
+      "aliases": [],
+      "ownerId": "欧必诺电子科技有限公司",
+      "platform": "淘宝",
+      "url": "https://shop511093896.taobao.com/",
+      "condition": "全新",
+      "businessScope": "单片机",
+      "sourceRows": [36],
+      "historicalReviews": [
+        {
+          "id": "historical-36",
+          "sourceRow": 36,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "牧师妹酱",
+          "date": "2022-05-08 00:00:00",
+          "reason": "STC代理商",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-37",
+      "name": "深圳沃乐康科技有限公司",
+      "aliases": ["乐康显示"],
+      "ownerId": "沃乐康液晶屏",
+      "platform": "淘宝",
+      "url": "https://shop341012592.taobao.com/",
+      "condition": "全新",
+      "businessScope": "液晶屏",
+      "sourceRows": [37],
+      "historicalReviews": [
+        {
+          "id": "historical-37",
+          "sourceRow": 37,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "武汉刘哥",
+          "date": "2022-05-10 00:00:00",
+          "reason": "专业显示触控屏，彩色SPI、TFT屏",
+          "notes": "某些充电器定制屏，懂的人一定懂。",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-38",
+      "name": "宏讯丰电子",
+      "aliases": [],
+      "ownerId": "宏讯丰电子",
+      "platform": "淘宝",
+      "url": "https://hxfdz.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "老IC",
+      "sourceRows": [38, 69],
+      "historicalReviews": [
+        {
+          "id": "historical-38",
+          "sourceRow": 38,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "TerayTech",
+          "date": "2022-06-02 00:00:00",
+          "reason": "买了点6502芯片组，芯片上用黑色油墨全涂，再重新打的丝印，蘸点酒精一擦全掉色。不同品牌混卖，拍这个发那个。客服神智无知一问话啊吧啊吧",
+          "notes": "货对不对看脸，还看卖家心情",
+          "supplements": "胖次：我草，才发现tt踩过坑，我有踩坑一次（#69）2024/12/23",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        },
+        {
+          "id": "historical-69",
+          "sourceRow": 69,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "无胖次不生活",
+          "date": "2024-12-23 00:00:00",
+          "reason": "标全新，实际发拆机的和打磨重新打标的IC来，芯片上原来有贴纸，胶都没清理就发来了",
+          "notes": "还他娘的是企业店铺",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-39",
+      "name": "奇伟达电子",
+      "aliases": [],
+      "ownerId": "bsjbxhzixb",
+      "platform": "淘宝",
+      "url": "https://shop292111302.taobao.com/",
+      "condition": "全新",
+      "businessScope": "灯珠",
+      "sourceRows": [39],
+      "historicalReviews": [
+        {
+          "id": "historical-39",
+          "sourceRow": 39,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "空银1997",
+          "date": "2022-07-06 00:00:00",
+          "reason": "灯珠价格合理，单个都包邮",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-40",
+      "name": "信泰微电子电子元器件",
+      "aliases": ["信泰微电子"],
+      "ownerId": "小张",
+      "platform": "淘宝",
+      "url": "https://shop60299985.taobao.com/",
+      "condition": "全新",
+      "businessScope": "主控芯片",
+      "sourceRows": [40],
+      "historicalReviews": [
+        {
+          "id": "historical-40",
+          "sourceRow": 40,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "空银1997",
+          "date": "2022-07-06 00:00:00",
+          "reason": "esp32，mpu6050，as5600价格合适，买了3套一切正常",
+          "notes": "做莱洛三角，主控芯片务必在他家买",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-41",
+      "name": "高芯达电子企业",
+      "aliases": ["高芯达电子"],
+      "ownerId": "高芯达",
+      "platform": "淘宝",
+      "url": "https://m.tb.cn/h.fxm9spm",
+      "condition": "全新",
+      "businessScope": "微动",
+      "sourceRows": [41],
+      "historicalReviews": [
+        {
+          "id": "historical-41",
+          "sourceRow": 41,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "空银1997",
+          "date": "2022-07-06 00:00:00",
+          "reason": "蓝点微动换上后用了没多久就出现连点现象，不好说是不是拆机",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-42",
+      "name": "DIY外设",
+      "aliases": [],
+      "ownerId": "djmonter",
+      "platform": "淘宝",
+      "url": "https://shop34567576.taobao.com/",
+      "condition": "全新",
+      "businessScope": "微动",
+      "sourceRows": [42],
+      "historicalReviews": [
+        {
+          "id": "historical-42",
+          "sourceRow": 42,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "空银1997",
+          "date": "2022-07-06 00:00:00",
+          "reason": "欧姆龙50M蓝点微动，买了两套，老板半夜打电话过来说微动是弹簧的不能放，让我买一个，坏了再买新的换",
+          "notes": "21年10月份换的微动用到现在都没有一点问题",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-43",
+      "name": "安富世纪威尔健专卖店",
+      "aliases": [],
+      "ownerId": "安富世纪威尔健专卖店",
+      "platform": "天猫",
+      "url": "https://anfushijiwej.tmall.com/",
+      "condition": "全新",
+      "businessScope": "各类IC",
+      "sourceRows": [43],
+      "historicalReviews": [
+        {
+          "id": "historical-43",
+          "sourceRow": 43,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "XYWZ",
+          "date": "2022-07-06 00:00:00",
+          "reason": "此家TJA接口芯片购买不能用，LC货换上无问题",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-44",
+      "name": "铨胜电子",
+      "aliases": [],
+      "ownerId": "tb860060595",
+      "platform": "淘宝",
+      "url": "https://shop322888554.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "Mos，晶体管",
+      "sourceRows": [44],
+      "historicalReviews": [
+        {
+          "id": "historical-44",
+          "sourceRow": 44,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "A_s_",
+          "date": "2022-07-10 00:00:00",
+          "reason": "价格便宜，mos好用，拍下店铺中一个“0.08元包邮”的商品就能包邮",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-45",
+      "name": "总店三极管专家 三极管之家",
+      "aliases": ["三极管之家"],
+      "ownerId": "yanfang9097",
+      "platform": "淘宝",
+      "url": "https://shop37095485.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "mos，晶体管",
+      "sourceRows": [45],
+      "historicalReviews": [
+        {
+          "id": "historical-45",
+          "sourceRow": 45,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "A_s_",
+          "date": "2022-07-10 00:00:00",
+          "reason": "价格便宜，型号齐全，邮费便宜",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-47",
+      "name": "深圳市坤烽芯城科技",
+      "aliases": ["坤烽芯城"],
+      "ownerId": "坤烽电子",
+      "platform": "淘宝",
+      "url": "https://shop121106608.taobao.com/",
+      "condition": "全新",
+      "businessScope": "IC 晶体管等",
+      "sourceRows": [47],
+      "historicalReviews": [
+        {
+          "id": "historical-47",
+          "sourceRow": 47,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "A_s_",
+          "date": "2022-07-11 00:00:00",
+          "reason": "买过4种不同型号共7个pmos（低压管高压管都有），到手后测量结电容，全！部！一！样！怀疑全店的大部分的管都是用同一个型号的mos打磨冒充的",
+          "notes": "而且后来还涨价了不少",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-48",
+      "name": "唯美电子",
+      "aliases": [],
+      "ownerId": "木木文a",
+      "platform": "淘宝",
+      "url": "https://item.taobao.com/item.htm?id=662173036975",
+      "condition": "全新",
+      "businessScope": "开发板",
+      "sourceRows": [48],
+      "historicalReviews": [
+        {
+          "id": "historical-48",
+          "sourceRow": 48,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "桃之夭夭",
+          "date": "2022-09-23 00:00:00",
+          "reason": "卖出的开发板不再提供技术支持和资料，前面资料忘记放哪里了，订单号也找不到，卖家拒绝提供支持。",
+          "notes": "",
+          "supplements": "#Edward：店无了，2022/12/17",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-49",
+      "name": "深名扬电子模块批发保护板温度计数显表",
+      "aliases": ["深名扬"],
+      "ownerId": "chenjunyang2009",
+      "platform": "淘宝",
+      "url": "https://icwang.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各类电子元件和模块",
+      "sourceRows": [49],
+      "historicalReviews": [
+        {
+          "id": "historical-49",
+          "sourceRow": 49,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "小米粥",
+          "date": "2022-10-05 00:00:00",
+          "reason": "缺货不提示，不沟通，直接发货，发货数量与订单数量不符。部分产品劣质。",
+          "notes": "到货后，发现缺货，前4天联系，只阅不回，第5天继续联系。回复后一句话“退款给你，还缺货。",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-50",
+      "name": "四裕电子企业店",
+      "aliases": [],
+      "ownerId": "深圳市四裕电子",
+      "platform": "淘宝",
+      "url": "https://shop355321931.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各种电容",
+      "sourceRows": [50],
+      "historicalReviews": [
+        {
+          "id": "historical-50",
+          "sourceRow": 50,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "黑手",
+          "date": "2022-10-18 00:00:00",
+          "reason": "宣称原装 到手一眼假",
+          "notes": "申请售后 理不直气也壮 直截了当让我退款 退款速度还行",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-51",
+      "name": "深圳市锦悦电子科技",
+      "aliases": [],
+      "ownerId": "tb046026488",
+      "platform": "淘宝",
+      "url": "https://shop260992781.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各种电容",
+      "sourceRows": [51],
+      "historicalReviews": [
+        {
+          "id": "historical-51",
+          "sourceRow": 51,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "黑手",
+          "date": "2022-10-18 00:00:00",
+          "reason": "宣传原装 到手一眼假 还假的离谱",
+          "notes": "申请售后 给退款 但是要改款式不合适",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-52",
+      "name": "深圳市金维利电子",
+      "aliases": [],
+      "ownerId": "金维利电子2",
+      "platform": "淘宝",
+      "url": "https://shop102745768.taobao.com/",
+      "condition": "全新",
+      "businessScope": "芯片",
+      "sourceRows": [52],
+      "historicalReviews": [
+        {
+          "id": "historical-52",
+          "sourceRow": 52,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "我是不会修",
+          "date": "2022-10-23 00:00:00",
+          "reason": "假冒打磨芯片，10片没有一片能用",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-53",
+      "name": "深圳市康胜世纪电子企",
+      "aliases": [],
+      "ownerId": "深圳市康胜世纪电子企业店",
+      "platform": "淘宝",
+      "url": "https://shop277865486.taobao.com/",
+      "condition": "全新",
+      "businessScope": "芯片",
+      "sourceRows": [53],
+      "historicalReviews": [
+        {
+          "id": "historical-53",
+          "sourceRow": 53,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "安全芯片",
+          "date": "2022-11-02 00:00:00",
+          "reason": "采购的MP4575芯片，是假冒的芯片，Mark是重新打标的，芯片仅是封装相同",
+          "notes": "当时忙的忘了退款，导致超期了，差评后，发现差评被删了，无法看到。",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-54",
+      "name": "深圳妙泽电子",
+      "aliases": [],
+      "ownerId": "我心依旧57198013",
+      "platform": "淘宝",
+      "url": "https://shop100845395.taobao.com/",
+      "condition": "全新",
+      "businessScope": "芯片",
+      "sourceRows": [54],
+      "historicalReviews": [
+        {
+          "id": "historical-54",
+          "sourceRow": 54,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "GND",
+          "date": "2022-12-17 00:00:00",
+          "reason": "所有器件都说全新原装 买来都是打磨芯片 没有一片可以正常使用的",
+          "notes": "态度蛮横拒不承认 装傻充楞 正在投诉中",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-55",
+      "name": "三贤电子商行",
+      "aliases": [],
+      "ownerId": "tb_421064606",
+      "platform": "淘宝",
+      "url": "https://shop110201471.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "各类运放 IC等",
+      "sourceRows": [55],
+      "historicalReviews": [
+        {
+          "id": "historical-55",
+          "sourceRow": 55,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "GND",
+          "date": "2022-12-17 00:00:00",
+          "reason": "原装拆机。 买过多次没有打磨翻新",
+          "notes": "维修示波器信号发生器买的件比较多",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-56",
+      "name": "翻倍倍",
+      "aliases": [],
+      "ownerId": "翻倍倍888",
+      "platform": "淘宝",
+      "url": "https://shop277731335.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各类电子模块",
+      "sourceRows": [56],
+      "historicalReviews": [
+        {
+          "id": "historical-56",
+          "sourceRow": 56,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "夜涩",
+          "date": "2022-12-17 00:00:00",
+          "reason": "STM32最小核心板说明使用STM32F103C8T6，实际为国产打磨芯片。",
+          "notes": "客服态度还行，退货不扯皮。",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-57",
+      "name": "古翊旗舰店",
+      "aliases": [],
+      "ownerId": "古翊旗舰店",
+      "platform": "天猫",
+      "url": "https://guyismpj.world.tmall.com/",
+      "condition": "全新",
+      "businessScope": "IC",
+      "sourceRows": [57],
+      "historicalReviews": [
+        {
+          "id": "historical-57",
+          "sourceRow": 57,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "イカロス",
+          "date": "2023-01-15 00:00:00",
+          "reason": "SI5351C-B-GMR到手验证后确定为假货，上板无法使用，引脚对地压降和电阻情况均与手册不符。",
+          "notes": "给了差评还没有沟通",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-58",
+      "name": "宝销电子",
+      "aliases": [],
+      "ownerId": "宝销电子",
+      "platform": "淘宝",
+      "url": "https://shop518787630.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "功率mos，IGBT",
+      "sourceRows": [58],
+      "historicalReviews": [
+        {
+          "id": "historical-58",
+          "sourceRow": 58,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "民科",
+          "date": "2023-01-15 00:00:00",
+          "reason": "与同类店铺相比良品率极高，连淘宝全是假货打标的BAT41都是真的",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-59",
+      "name": "元宇电子商店 批发和零售",
+      "aliases": [],
+      "ownerId": "元宇电子商店 批发和零售",
+      "platform": "淘宝",
+      "url": "https://shop58565704.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "功率mos，IGBT",
+      "sourceRows": [59],
+      "historicalReviews": [
+        {
+          "id": "historical-59",
+          "sourceRow": 59,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "民科",
+          "date": "2023-01-15 00:00:00",
+          "reason": "便宜好用",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-60",
+      "name": "risym旗舰店",
+      "aliases": [],
+      "ownerId": "risym旗舰店",
+      "platform": "淘宝",
+      "url": "https://m.tb.cn/h.UqAAyZy",
+      "condition": "全新",
+      "businessScope": "各类电子元器件",
+      "sourceRows": [60],
+      "historicalReviews": [
+        {
+          "id": "historical-60",
+          "sourceRow": 60,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "kjazz",
+          "date": "2023-03-20 00:00:00",
+          "reason": "良品率高，元件齐全，每次买都送一支笔，有问题客服及时解决",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-61",
+      "name": "深圳市伟诚鑫电子有限公司",
+      "aliases": [],
+      "ownerId": "深圳市伟诚鑫电子有限公司",
+      "platform": "淘宝",
+      "url": "https://shop202823742.taobao.com/",
+      "condition": "全新",
+      "businessScope": "各类电子元器件",
+      "sourceRows": [61],
+      "historicalReviews": [
+        {
+          "id": "historical-61",
+          "sourceRow": 61,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "BG4AHU",
+          "date": "2023-04-20 00:00:00",
+          "reason": "页面显示的包邮,结果下单时候要付运费,联系客服,就回些无意义数字,订单给直接取消",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-62",
+      "name": "欧贝顿旗舰店",
+      "aliases": [],
+      "ownerId": "欧贝顿旗舰店",
+      "platform": "天猫",
+      "url": "https://oubeidun.tmall.com/",
+      "condition": "全新",
+      "businessScope": "电阻电容电感",
+      "sourceRows": [62],
+      "historicalReviews": [
+        {
+          "id": "historical-62",
+          "sourceRow": 62,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "whirlun",
+          "date": "2024-03-10 00:00:00",
+          "reason": "电容问牌子只说是国产，参数标的明显有问题，甚至1206 100uF有50V耐压版本",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-63",
+      "name": "反客科技",
+      "aliases": [],
+      "ownerId": "反客科技",
+      "platform": "淘宝",
+      "url": "https://shop212360197.taobao.com/",
+      "condition": "全新",
+      "businessScope": "开发板",
+      "sourceRows": [63],
+      "historicalReviews": [
+        {
+          "id": "historical-63",
+          "sourceRow": 63,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "whirlun",
+          "date": "2024-03-10 00:00:00",
+          "reason": "板子设计精简，有原理图和基本例程资料",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-64",
+      "name": "联科达电子",
+      "aliases": [],
+      "ownerId": "深圳联科达电子",
+      "platform": "淘宝",
+      "url": "",
+      "condition": "全新",
+      "businessScope": "各类芯片",
+      "sourceRows": [64],
+      "historicalReviews": [
+        {
+          "id": "historical-64",
+          "sourceRow": 64,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "BH2VGM",
+          "date": "2024-03-27 00:00:00",
+          "reason": "AD8066、AD8032等使用劣质运放重打标，性能极差",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-65",
+      "name": "深圳市正华科电子科技",
+      "aliases": ["正华科电子"],
+      "ownerId": "",
+      "platform": "未注明",
+      "url": "",
+      "condition": "全新",
+      "businessScope": "模拟IC",
+      "sourceRows": [65],
+      "historicalReviews": [
+        {
+          "id": "historical-65",
+          "sourceRow": 65,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "Sh1ho",
+          "date": "2024-06-20 00:00:00",
+          "reason": "",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-66",
+      "name": "单片机世界 富强通电子",
+      "aliases": ["富强通电子"],
+      "ownerId": "富强通电子",
+      "platform": "淘宝",
+      "url": "https://shop162323755.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "MCU等单片机",
+      "sourceRows": [66],
+      "historicalReviews": [
+        {
+          "id": "historical-66",
+          "sourceRow": 66,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "Justin",
+          "date": "2024-07-27 00:00:00",
+          "reason": "踩雷！原以为是原版拆机片，丝印不太对劲ESS标志的分割线间距不一样，E的字母也不同，洗版时用酒精都能擦掉，是磨片货",
+          "notes": "企业店铺",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-67",
+      "name": "WeAct Studio",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "https://weactstudio.taobao.com/",
+      "condition": "全新",
+      "businessScope": "开发板/模块",
+      "sourceRows": [67],
+      "historicalReviews": [
+        {
+          "id": "historical-67",
+          "sourceRow": 67,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "AD7124",
+          "date": "2024-11-21 00:00:00",
+          "reason": "掌柜自己画的，会定期出新品，会迭代升级",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-68",
+      "name": "深圳市潮信电子科技有限公司",
+      "aliases": ["潮信电子"],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "https://chaoxin-ic.taobao.com/",
+      "condition": "全新",
+      "businessScope": "IC 晶体管等",
+      "sourceRows": [68],
+      "historicalReviews": [
+        {
+          "id": "historical-68",
+          "sourceRow": 68,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "无胖次不生活",
+          "date": "2024-12-23 00:00:00",
+          "reason": "标全新，实际发拆机接脚打磨重新打标的管子来",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-70",
+      "name": "源楷晟电子",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "https://shop102438331.taobao.com/",
+      "condition": "全新",
+      "businessScope": "IC 晶体管等",
+      "sourceRows": [70],
+      "historicalReviews": [
+        {
+          "id": "historical-70",
+          "sourceRow": 70,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "无胖次不生活",
+          "date": "2025-01-03 00:00:00",
+          "reason": "标全新，实际发打磨重新打标的管子来",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-71",
+      "name": "深圳市垚鑫电子科技",
+      "aliases": ["垚鑫电子"],
+      "ownerId": "垚鑫数码",
+      "platform": "淘宝",
+      "url": "https://shop268485293.m.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "IC 接口 晶体管…",
+      "sourceRows": [71, 81, 82],
+      "historicalReviews": [
+        {
+          "id": "historical-71",
+          "sourceRow": 71,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "JoeyDeng",
+          "date": "2024-02-27 00:00:00",
+          "reason": "标的全新，实际上是烂芯片，脚全部氧化完，根本焊接不上，还有两颗内部dcdc都坏了，网口拆开是百兆变压器，按的千兆卖的，拆了一个nanopi的装我板子上一切正常，调试期间千万不要买这家踩坑",
+          "notes": "把我坑死了，怀疑了自己impedance，自己滤波没画好，dcdc算错值了…结果就是没怀疑这个店铺tm卖垃圾东西",
+          "supplements": "购买的INA226全都不能用，最后全部更换其他家芯片了，以及他家的MO2456动不动就出问题\n\n我是另一个被坑的，买了三片flash两片坏的，送来的时候压根没包装，客服态度也不咋滴",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        },
+        {
+          "id": "historical-81",
+          "sourceRow": 81,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "赵罗军",
+          "date": "2025-11-22 00:00:00",
+          "reason": "拆机特别脏，还是坏的",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        },
+        {
+          "id": "historical-82",
+          "sourceRow": 82,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "星伽绫霜",
+          "date": "2026-01-08 00:00:00",
+          "reason": "声称全新芯片但肉眼可见打磨痕迹，非同型号旧IC翻新，无法正常使用。",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-72",
+      "name": "雪松电子科技",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "https://cedar-tech.taobao.com/",
+      "condition": "全新",
+      "businessScope": "原创电子模块",
+      "sourceRows": [72],
+      "historicalReviews": [
+        {
+          "id": "historical-72",
+          "sourceRow": 72,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "冰块🧊",
+          "date": "2025-03-23 00:00:00",
+          "reason": "模块原创的，客服有点慢，但服务很好。有时候活动还送水果，柑橘🍊很甜很好吃",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-73",
+      "name": "深圳市铭芯科电子",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "",
+      "condition": "",
+      "businessScope": "",
+      "sourceRows": [73],
+      "historicalReviews": [
+        {
+          "id": "historical-73",
+          "sourceRow": 73,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "未分类",
+          "sentiment": "neutral",
+          "contributor": "提瓦特大陆超电管理员",
+          "date": "2025-03-23 00:00:00",
+          "reason": "",
+          "notes": "",
+          "supplements": "买一个价格最低，越买越贵",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-74",
+      "name": "顺润成电子芯片",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "https://xiaohubenbenic.taobao.com/",
+      "condition": "全新",
+      "businessScope": "台湾省那些电脑主板上的周边芯片，比如茂达、立锜、联咏、瑞昱、力智",
+      "sourceRows": [74],
+      "historicalReviews": [
+        {
+          "id": "historical-74",
+          "sourceRow": 74,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "Tentou_Reikie",
+          "date": "2023-03-28 00:00:00",
+          "reason": "有全新原装、全新剪段（店内标为散新）、拆机，都标得比较清楚，性价比超好但是不常见的电脑周边芯片这里几乎都有",
+          "notes": "不提供那些电脑周边芯片的DataSheet，需要你知道自己在买什么干什么用怎么用",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-75",
+      "name": "深圳市铭科芯电子",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "",
+      "condition": "全新",
+      "businessScope": "ADR4525",
+      "sourceRows": [75, 78],
+      "historicalReviews": [
+        {
+          "id": "historical-75",
+          "sourceRow": 75,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "安全芯片",
+          "date": "2025-04-25 00:00:00",
+          "reason": "采购全新，发的拆机打磨芯片，而且芯片不是正品，不能用",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        },
+        {
+          "id": "historical-78",
+          "sourceRow": 78,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "未分类",
+          "sentiment": "neutral",
+          "contributor": "",
+          "date": "",
+          "reason": "买了十几个，暂时用的都能跑，噪声正常，不像是拆机。回头还有H7和SDRAM到了看看真假",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-76",
+      "name": "深圳市博易达电子",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "",
+      "condition": "全新",
+      "businessScope": "REF5040",
+      "sourceRows": [76],
+      "historicalReviews": [
+        {
+          "id": "historical-76",
+          "sourceRow": 76,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "安全芯片",
+          "date": "2025-04-25 00:00:00",
+          "reason": "打磨的芯片，芯片有好有坏，好坏参半",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-77",
+      "name": "正品电子元器件皇冠店",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "",
+      "condition": "全新",
+      "businessScope": "BMP580",
+      "sourceRows": [77],
+      "historicalReviews": [
+        {
+          "id": "historical-77",
+          "sourceRow": 77,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "白菜",
+          "date": "2025-05-15 00:00:00",
+          "reason": "能跑 指标正常 不太贵（对比立创商城）",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-79",
+      "name": "有源芯片科技",
+      "aliases": [],
+      "ownerId": "",
+      "platform": "淘宝",
+      "url": "https://shop569283559.taobao.com/",
+      "condition": "拆机",
+      "businessScope": "STM32系列MCU",
+      "sourceRows": [79],
+      "historicalReviews": [
+        {
+          "id": "historical-79",
+          "sourceRow": 79,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "十三",
+          "date": "2025-06-20 00:00:00",
+          "reason": "要么假货要么拆机，贴上无法使用",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-80",
+      "name": "深圳汉利科技有限公司",
+      "aliases": ["汉利科技"],
+      "ownerId": "欣欣",
+      "platform": "淘宝",
+      "url": "",
+      "condition": "拆机",
+      "businessScope": "MX29LV640etti",
+      "sourceRows": [80],
+      "historicalReviews": [
+        {
+          "id": "historical-80",
+          "sourceRow": 80,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "全世界失眠",
+          "date": "2025-07-21 00:00:00",
+          "reason": "散新，但是一点都不新，拆机特别脏",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-83",
+      "name": "宝香电子",
+      "aliases": [],
+      "ownerId": "宝香电子",
+      "platform": "淘宝",
+      "url": "https://shop64516698.taobao.com/",
+      "condition": "全新",
+      "businessScope": "主营电脑周边ic，包括USB HUB，高速信号开关，还有一些音频IC",
+      "sourceRows": [83],
+      "historicalReviews": [
+        {
+          "id": "historical-83",
+          "sourceRow": 83,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "红榜",
+          "sentiment": "positive",
+          "contributor": "电容爱莉",
+          "date": "2026-02-10 00:00:00",
+          "reason": "正品，他家VLI 祥硕 瑞昱品牌芯片品类多，价格也合适",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-84",
+      "name": "深圳科拓电子",
+      "aliases": [],
+      "ownerId": "深圳科拓电子",
+      "platform": "淘宝",
+      "url": "https://shop68463240.taobao.com/",
+      "condition": "全新",
+      "businessScope": "存储IC",
+      "sourceRows": [84],
+      "historicalReviews": [
+        {
+          "id": "historical-84",
+          "sourceRow": 84,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "细胞色素P450 2D6",
+          "date": "2026-06-24 00:00:00",
+          "reason": "发货型号货不对版，说是库存全新的芯片贴片后发现引脚腐蚀严重",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    },
+    {
+      "id": "shop-85",
+      "name": "欣荣生活服务",
+      "aliases": [],
+      "ownerId": "显卡维修",
+      "platform": "天猫",
+      "url": "",
+      "condition": "拆机",
+      "businessScope": "电子维修",
+      "sourceRows": [85],
+      "historicalReviews": [
+        {
+          "id": "historical-85",
+          "sourceRow": 85,
+          "sourceSheet": "电子元件网店红黑榜",
+          "category": "黑榜",
+          "sentiment": "negative",
+          "contributor": "哈是佩奇",
+          "date": "2026-07-22 00:00:00",
+          "reason": "维修内存条踩坑（报维修低价引你发东西过去维修，收到会说修不了，低价回收，不同意可能拆你颗粒，已经有人在黑猫、贴吧、抖音发表被坑经历）",
+          "notes": "",
+          "supplements": "",
+          "questions": "",
+          "status": "approved",
+          "sourceType": "workbook"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "electronic-pancake",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "dev:server": "node --env-file-if-exists=.env --watch server/index.js",
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "init-owner": "node --env-file-if-exists=.env server/init-owner.js",
+    "bind-owner-email": "node --env-file-if-exists=.env server/bind-owner-email.js",
+    "build": "vite build",
+    "validate:content": "node server/validate-content.js",
+    "preview": "vite preview --host 127.0.0.1",
+    "test:ui": "node tests/production-ui.mjs",
+    "test:api": "node tests/api.mjs",
+    "test:mail": "node tests/auth-mail.mjs",
+    "test:integration": "node tests/production-integration.mjs",
+    "test:e2e": "node tests/production-e2e.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "highlight.js": "^11.11.1",
+    "katex": "^0.16.22",
+    "lucide-react": "^0.468.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^10.0.10",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.9.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite": "^7.1.0"
+  }
+}
