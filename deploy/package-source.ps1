@@ -15,7 +15,7 @@ $stagingRoot = Join-Path $outputRoot ".electronic-pancake-staging-$timestamp"
 $files = @(
     '.env.example', '.gitattributes', '.gitignore', 'index.html', 'package.json', 'package-lock.json',
     'vite.config.js', 'README.md', 'SHOP-REVIEW-DESIGN.md', 'PHOTO-CREDITS.md',
-    '上线配置清单.md', 'start-preview.ps1', '启动本地预览.cmd',
+    '上线配置清单.md', '服务器开站流程.md', 'start-preview.ps1', '启动本地预览.cmd',
     'src\App.jsx', 'src\data.js', 'src\main.jsx', 'src\Markdown.jsx',
     'src\photo-data.json', 'src\photography.css', 'src\Photos.jsx',
     'src\store.jsx', 'src\styles.css',

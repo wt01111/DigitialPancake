@@ -529,15 +529,70 @@ app.post("/api/auth/change-password", auth, async (req, res, next) => {
 app.get("/api/me", auth, (req, res) => res.json(publicUser(req.user, true)));
 app.patch("/api/me", auth, (req, res, next) => {
   try {
-    const nickname = String(req.body.nickname || "")
-      .trim()
-      .slice(0, 30);
+    const nickname = String(req.body.nickname ?? req.user.nickname ?? "")
+        .trim()
+        .slice(0, 30),
+      bio = String(req.body.bio ?? req.user.bio ?? "")
+        .trim()
+        .slice(0, 500);
     if (!nickname) throw fail(400, "昵称不能为空", "INVALID_INPUT");
-    run("UPDATE users SET nickname=? WHERE id=?", nickname, req.user.id);
-    res.json({ ...publicUser(req.user, true), nickname });
+    run(
+      "UPDATE users SET nickname=?,bio=? WHERE id=?",
+      nickname,
+      bio,
+      req.user.id,
+    );
+    res.json({ ...publicUser(req.user, true), nickname, bio });
   } catch (e) {
     next(e);
   }
+});
+app.get("/api/users/:id", (req, res, next) => {
+  const user = one(
+    "SELECT id,nickname,bio FROM users WHERE id=? AND enabled=1",
+    req.params.id,
+  );
+  if (!user) return next(fail(404, "用户不存在", "NOT_FOUND"));
+  const articles = all(
+      "SELECT id,published_payload,published_at FROM articles WHERE user_id=? AND published_payload IS NOT NULL AND published_visible=1 ORDER BY published_at DESC LIMIT 100",
+      user.id,
+    ).map((a) => {
+      const p = json(a.published_payload, {});
+      return {
+        id: a.id,
+        title: p.title,
+        excerpt: p.excerpt,
+        category: p.category,
+        tags: p.tags || [],
+        date: a.published_at,
+      };
+    }),
+    comments = all(
+      `SELECT c.id,c.body,c.parent_id parentId,c.target_type targetType,c.target_id targetId,c.created_at createdAt,
+        CASE WHEN c.target_type='article' THEN json_extract(a.published_payload,'$.title') ELSE p.title END targetTitle
+       FROM comments c
+       LEFT JOIN articles a ON c.target_type='article' AND a.id=c.target_id AND a.published_payload IS NOT NULL AND a.published_visible=1
+       LEFT JOIN problems p ON c.target_type='problem' AND p.id=c.target_id AND p.status='published'
+       WHERE c.user_id=? AND c.status='visible'
+         AND ((c.target_type='article' AND a.id IS NOT NULL) OR (c.target_type='problem' AND p.id IS NOT NULL))
+       ORDER BY c.created_at DESC LIMIT 200`,
+      user.id,
+    ).map((c) => ({
+      ...c,
+      href: `/${c.targetType}s/${c.targetId}#comment-${c.id}`,
+    })),
+    reviews = all(
+      `SELECT r.*,s.name shop_name,u.nickname FROM reviews r JOIN shops s ON s.id=r.shop_id AND s.status='approved'
+       JOIN users u ON u.id=r.user_id WHERE r.user_id=? AND r.status='approved' AND r.source_type='site'
+       ORDER BY r.created_at DESC LIMIT 100`,
+      user.id,
+    ).map((r) => {
+      const result = reviewOut(r);
+      delete result.proofFileId;
+      delete result.decisionReason;
+      return result;
+    });
+  res.json({ ...publicUser(user), articles, comments, reviews });
 });
 app.get("/api/me/reviews", auth, (req, res) =>
   res.json({
@@ -576,6 +631,12 @@ app.get("/api/me/notifications", auth, (req, res) =>
     items: all(
       "SELECT id,title,href,read_at readAt,created_at createdAt FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 200",
       req.user.id,
+    ).map((item) => ({ ...item, read: Boolean(item.readAt) })),
+    unreadCount: Number(
+      one(
+        "SELECT COUNT(*) count FROM notifications WHERE user_id=? AND read_at IS NULL",
+        req.user.id,
+      ).count,
     ),
   }),
 );
@@ -737,7 +798,18 @@ app.get("/api/shops/:id", (req, res, next) => {
     delete o.proofMime;
     return o;
   });
-  res.json({ ...shopOut(s), reviews });
+  res.json({
+    ...shopOut(s),
+    reviews,
+    bookmarked: Boolean(
+      req.user &&
+      one(
+        "SELECT 1 FROM bookmarks WHERE user_id=? AND item_type='shop' AND item_id=?",
+        req.user.id,
+        s.id,
+      ),
+    ),
+  });
 });
 app.post("/api/shops", auth, submitLimit, (req, res, next) => {
   try {
@@ -924,7 +996,7 @@ function articleOut(a, published = false) {
         decisionReason: a.decision_reason,
         updatedAt: a.updated_at,
         attachments: all(
-          "SELECT id,original_name name,original_name originalName,size,mime FROM files WHERE entity_id=? AND kind IN ('article-draft','article-published') ORDER BY created_at",
+          "SELECT id,original_name name,original_name originalName,size,mime,kind FROM files WHERE entity_id=? AND kind IN ('article-draft','article-published','article-image-draft','article-image-published') ORDER BY created_at",
           a.id,
         ).map((f) => ({ ...f, url: `/api/files/${f.id}` })),
       };
@@ -939,11 +1011,20 @@ app.get("/api/articles", (req, res) => {
     cat,
     cat,
   );
+  const saved = new Set(
+    req.user
+      ? all(
+          "SELECT item_id id FROM bookmarks WHERE user_id=? AND item_type='article'",
+          req.user.id,
+        ).map((x) => x.id)
+      : [],
+  );
   res.json({
     items: rows.map((a) => {
       const item = articleOut(a, true);
       delete item.body;
       delete item.attachments;
+      item.bookmarked = saved.has(a.id);
       return item;
     }),
     total: rows.length,
@@ -955,7 +1036,17 @@ app.get("/api/articles/:id", (req, res, next) => {
     req.params.id,
   );
   a
-    ? res.json(articleOut(a, true))
+    ? res.json({
+        ...articleOut(a, true),
+        bookmarked: Boolean(
+          req.user &&
+          one(
+            "SELECT 1 FROM bookmarks WHERE user_id=? AND item_type='article' AND item_id=?",
+            req.user.id,
+            a.id,
+          ),
+        ),
+      })
     : next(fail(404, "文章不存在", "NOT_FOUND"));
 });
 app.post("/api/articles/drafts", auth, submitLimit, (req, res, next) => {
@@ -1042,6 +1133,63 @@ app.post(
         now(),
       );
       res.status(201).json({ id: fid, name: req.file.originalname });
+    } catch (e) {
+      if (req.file?.path && existsSync(req.file.path))
+        unlinkSync(req.file.path);
+      next(e);
+    }
+  },
+);
+app.post(
+  "/api/articles/drafts/:id/images",
+  auth,
+  submitLimit,
+  (req, _res, next) =>
+    one(
+      "SELECT id FROM articles WHERE id=? AND user_id=?",
+      req.params.id,
+      req.user.id,
+    )
+      ? next()
+      : next(fail(404, "草稿不存在", "NOT_FOUND")),
+  uploadCapacity,
+  upload.single("image"),
+  uploadedCapacity,
+  (req, res, next) => {
+    try {
+      if (
+        !req.file ||
+        req.file.size > 5 * 1024 * 1024 ||
+        !["image/png", "image/jpeg", "image/webp"].includes(
+          req.file.mimetype,
+        ) ||
+        !validProof(req.file)
+      )
+        throw fail(
+          400,
+          "正文图片须为有效的 PNG、JPEG 或 WebP，且不超过 5 MiB",
+          "INVALID_IMAGE",
+        );
+      const fid = id("file");
+      run(
+        "INSERT INTO files VALUES(?,?,?,?,?,?,?,?,?)",
+        fid,
+        req.user.id,
+        "article-image-draft",
+        req.params.id,
+        req.file.filename,
+        req.file.originalname,
+        req.file.mimetype,
+        req.file.size,
+        now(),
+      );
+      const markdownUrl = `/api/article-images/${fid}`;
+      res.status(201).json({
+        id: fid,
+        name: req.file.originalname,
+        markdownUrl,
+        markdown: `![${req.file.originalname}](${markdownUrl})`,
+      });
     } catch (e) {
       if (req.file?.path && existsSync(req.file.path))
         unlinkSync(req.file.path);
@@ -1153,6 +1301,14 @@ app.get("/api/problems", (req, res) => {
       one(`SELECT COUNT(*) count FROM problems WHERE ${where}`, ...params)
         .count,
     ),
+    saved = new Set(
+      req.user
+        ? all(
+            "SELECT item_id id FROM bookmarks WHERE user_id=? AND item_type='problem'",
+            req.user.id,
+          ).map((x) => x.id)
+        : [],
+    ),
     items = all(
       `SELECT * FROM problems WHERE ${where}
       ORDER BY CAST(json_extract(metadata,'$.year') AS INTEGER) DESC,created_at DESC LIMIT ? OFFSET ?`,
@@ -1163,6 +1319,7 @@ app.get("/api/problems", (req, res) => {
       const item = { id: p.id, title: p.title, ...json(p.metadata, {}) };
       delete item.body;
       delete item.files;
+      item.bookmarked = saved.has(p.id);
       return item;
     }),
     facetRows = all(
@@ -1194,6 +1351,14 @@ app.get("/api/problems/:id", (req, res, next) => {
         id: p.id,
         title: p.title,
         ...json(p.metadata, {}),
+        bookmarked: Boolean(
+          req.user &&
+          one(
+            "SELECT 1 FROM bookmarks WHERE user_id=? AND item_type='problem' AND item_id=?",
+            req.user.id,
+            p.id,
+          ),
+        ),
         attachments: [
           ...all(
             "SELECT id,original_name name,size FROM files WHERE entity_id=? AND kind='problem-published'",
@@ -1221,17 +1386,132 @@ app.get("/api/comments", (req, res, next) => {
           )
         : null;
   if (!visible) return next(fail(404, "内容不存在", "NOT_FOUND"));
+  const sort = req.query.sort === "latest" ? "latest" : "popular",
+    page = Math.max(1, Number.parseInt(req.query.page, 10) || 1),
+    pageSize = Math.min(
+      50,
+      Math.max(1, Number.parseInt(req.query.pageSize, 10) || 20),
+    ),
+    focus = String(req.query.focus || ""),
+    focusedRoot = focus
+      ? one(
+          `WITH RECURSIVE ancestors(id,parent_id) AS (
+             SELECT id,parent_id FROM comments WHERE id=? AND target_type=? AND target_id=?
+             UNION ALL SELECT c.id,c.parent_id FROM comments c JOIN ancestors a ON a.parent_id=c.id
+           ) SELECT id FROM ancestors WHERE parent_id IS NULL LIMIT 1`,
+          focus,
+          req.query.targetType,
+          req.query.targetId,
+        )
+      : null,
+    total = Number(
+      one(
+        `WITH RECURSIVE ancestors(id,parent_id) AS (
+           SELECT id,parent_id FROM comments WHERE target_type=? AND target_id=? AND status='visible'
+           UNION SELECT c.id,c.parent_id FROM comments c JOIN ancestors a ON a.parent_id=c.id
+             WHERE c.target_type=? AND c.target_id=?
+         ) SELECT COUNT(DISTINCT id) count FROM ancestors WHERE parent_id IS NULL`,
+        req.query.targetType,
+        req.query.targetId,
+        req.query.targetType,
+        req.query.targetId,
+      ).count,
+    ),
+    roots = focusedRoot
+      ? [{ id: focusedRoot.id }]
+      : all(
+          `WITH RECURSIVE ancestors(id,parent_id) AS (
+             SELECT id,parent_id FROM comments WHERE target_type=? AND target_id=? AND status='visible'
+             UNION SELECT c.id,c.parent_id FROM comments c JOIN ancestors a ON a.parent_id=c.id
+               WHERE c.target_type=? AND c.target_id=?
+           ), eligible AS (SELECT DISTINCT id FROM ancestors WHERE parent_id IS NULL)
+           SELECT c.id,COUNT(l.user_id) likeCount,c.created_at createdAt FROM comments c
+           JOIN eligible e ON e.id=c.id
+           LEFT JOIN comment_likes l ON l.comment_id=c.id
+           GROUP BY c.id
+           ORDER BY ${sort === "latest" ? "c.created_at DESC,c.id ASC" : "likeCount DESC,c.created_at ASC,c.id ASC"}
+           LIMIT ? OFFSET ?`,
+          req.query.targetType,
+          req.query.targetId,
+          req.query.targetType,
+          req.query.targetId,
+          pageSize,
+          (page - 1) * pageSize,
+        ),
+    rootIds = roots.map((root) => root.id),
+    placeholders = rootIds.map(() => "?").join(","),
+    rows = rootIds.length
+      ? all(
+          `WITH RECURSIVE tree AS (
+             SELECT * FROM comments WHERE id IN (${placeholders})
+             UNION ALL SELECT c.* FROM comments c JOIN tree t ON c.parent_id=t.id
+           )
+           SELECT tree.id,tree.body,tree.parent_id parentId,tree.status,tree.created_at createdAt,
+             u.id userId,u.nickname,u.bio,COUNT(l.user_id) likeCount,
+             MAX(CASE WHEN l.user_id=? THEN 1 ELSE 0 END) liked
+           FROM tree JOIN users u ON u.id=tree.user_id LEFT JOIN comment_likes l ON l.comment_id=tree.id
+           GROUP BY tree.id`,
+          ...rootIds,
+          req.user?.id || "",
+        )
+      : [],
+    byParent = new Map();
+  for (const row of rows) {
+    const key = row.parentId || "";
+    if (!byParent.has(key)) byParent.set(key, []);
+    byParent.get(key).push(row);
+  }
+  const hasVisible = new Map();
+  function threadVisible(row, visiting = new Set()) {
+    if (hasVisible.has(row.id)) return hasVisible.get(row.id);
+    if (visiting.has(row.id)) return false;
+    visiting.add(row.id);
+    const result =
+      row.status === "visible" ||
+      (byParent.get(row.id) || []).some((child) =>
+        threadVisible(child, visiting),
+      );
+    visiting.delete(row.id);
+    hasVisible.set(row.id, result);
+    return result;
+  }
+  const rootRows = rootIds
+      .map((rootId) => rows.find((row) => row.id === rootId))
+      .filter((row) => row && threadVisible(row)),
+    items = [];
+  function append(row) {
+    const deleted = row.status !== "visible";
+    items.push({
+      id: row.id,
+      body: deleted ? null : row.body,
+      parentId: row.parentId,
+      createdAt: row.createdAt,
+      author: deleted
+        ? null
+        : { id: row.userId, nickname: row.nickname, bio: row.bio || "" },
+      likeCount: Number(row.likeCount),
+      liked: Boolean(row.liked),
+      deleted,
+      canDelete:
+        !deleted &&
+        Boolean(
+          req.user && (req.user.id === row.userId || can(req.user, "reports")),
+        ),
+      canReply: !deleted && Boolean(req.user),
+    });
+    for (const child of (byParent.get(row.id) || [])
+      .filter((x) => threadVisible(x))
+      .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt))))
+      append(child);
+  }
+  for (const root of rootRows) append(root);
   res.json({
-    items: all(
-      "SELECT c.id,c.body,c.parent_id parentId,c.created_at createdAt,u.id userId,u.nickname FROM comments c JOIN users u ON u.id=c.user_id WHERE c.target_type=? AND c.target_id=? AND c.status='visible' ORDER BY c.created_at LIMIT 200",
-      req.query.targetType,
-      req.query.targetId,
-    ).map((c) => ({
-      ...c,
-      author: { id: c.userId, nickname: c.nickname },
-      userId: undefined,
-      nickname: undefined,
-    })),
+    items,
+    sort,
+    page,
+    pageSize,
+    total,
+    focused: Boolean(focusedRoot),
   });
 });
 app.post("/api/comments", auth, submitLimit, (req, res, next) => {
@@ -1244,7 +1524,7 @@ app.post("/api/comments", auth, submitLimit, (req, res, next) => {
     const targetExists =
       req.body.targetType === "article"
         ? one(
-            "SELECT 1 FROM articles WHERE id=? AND published_payload IS NOT NULL AND published_visible=1",
+            "SELECT id,user_id FROM articles WHERE id=? AND published_payload IS NOT NULL AND published_visible=1",
             req.body.targetId,
           )
         : one(
@@ -1273,13 +1553,18 @@ app.post("/api/comments", auth, submitLimit, (req, res, next) => {
       String(req.body.body).trim().slice(0, 2000),
       now(),
     );
-    if (parent && parent.user_id !== req.user.id)
+    const recipients = new Map();
+    if (parent) recipients.set(parent.user_id, "有人回复了你的评论");
+    if (req.body.targetType === "article")
+      recipients.set(targetExists.user_id, "你的文章收到了新评论");
+    recipients.delete(req.user.id);
+    for (const [recipient, title] of recipients)
       run(
         "INSERT INTO notifications VALUES(?,?,?,?,?,?)",
         id("notification"),
-        parent.user_id,
-        "有人回复了你的评论",
-        `/${req.body.targetType}s/${req.body.targetId}`,
+        recipient,
+        title,
+        `/${req.body.targetType}s/${req.body.targetId}#comment-${cid}`,
         null,
         now(),
       );
@@ -1288,23 +1573,120 @@ app.post("/api/comments", auth, submitLimit, (req, res, next) => {
     next(e);
   }
 });
-app.post("/api/comments/:id/report", auth, (req, res, next) => {
-  if (
-    !one(
-      "SELECT 1 FROM comments WHERE id=? AND status='visible'",
+app.post("/api/comments/:id/like", auth, submitLimit, (req, res, next) => {
+  try {
+    const comment = one(
+      "SELECT * FROM comments WHERE id=? AND status='visible'",
       req.params.id,
+    );
+    if (!comment) throw fail(404, "评论不存在", "NOT_FOUND");
+    const visible =
+      comment.target_type === "article"
+        ? one(
+            "SELECT 1 FROM articles WHERE id=? AND published_payload IS NOT NULL AND published_visible=1",
+            comment.target_id,
+          )
+        : one(
+            "SELECT 1 FROM problems WHERE id=? AND status='published'",
+            comment.target_id,
+          );
+    if (!visible) throw fail(404, "评论目标不存在", "NOT_FOUND");
+    const existing = one(
+      "SELECT 1 FROM comment_likes WHERE comment_id=? AND user_id=?",
+      comment.id,
+      req.user.id,
+    );
+    if (existing)
+      run(
+        "DELETE FROM comment_likes WHERE comment_id=? AND user_id=?",
+        comment.id,
+        req.user.id,
+      );
+    else
+      run(
+        "INSERT INTO comment_likes VALUES(?,?,?)",
+        comment.id,
+        req.user.id,
+        now(),
+      );
+    res.json({
+      liked: !existing,
+      likeCount: Number(
+        one(
+          "SELECT COUNT(*) count FROM comment_likes WHERE comment_id=?",
+          comment.id,
+        ).count,
+      ),
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+app.delete("/api/comments/:id", auth, (req, res, next) => {
+  try {
+    const comment = one("SELECT * FROM comments WHERE id=?", req.params.id);
+    if (!comment || !["visible", "deleted", "removed"].includes(comment.status))
+      throw fail(404, "评论不存在", "NOT_FOUND");
+    if (req.user.id !== comment.user_id && !can(req.user, "reports"))
+      throw fail(403, "无权删除该评论", "FORBIDDEN");
+    if (comment.status === "visible") {
+      run(
+        "UPDATE comments SET body='',status='deleted' WHERE id=?",
+        comment.id,
+      );
+      run("DELETE FROM comment_likes WHERE comment_id=?", comment.id);
+      audit(req.user, "删除评论", "comment", comment.id);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    next(e);
+  }
+});
+app.post("/api/comments/:id/report", auth, submitLimit, (req, res, next) => {
+  try {
+    const comment = one(
+      "SELECT * FROM comments WHERE id=? AND status='visible'",
+      req.params.id,
+    );
+    if (!comment) throw fail(404, "评论不存在", "NOT_FOUND");
+    const visible =
+      comment.target_type === "article"
+        ? one(
+            "SELECT 1 FROM articles WHERE id=? AND published_payload IS NOT NULL AND published_visible=1",
+            comment.target_id,
+          )
+        : comment.target_type === "problem"
+          ? one(
+              "SELECT 1 FROM problems WHERE id=? AND status='published'",
+              comment.target_id,
+            )
+          : null;
+    if (!visible) throw fail(404, "评论目标不存在", "NOT_FOUND");
+    if (comment.user_id === req.user.id)
+      throw fail(400, "不能举报自己的评论", "SELF_REPORT");
+    const reason = String(req.body.reason || "").trim();
+    if (reason.length < 2 || reason.length > 500)
+      throw fail(400, "请填写 2 至 500 字的举报原因", "INVALID_INPUT");
+    if (
+      one(
+        "SELECT 1 FROM reports WHERE user_id=? AND comment_id=? AND status='pending'",
+        req.user.id,
+        comment.id,
+      )
     )
-  )
-    return next(fail(404, "评论不存在", "NOT_FOUND"));
-  run(
-    "INSERT INTO reports VALUES(?,?,?,?, 'pending',?)",
-    id("report"),
-    req.user.id,
-    req.params.id,
-    String(req.body.reason || "").slice(0, 500),
-    now(),
-  );
-  res.status(201).json({ ok: true });
+      throw fail(409, "该举报正在处理中", "REPORT_EXISTS");
+    run(
+      "INSERT INTO reports VALUES(?,?,?,?, 'pending',?)",
+      id("report"),
+      req.user.id,
+      comment.id,
+      reason,
+      now(),
+    );
+    res.status(201).json({ ok: true });
+  } catch (e) {
+    next(e);
+  }
 });
 
 app.get("/api/files/:id", auth, (req, res, next) => {
@@ -1330,6 +1712,24 @@ app.get("/api/files/:id", auth, (req, res, next) => {
     );
   if (!allowed) return next(fail(403, "无权访问该文件", "FORBIDDEN"));
   res.type(f.mime).download(resolve(uploadDir, f.stored_name), f.original_name);
+});
+app.get("/api/article-images/:id", (req, res, next) => {
+  const f = one(
+    "SELECT * FROM files WHERE id=? AND kind IN ('article-image-draft','article-image-published') AND mime LIKE 'image/%'",
+    req.params.id,
+  );
+  if (!f) return next(fail(404, "图片不存在", "NOT_FOUND"));
+  const ownDraft = req.user?.id === f.owner_id || can(req.user, "content"),
+    published = one(
+      `SELECT 1 FROM articles a,json_each(a.published_payload,'$.attachments') attachment
+       WHERE a.id=? AND a.published_payload IS NOT NULL AND a.published_visible=1
+       AND json_extract(attachment.value,'$.id')=? AND json_extract(attachment.value,'$.publicImage')=1`,
+      f.entity_id,
+      f.id,
+    );
+  if (!ownDraft && !published)
+    return next(fail(404, "图片不存在", "NOT_FOUND"));
+  res.type(f.mime).sendFile(resolve(uploadDir, f.stored_name));
 });
 app.get("/api/official-files/:id", auth, (req, res, next) => {
   const f = one(
@@ -1412,9 +1812,27 @@ function decisionRoute(table, permission) {
             row.user_id,
           );
           const attachments = all(
-            "SELECT id,original_name name,size FROM files WHERE entity_id=? AND kind IN ('article-draft','article-published')",
+            "SELECT id,original_name name,size,mime,kind FROM files WHERE entity_id=? AND kind IN ('article-draft','article-published','article-image-draft','article-image-published')",
             row.id,
-          ).map((f) => ({ ...f, url: `/api/files/${f.id}` }));
+          )
+            .filter(
+              (f) =>
+                !f.kind.startsWith("article-image") ||
+                row.body.includes(`/api/article-images/${f.id}`),
+            )
+            .map((f) => {
+              const publicImage = f.kind.startsWith("article-image");
+              return {
+                id: f.id,
+                name: f.name,
+                size: f.size,
+                mime: f.mime,
+                publicImage,
+                url: publicImage
+                  ? `/api/article-images/${f.id}`
+                  : `/api/files/${f.id}`,
+              };
+            });
           const payload = JSON.stringify({
             title: row.title,
             body: row.body,
@@ -1432,7 +1850,7 @@ function decisionRoute(table, permission) {
             row.id,
           );
           run(
-            "UPDATE files SET kind='article-published' WHERE entity_id=? AND kind='article-draft'",
+            "UPDATE files SET kind=CASE WHEN kind='article-image-draft' THEN 'article-image-published' ELSE 'article-published' END WHERE entity_id=? AND kind IN ('article-draft','article-image-draft')",
             row.id,
           );
         } else {
@@ -1497,7 +1915,12 @@ app.post(
       if (!r) throw fail(404, "举报不存在", "NOT_FOUND");
       run("UPDATE reports SET status=? WHERE id=?", req.body.decision, r.id);
       if (req.body.decision === "removed")
-        run("UPDATE comments SET status='removed' WHERE id=?", r.comment_id);
+        run(
+          "UPDATE comments SET body='',status='deleted' WHERE id=?",
+          r.comment_id,
+        );
+      if (req.body.decision === "removed")
+        run("DELETE FROM comment_likes WHERE comment_id=?", r.comment_id);
       audit(req.user, "处理举报", "report", r.id, req.body.decision);
       res.json({ ok: true });
     } catch (e) {

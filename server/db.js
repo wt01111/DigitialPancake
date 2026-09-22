@@ -26,14 +26,16 @@ CREATE TABLE IF NOT EXISTS articles(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,ti
 CREATE TABLE IF NOT EXISTS problems(id TEXT PRIMARY KEY,title TEXT NOT NULL,metadata TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'published',created_by TEXT,created_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS official_problem_files(id TEXT PRIMARY KEY,problem_id TEXT NOT NULL,relative_path TEXT NOT NULL,original_name TEXT NOT NULL,mime TEXT NOT NULL,size INTEGER NOT NULL,sha256 TEXT NOT NULL,source_url TEXT,FOREIGN KEY(problem_id) REFERENCES problems(id));
 CREATE TABLE IF NOT EXISTS comments(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,target_type TEXT NOT NULL,target_id TEXT NOT NULL,parent_id TEXT,body TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'visible',created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id));
+CREATE TABLE IF NOT EXISTS comment_likes(comment_id TEXT NOT NULL,user_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(comment_id,user_id),FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,comment_id TEXT NOT NULL,reason TEXT,status TEXT NOT NULL DEFAULT 'pending',created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id),FOREIGN KEY(comment_id) REFERENCES comments(id));
 CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,owner_id TEXT NOT NULL,kind TEXT NOT NULL,entity_id TEXT,stored_name TEXT NOT NULL,original_name TEXT NOT NULL,mime TEXT NOT NULL,size INTEGER NOT NULL,created_at TEXT NOT NULL,FOREIGN KEY(owner_id) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS bookmarks(user_id TEXT NOT NULL,item_type TEXT NOT NULL,item_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(user_id,item_type,item_id));
 CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,title TEXT NOT NULL,href TEXT,read_at TEXT,created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,actor_id TEXT,action TEXT NOT NULL,entity_type TEXT,entity_id TEXT,detail TEXT,created_at TEXT NOT NULL);
-CREATE INDEX IF NOT EXISTS idx_shops_status_name ON shops(status,name); CREATE INDEX IF NOT EXISTS idx_reviews_shop_status ON reviews(shop_id,status); CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status); CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at);`);
+CREATE INDEX IF NOT EXISTS idx_shops_status_name ON shops(status,name); CREATE INDEX IF NOT EXISTS idx_reviews_shop_status ON reviews(shop_id,status); CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status); CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at); CREATE INDEX IF NOT EXISTS idx_comments_target_thread ON comments(target_type,target_id,parent_id,created_at);`);
 for (const sql of [
   "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 1",
+  "ALTER TABLE users ADD COLUMN bio TEXT NOT NULL DEFAULT ''",
   "ALTER TABLE articles ADD COLUMN published_payload TEXT",
   "ALTER TABLE articles ADD COLUMN published_version INTEGER NOT NULL DEFAULT 0",
   "ALTER TABLE articles ADD COLUMN published_visible INTEGER NOT NULL DEFAULT 0",

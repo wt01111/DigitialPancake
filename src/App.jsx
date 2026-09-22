@@ -15,6 +15,7 @@ import {
   Bell,
   Bookmark,
   Check,
+  ChevronLeft,
   ChevronRight,
   Download,
   FolderOpen,
@@ -25,6 +26,8 @@ import {
   Search,
   ShieldCheck,
   Store,
+  Image,
+  Link2,
   X,
 } from "lucide-react";
 import { Provider, api, asItems, useSite } from "./store";
@@ -87,18 +90,22 @@ function MD({ children }) {
   );
 }
 function useLoad(path, deps = []) {
-  const [s, setS] = useState({ loading: true, data: null, error: "" });
+  const [s, setS] = useState({ path, loading: true, data: null, error: "" });
   const request = useRef(0);
+  const currentPath = useRef(path);
+  currentPath.current = path;
   const load = async () => {
+    const requestedPath = path;
+    if (currentPath.current !== requestedPath) return;
     const current = ++request.current;
-    setS((x) => ({ ...x, loading: true, error: "" }));
+    setS({ path, loading: true, data: null, error: "" });
     try {
       const data = await api(path);
-      if (current === request.current)
-        setS({ loading: false, data, error: "" });
+      if (current === request.current && currentPath.current === requestedPath)
+        setS({ path, loading: false, data, error: "" });
     } catch (e) {
-      if (current === request.current)
-        setS({ loading: false, data: null, error: e.message });
+      if (current === request.current && currentPath.current === requestedPath)
+        setS({ path, loading: false, data: null, error: e.message });
     }
   };
   useEffect(() => {
@@ -106,8 +113,10 @@ function useLoad(path, deps = []) {
     return () => {
       request.current += 1;
     };
-  }, deps);
-  return { ...s, reload: load };
+  }, [path, ...deps]);
+  return s.path === path
+    ? { ...s, reload: load }
+    : { path, loading: true, data: null, error: "", reload: load };
 }
 function Brand() {
   return (
@@ -120,6 +129,18 @@ function Brand() {
       </span>
     </Link>
   );
+}
+function NotificationBell() {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let live = true;
+    const load = () => document.visibilityState === "visible" && api("/me/notifications").then((x) => live && setCount(Number(x.unreadCount ?? asItems(x).filter((n) => !n.read).length))).catch(() => {});
+    const visible = () => document.visibilityState === "visible" && load();
+    load(); const timer = setInterval(load, 45000);
+    window.addEventListener("focus", load); window.addEventListener("notifications-changed", load); document.addEventListener("visibilitychange", visible);
+    return () => { live = false; clearInterval(timer); window.removeEventListener("focus", load); window.removeEventListener("notifications-changed", load); document.removeEventListener("visibilitychange", visible); };
+  }, []);
+  return <Link className="icon-button notification-bell" to="/account?tab=notifications" aria-label={count ? `${count} 条未读通知` : "通知"}><Bell />{count > 0 && <span>{count > 99 ? "99+" : count}</span>}</Link>;
 }
 function Header() {
   const { user, refresh } = useSite();
@@ -152,13 +173,7 @@ function Header() {
           </Link>
           {user ? (
             <>
-              <Link
-                className="icon-button"
-                to="/account?tab=notifications"
-                aria-label="通知"
-              >
-                <Bell />
-              </Link>
+              <NotificationBell />
               <Link className="avatar" to="/account">
                 {user.nickname?.[0] || "我"}
               </Link>
@@ -242,32 +257,37 @@ function SearchBox({
     </form>
   );
 }
-function Save({ type, id, initial = false }) {
+function Save({ type, id, initial = false, showLabel = false }) {
   const { user } = useSite();
   const nav = useNavigate();
   const [on, setOn] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => { setOn(!!initial); setError(""); }, [type, id, initial, user?.id]);
   async function toggle() {
     if (!user) return nav("/auth");
+    if (busy) return;
+    setBusy(true); setError("");
     try {
       await api(`/me/bookmarks/${type}/${id}`, {
         method: on ? "DELETE" : "POST",
       });
       setOn(!on);
     } catch (e) {
-      alert(e.message);
-    }
+      setError(e.message);
+    } finally { setBusy(false); }
   }
   return (
-    <button
-      className={`icon-button ${on ? "saved" : ""}`}
-      onClick={toggle}
-      aria-label={on ? "取消收藏" : "收藏"}
-    >
-      <Bookmark fill={on ? "currentColor" : "none"} />
-    </button>
+    <span className="save-control">
+      <button className={`${showLabel ? "button secondary bookmark-button" : "icon-button"} ${on ? "saved" : ""}`} onClick={toggle} disabled={busy} aria-pressed={on} aria-label={on ? "取消收藏" : "收藏"}>
+        <Bookmark fill={on ? "currentColor" : "none"} />{showLabel && (busy ? "处理中…" : on ? "已收藏" : "收藏店铺")}
+      </button>
+      {error && <small className="field-error" role="alert">{error}</small>}
+    </span>
   );
 }
 function Card({ a }) {
+  const authorId = a.author?.id || a.authorId;
   return (
     <article className="article-card">
       <Link className="article-photo" to={`/articles/${a.id}`}>
@@ -280,7 +300,13 @@ function Card({ a }) {
         </Link>
         <p>{a.excerpt || ""}</p>
         <div className="article-meta">
-          <span>{a.author?.nickname || a.author || "站内作者"}</span>
+          {authorId ? (
+            <Link to={`/users/${authorId}`} className="author-link">
+              {a.author?.nickname || a.author || "站内作者"}
+            </Link>
+          ) : (
+            <span>{a.author?.nickname || a.author || "站内作者"}</span>
+          )}
           <span>{fmt(a.date || a.createdAt)}</span>
           <Save type="article" id={a.id} initial={a.bookmarked} />
         </div>
@@ -640,9 +666,38 @@ function FileLink({ f }) {
     </Link>
   );
 }
+const PdfViewer = lazy(() => import("./PdfViewer"));
+function Attachment({ f }) {
+  return (
+    <div className="attachment-row">
+      <FileLink f={f} />
+    </div>
+  );
+}
+function PdfAttachments({ files }) {
+  const { user } = useSite();
+  const pdfs = (files || []).filter((f) => f.mimeType === "application/pdf" || /\.pdf$/i.test(f.originalName || f.name || ""));
+  const [selected, setSelected] = useState(0);
+  useEffect(() => setSelected(0), [pdfs.map((f) => f.id).join(",")]);
+  if (!pdfs.length || !user) return null;
+  const f = pdfs[selected] || pdfs[0];
+  return (
+    <section className="pdf-reader-section">
+      <div className="pdf-reader-heading"><div><h2>在线阅读</h2><p>页面按需加载，可连续滚动阅读。</p></div>
+        {pdfs.length > 1 && <label>选择 PDF<select value={selected} onChange={(e) => setSelected(Number(e.target.value))}>{pdfs.map((x, i) => <option key={x.id} value={i}>{x.originalName || x.name}</option>)}</select></label>}
+      </div>
+      <Suspense fallback={<Loading />}><PdfViewer key={f.id} url={f.url || `/api/files/${f.id}`} name={f.originalName || f.name || "PDF 附件"} /></Suspense>
+    </section>
+  );
+}
+function AuthorBadge({ author, date }) {
+  const id = author?.id;
+  const name = author?.nickname || (typeof author === "string" ? author : "站内作者");
+  return <div className="author-badge"><span className="author-avatar">{name?.[0] || "作"}</span><div><span className="author-role">本文作者 · 社区成员</span>{id ? <Link className="author-name" to={`/users/${id}`}>{name}</Link> : <strong>{name}</strong>}<span className="author-foot">{date && <small>发布于 {fmt(date)}</small>}{id && <Link to={`/users/${id}`}>查看主页 →</Link>}</span></div></div>;
+}
 function Detail({ type }) {
   const { id } = useParams();
-  const r = useLoad(`/${type}/${id}`, [id]);
+  const r = useLoad(`/${type}/${id}`, [type, id]);
   if (r.loading) return <Loading />;
   if (r.error)
     return (
@@ -715,9 +770,8 @@ function Detail({ type }) {
             </p>
           </>
         )}
-        <div className="article-meta">
-          <span>{x.author?.nickname || x.author || ""}</span>
-          <span>{fmt(x.date || x.createdAt)}</span>
+        <div className="article-meta detail-meta">
+          {article ? <AuthorBadge author={typeof x.author === "object" ? x.author : { id: x.authorId, nickname: x.author }} date={x.date || x.createdAt} /> : <span>{fmt(x.date || x.createdAt)}</span>}
           <Save
             type={article ? "article" : "problem"}
             id={x.id}
@@ -727,7 +781,7 @@ function Detail({ type }) {
         {x.body || x.content || x.description ? (
           <MD>{x.body || x.content || x.description}</MD>
         ) : !article ? (
-          <p className="official-body-note">题目原文请下载下方官方 PDF。</p>
+          <p className="official-body-note">题目原文可直接阅读下方 PDF，也可下载后查看。</p>
         ) : null}
         {!article && x.classificationReason && (
           <details className="classification-reason">
@@ -759,10 +813,11 @@ function Detail({ type }) {
           <section className="attachments">
             <h2>附件</h2>
             {x.attachments.map((f) => (
-              <FileLink f={f} key={f.id} />
+              <Attachment f={f} key={f.id} />
             ))}
           </section>
         )}
+        <PdfAttachments files={x.attachments} />
         {!article && x.externalFiles?.length > 0 && (
           <section className="attachments external-files">
             <h2>官网原始文件</h2>
@@ -791,91 +846,135 @@ function Detail({ type }) {
             ))}
           </section>
         )}
-        <Comments type={article ? "article" : "problem"} id={x.id} />
+        <Comments type={article ? "article" : "problem"} id={x.id} contentAuthorId={article ? x.author?.id || x.authorId : null} />
       </article>
     </div>
   );
 }
-function Comments({ type, id }) {
+function Comments({ type, id, contentAuthorId }) {
   const { user } = useSite();
-  const r = useLoad(`/comments?targetType=${type}&targetId=${id}`, [type, id]);
+  const nav = useNavigate();
+  const [sort, setSort] = useState("popular");
+  const [page, setPage] = useState(1);
+  const loc = useLocation();
+  const focus = /^#comment-(.+)$/.exec(loc.hash)?.[1] || "";
+  const commentsPath = `/comments?targetType=${type}&targetId=${id}&sort=${sort}&page=${page}&pageSize=20${focus ? `&focus=${encodeURIComponent(focus)}` : ""}`;
+  const r = useLoad(commentsPath, [type, id, sort, page, focus]);
   const [body, setBody] = useState(""),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [active, setActive] = useState(null),
+    [inline, setInline] = useState(""),
+    [busy, setBusy] = useState(""),
+    [notice, setNotice] = useState("");
+  useEffect(() => { setPage(1); }, [type, id, sort]);
+  useEffect(() => {
+    if (!r.loading && focus) requestAnimationFrame(() => document.getElementById(`comment-${focus}`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+  }, [r.loading, focus]);
   async function submit(e) {
     e.preventDefault();
-    setError("");
+    setError(""); setBusy("main");
     try {
       await api("/comments", {
         method: "POST",
         body: { targetType: type, targetId: id, body },
       });
       setBody("");
-      r.reload();
+      setNotice("评论已发表"); await r.reload();
     } catch (x) {
       setError(x.message);
-    }
+    } finally { setBusy(""); }
   }
-  async function reply(parentId) {
-    const replyBody = prompt("回复内容");
-    if (!replyBody?.trim()) return;
+  async function sendInline(e, commentId, kind) {
+    e.preventDefault();
+    if (!inline.trim()) return;
+    setBusy(`${kind}-${commentId}`);
+    setError("");
+    setNotice("");
     try {
-      await api("/comments", {
-        method: "POST",
-        body: {
-          targetType: type,
-          targetId: id,
-          parentId,
-          body: replyBody.trim(),
-        },
-      });
-      r.reload();
+      if (kind === "reply") {
+        await api("/comments", {
+          method: "POST",
+          body: { targetType: type, targetId: id, parentId: commentId, body: inline.trim() },
+        });
+        setNotice("回复已发表");
+      } else {
+        await api(`/comments/${commentId}/report`, {
+          method: "POST",
+          body: { reason: inline.trim() },
+        });
+        setNotice("举报已提交审核");
+      }
+      setActive(null);
+      setInline("");
+      await r.reload();
     } catch (x) {
-      alert(x.message);
+      setError(x.message);
+    } finally {
+      setBusy("");
     }
   }
-  async function report(cid) {
-    const reason = prompt("请简要说明举报原因") || "";
-    try {
-      await api(`/comments/${cid}/report`, {
-        method: "POST",
-        body: { reason },
-      });
-      alert("举报已提交审核");
-    } catch (x) {
-      alert(x.message);
-    }
+  async function like(commentId) {
+    setBusy(`like-${commentId}`); setError("");
+    try { await api(`/comments/${commentId}/like`, { method: "POST" }); await r.reload(); }
+    catch (x) { setError(x.message); } finally { setBusy(""); }
   }
+  async function remove(commentId) {
+    setBusy(`delete-${commentId}`); setError("");
+    try { await api(`/comments/${commentId}`, { method: "DELETE" }); setActive(null); setNotice("评论已删除"); await r.reload(); }
+    catch (x) { setError(x.message); } finally { setBusy(""); }
+  }
+  const commentAuthors = new Map(asItems(r.data).map((c) => [c.id, c.author?.nickname]));
   return (
     <section className="comments">
-      <h2>
-        <MessageSquare />
-        讨论
-      </h2>
+      <div className="comments-head"><h2><MessageSquare />讨论</h2><div className="comment-sort"><button className={sort === "popular" ? "selected" : ""} onClick={() => { if (focus) nav(loc.pathname, { replace: true }); setPage(1); setSort("popular"); }}>热门</button><button className={sort === "latest" ? "selected" : ""} onClick={() => { if (focus) nav(loc.pathname, { replace: true }); setPage(1); setSort("latest"); }}>最新</button></div></div>
+      {r.data?.focused && <button className="text-button view-all-comments" onClick={() => { nav(loc.pathname, { replace: true }); setPage(1); }}>← 查看全部讨论</button>}
       {r.loading ? (
         <Loading />
       ) : r.error ? (
         <Err error={r.error} />
       ) : asItems(r.data).length ? (
         asItems(r.data).map((c) => (
-          <article className="comment" key={c.id}>
-            <strong>{c.author?.nickname || "用户"}</strong>
-            <p>{c.body}</p>
-            <small>{fmt(c.createdAt)}</small>
+          <article className={`comment ${c.parentId ? "comment-reply" : ""}`} id={`comment-${c.id}`} key={c.id}>
+            {c.parentId && commentAuthors.get(c.parentId) && <small className="reply-target">回复 @{commentAuthors.get(c.parentId)}</small>}
+            {c.deleted ? <><strong className="muted">已删除</strong><p className="deleted-comment">该评论已删除，后续回复保留。</p></> : <>
+              <div className="comment-author"><span className="comment-avatar">{(c.author?.nickname || "用户")[0]}</span><div>{c.author?.id || c.authorId ? <Link to={`/users/${c.author?.id || c.authorId}`}>{c.author?.nickname || "用户"}</Link> : <strong>{c.author?.nickname || "用户"}</strong>}<span>{(c.author?.id || c.authorId) === contentAuthorId ? "作者" : "社区成员"} · {fmt(c.createdAt)}</span></div></div>
+              {!(c.author?.id || c.authorId) && <p>{c.body}</p>}
+            </>}
+            {!c.deleted && (c.author?.id || c.authorId) && <p>{c.body}</p>}
+            <div className="comment-actions"><span className="comment-action-spacer" />
+            {!c.deleted && (user ? <button className={`like-button ${c.liked ? "selected" : ""}`} aria-pressed={!!c.liked} disabled={busy === `like-${c.id}`} onClick={() => like(c.id)}>赞 {c.likeCount || 0}</button> : <Link className="text-button" to={`/auth?next=${encodeURIComponent(location.pathname + location.hash)}`}>赞 {c.likeCount || 0}</Link>)}
             {user && (
               <>
-                <button className="text-button" onClick={() => reply(c.id)}>
-                  回复
-                </button>
-                <button className="text-button" onClick={() => report(c.id)}>
+                {!c.deleted && c.canReply !== false && <button className="text-button" onClick={() => { setActive({ id: c.id, kind: "reply" }); setInline(""); setError(""); }}>
+                  {(c.author?.id || c.authorId) === user.id ? "追评" : "回复"}
+                </button>}
+                {!c.deleted && (c.author?.id || c.authorId) !== user.id && <button className="text-button" onClick={() => { setActive({ id: c.id, kind: "report" }); setInline(""); setError(""); }}>
                   举报
-                </button>
+                </button>}
+                {!c.deleted && c.canDelete && <button className="text-button danger" onClick={() => setActive({ id: c.id, kind: "delete" })}>删除</button>}
               </>
+            )}</div>
+            {active?.id === c.id && active.kind === "delete" && <div className="delete-confirm" role="alert"><p>删除后原文不会恢复；若已有回复，这里会保留删除占位。</p><div className="inline-actions"><button className="button danger-button small" disabled={busy === `delete-${c.id}`} onClick={() => remove(c.id)}>确认删除</button><button className="button secondary small" onClick={() => setActive(null)}>取消</button></div></div>}
+            {active?.id === c.id && active.kind !== "delete" && (
+              <form className="comment-inline-form" onSubmit={(e) => sendInline(e, c.id, active.kind)}>
+                <label>
+                  {active.kind === "reply" ? `回复 ${c.author?.nickname || "该用户"}` : "举报原因"}
+                  <textarea autoFocus required minLength={active.kind === "report" ? 2 : 1} maxLength={active.kind === "report" ? 500 : 1000} value={inline} onChange={(e) => setInline(e.target.value)} placeholder={active.kind === "reply" ? "写下你的回复…" : "请具体说明需要审核的问题…"} />
+                </label>
+                <div className="inline-actions">
+                  <button className="button primary small" disabled={!!busy}>{busy ? "提交中…" : "提交"}</button>
+                  <button type="button" className="button secondary small" onClick={() => { setActive(null); setInline(""); }}>取消</button>
+                </div>
+              </form>
             )}
           </article>
         ))
       ) : (
         <p className="muted">还没有评论。</p>
       )}
+      {!r.loading && !r.error && !r.data?.focused && r.data?.total > r.data?.pageSize && <div className="pagination"><button disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>上一页</button><span>第 {page} / {Math.ceil(r.data.total / r.data.pageSize)} 页</span><button disabled={page >= Math.ceil(r.data.total / r.data.pageSize)} onClick={() => setPage((p) => p + 1)}>下一页</button></div>}
+      {notice && <div className="success-box" role="status"><Check />{notice}</div>}
+      <Err error={error} />
       {user ? (
         <form onSubmit={submit}>
           <label>
@@ -886,12 +985,11 @@ function Comments({ type, id }) {
               required
             />
           </label>
-          <Err error={error} />
-          <button className="button primary">发表评论</button>
+          <button className="button primary" disabled={busy === "main"}>{busy === "main" ? "发表中…" : "发表评论"}</button>
         </form>
       ) : (
         <p>
-          <Link to="/auth">登录</Link>后参与讨论。
+          <Link to="/auth">登录</Link>后参与讨论、回复和点赞。
         </p>
       )}
     </section>
@@ -1004,7 +1102,10 @@ function ShopDetail() {
           ← 返回店铺搜索
         </Link>
         <span className="eyebrow">{s.platform}</span>
-        <h1>{s.name}</h1>
+        <div className="shop-title-row">
+          <h1>{s.name}</h1>
+          <Save type="shop" id={s.id || id} initial={s.bookmarked} showLabel />
+        </div>
         <dl className="shop-facts">
           <div>
             <dt>平台</dt>
@@ -1445,6 +1546,7 @@ function Auth() {
 function Write() {
   const { user, config } = useSite();
   const [sp] = useSearchParams(),
+    draftParam = sp.get("draft"),
     [f, setF] = useState({
       title: "",
       category: topics[0].name,
@@ -1452,19 +1554,92 @@ function Write() {
       excerpt: "",
       body: starterMarkdown,
     }),
-    [id, setId] = useState(sp.get("draft")),
+    [id, setId] = useState(draftParam),
     [files, setFiles] = useState([]),
     [error, setError] = useState(""),
-    [saved, setSaved] = useState("");
+    [saved, setSaved] = useState(""),
+    [imageBusy, setImageBusy] = useState(false),
+    [loadingDraft, setLoadingDraft] = useState(!!draftParam),
+    [draftLoadError, setDraftLoadError] = useState(""),
+    [draftRetry, setDraftRetry] = useState(0),
+    [saving, setSaving] = useState(false);
+  const editorRef = useRef(null);
+  const loadedDraft = useRef(null);
+  const seenDraftParam = useRef(draftParam);
   const nav = useNavigate();
   useEffect(() => {
-    if (id)
-      api(`/articles/drafts/${id}`)
-        .then((d) => setF({ ...d, tags: (d.tags || []).join(",") }))
-        .catch(() => {});
-  }, []);
+    if (draftParam === seenDraftParam.current) return;
+    seenDraftParam.current = draftParam;
+    if (draftParam === id) return;
+    loadedDraft.current = null;
+    setError(""); setDraftLoadError(""); setSaved(""); setFiles([]); setId(draftParam);
+    if (draftParam) setLoadingDraft(true);
+    else {
+      setLoadingDraft(false);
+      setF({ title: "", category: topics[0].name, tags: "", excerpt: "", body: starterMarkdown });
+    }
+  }, [draftParam, id]);
+  useEffect(() => {
+    let live = true;
+    if (id && loadedDraft.current !== id) {
+      const requestedId = id;
+      setLoadingDraft(true); setDraftLoadError("");
+      api(`/articles/drafts/${id}`).then((d) => {
+        if (live && loadedDraft.current !== requestedId) {
+          loadedDraft.current = requestedId;
+          setF({ ...d, tags: (d.tags || []).join(",") });
+          setLoadingDraft(false);
+        }
+      }).catch((x) => { if (live) { setDraftLoadError(x.message); setLoadingDraft(false); } });
+    }
+    return () => { live = false; };
+  }, [id, draftRetry]);
   if (!user) return <Navigate to="/auth" />;
+  if (loadingDraft) return <div className="container editor-page"><h1>载入草稿</h1><Loading /></div>;
+  if (id && (draftLoadError || loadedDraft.current !== id)) return (
+    <div className="container editor-page draft-load-error">
+      <h1>无法打开草稿</h1>
+      <Err error={draftLoadError || "草稿尚未载入"} />
+      <div className="action-row">
+        <button className="button primary" onClick={() => { setLoadingDraft(true); setDraftLoadError(""); setDraftRetry((n) => n + 1); }}>重试</button>
+        <Link className="button secondary" to="/account?tab=drafts">返回草稿列表</Link>
+      </div>
+    </div>
+  );
+  async function ensureDraft() {
+    if (id) return id;
+    const body = { ...f, tags: f.tags.split(/[，,]/).map((x) => x.trim()).filter(Boolean) };
+    const created = await api("/articles/drafts", { method: "POST", body });
+    const did = created.id || created.draft?.id;
+    loadedDraft.current = did;
+    setId(did);
+    nav(`/write?draft=${did}`, { replace: true });
+    return did;
+  }
+  function insertMarkdown(text, selectStart = 0, selectLength = 0) {
+    const el = editorRef.current;
+    const start = el?.selectionStart ?? f.body.length;
+    const end = el?.selectionEnd ?? start;
+    setF((current) => ({ ...current, body: `${current.body.slice(0, start)}${text}${current.body.slice(end)}` }));
+    requestAnimationFrame(() => {
+      el?.focus();
+      el?.setSelectionRange(start + selectStart, start + selectStart + selectLength);
+    });
+  }
+  async function uploadImage(file) {
+    if (!file) return;
+    setImageBusy(true); setError(""); setSaved("");
+    try {
+      const did = await ensureDraft();
+      const fd = new FormData(); fd.append("image", file);
+      const result = await api(`/articles/drafts/${did}/images`, { method: "POST", body: fd });
+      insertMarkdown(`\n${result.markdown || `![${result.name}](${result.markdownUrl})`}\n`);
+      setSaved("图片已上传并插入正文，请继续保存草稿");
+    } catch (x) { setError(x.message); } finally { setImageBusy(false); }
+  }
   async function save(submit) {
+    if (saving || imageBusy) return;
+    setSaving(true);
     setError("");
     setSaved("");
     try {
@@ -1480,7 +1655,9 @@ function Write() {
         body,
       });
       const did = r.id || r.draft?.id || id;
+      loadedDraft.current = did;
       setId(did);
+      if (!id) nav(`/write?draft=${did}`, { replace: true });
       for (const file of files) {
         const fd = new FormData();
         fd.append("file", file);
@@ -1497,7 +1674,7 @@ function Write() {
       }
     } catch (x) {
       setError(x.message);
-    }
+    } finally { setSaving(false); }
   }
   return (
     <div className="container editor-page">
@@ -1507,10 +1684,10 @@ function Write() {
           <p>Markdown 草稿可反复保存，提交后进入审核。</p>
         </div>
         <div>
-          <button className="button secondary" onClick={() => save(false)}>
-            保存草稿
+          <button className="button secondary" disabled={saving || imageBusy} onClick={() => save(false)}>
+            {saving ? "保存中…" : "保存草稿"}
           </button>
-          <button className="button primary" onClick={() => save(true)}>
+          <button className="button primary" disabled={saving || imageBusy} onClick={() => save(true)}>
             提交审核
           </button>
         </div>
@@ -1558,14 +1735,24 @@ function Write() {
         </label>
       </div>
       <div className="editor-split">
-        <label>
-          Markdown
+        <div className="editor-field">
+          <label htmlFor="markdown-body">Markdown</label>
+          <div className="markdown-toolbar" role="toolbar" aria-label="Markdown 工具栏">
+            <button type="button" onClick={() => insertMarkdown("[链接文字](https://example.com)", 1, 4)}><Link2 size={17} />插入链接</button>
+            <label className="toolbar-upload">
+              <Image size={17} />{imageBusy ? "上传中…" : "上传图片"}
+              <input type="file" accept="image/png,image/jpeg,image/webp" disabled={imageBusy} onChange={(e) => { uploadImage(e.target.files?.[0]); e.target.value = ""; }} />
+            </label>
+            <small>PNG / JPEG / WebP，最大 5 MiB</small>
+          </div>
           <textarea
+            id="markdown-body"
+            ref={editorRef}
             className="editor-textarea"
             value={f.body}
             onChange={(e) => setF({ ...f, body: e.target.value })}
           />
-        </label>
+        </div>
         <section className="preview">
           <h2>{f.title || "文章预览"}</h2>
           <MD>{f.body}</MD>
@@ -1625,12 +1812,13 @@ function Account() {
 }
 function Profile({ user, refresh }) {
   const [nickname, setNickname] = useState(user.nickname),
+    [bio, setBio] = useState(user.bio || ""),
     [pw, setPw] = useState({ currentPassword: "", newPassword: "" }),
     [status, setStatus] = useState("");
   async function update(e) {
     e.preventDefault();
     try {
-      await api("/me", { method: "PATCH", body: { nickname } });
+      await api("/me", { method: "PATCH", body: { nickname, bio } });
       await refresh();
       setStatus("资料已保存");
     } catch (x) {
@@ -1662,6 +1850,10 @@ function Profile({ user, refresh }) {
           邮箱
           <input value={user.email} disabled />
         </label>
+        <label>
+          个人简介
+          <textarea maxLength="500" value={bio} onChange={(e) => setBio(e.target.value)} placeholder="介绍你的学习方向或项目经历" />
+        </label>
         <button className="button primary">保存资料</button>
       </form>
       <h2>修改密码</h2>
@@ -1689,22 +1881,47 @@ function Profile({ user, refresh }) {
     </>
   );
 }
+function PublicUser() {
+  const { id } = useParams();
+  const r = useLoad(`/users/${id}`, [id]);
+  if (r.loading) return <Loading />;
+  if (r.error) return <div className="container page"><Err error={r.error} retry={r.reload} /></div>;
+  const u = r.data;
+  return (
+    <div className="container page public-profile">
+      <header className="profile-hero">
+        <span className="avatar">{u.nickname?.[0] || "用"}</span>
+        <div><h1>{u.nickname || "社区用户"}</h1><p>{u.bio || "这位用户还没有填写简介。"}</p></div>
+      </header>
+      <section><h2>公开文章</h2>
+        {u.articles?.length ? <div className="article-grid">{u.articles.map((a) => <Card key={a.id} a={{ ...a, author: { id: u.id, nickname: u.nickname } }} />)}</div> : <Empty title="还没有公开文章" text="审核通过并公开的文章会显示在这里。" />}
+      </section>
+      <section><h2>公开评论与互动</h2>
+        {u.comments?.length ? <div className="record-list">{u.comments.map((c) => <article key={c.id}><strong>{c.targetTitle || "内容讨论"}</strong><p>{c.body}</p><small>{fmt(c.createdAt)}</small>{c.href && <Link to={c.href}>回到原内容</Link>}</article>)}</div> : <Empty title="还没有公开评论" text="公开内容下可见的评论会显示在这里。" />}
+      </section>
+      {u.reviews?.length > 0 && <section><h2>已审核店铺评价</h2><div className="record-list">{u.reviews.map((x) => <article key={x.id}><strong>{x.shopName || "店铺评价"}{x.rating ? ` · ${x.rating} / 5` : ""}</strong><p>{x.pros || x.purchaseExperience || x.reason}</p><small>{fmt(x.createdAt || x.date)}</small>{x.shopId && <Link to={`/shops/${x.shopId}`}>查看店铺</Link>}</article>)}</div></section>}
+    </div>
+  );
+}
 function Mine({ tab }) {
   const r = useLoad(`/me/${tab}`, [tab]);
+  const nav = useNavigate();
   async function markRead() {
     try {
-      await api("/me/notifications/read", {
-        method: "POST",
-        body: {
-          ids: asItems(r.data)
-            .filter((x) => !x.read)
-            .map((x) => x.id),
-        },
-      });
+      await api("/me/notifications/read", { method: "POST" });
+      window.dispatchEvent(new Event("notifications-changed"));
       r.reload();
     } catch (x) {
       alert(x.message);
     }
+  }
+  async function openNotification(x) {
+    try {
+      if (!x.read) await api("/me/notifications/read", { method: "POST", body: { ids: [x.id] } });
+      window.dispatchEvent(new Event("notifications-changed"));
+      if (x.href) nav(x.href);
+      else r.reload();
+    } catch (e) { alert(e.message); }
   }
   return (
     <>
@@ -1749,6 +1966,9 @@ function Mine({ tab }) {
                 >
                   查看收藏
                 </Link>
+              )}
+              {tab === "notifications" && x.href && (
+                <button className="text-button" onClick={() => openNotification(x)}>{x.read ? "查看内容" : "标为已读并查看"}</button>
               )}
             </article>
           ))}
@@ -2701,6 +2921,7 @@ function RoutesView() {
         <Route path="/problems/:id" element={<Detail type="problems" />} />
         <Route path="/articles" element={<Listing type="articles" />} />
         <Route path="/articles/:id" element={<Detail type="articles" />} />
+        <Route path="/users/:id" element={<PublicUser />} />
         <Route path="/topics" element={<Topics />} />
         <Route path="/shops" element={<Shops />} />
         <Route path="/shops/submit" element={<ShopSubmit />} />

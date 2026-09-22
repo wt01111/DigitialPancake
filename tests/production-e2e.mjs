@@ -114,7 +114,7 @@ try {
   await page.getByLabel("标题").fill("端到端 Markdown 调试记录");
   await page.getByLabel("摘要").fill("真实前后端审核测试");
   await page
-    .getByLabel("Markdown")
+    .locator("textarea.editor-textarea")
     .fill(
       "## E2E 正文\n\n这段正文必须出现在审核页和公开详情。\n\n```c\nint main(void){return 0;}\n```",
     );

@@ -292,6 +292,89 @@
     gap: 8px;
   }
 }
+
+/* Keep the production discussion layout after legacy selectors. */
+.comments .comment {
+  display: block;
+  width: 100%;
+  gap: 0;
+  padding: 16px;
+  margin-block: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+.comments .comment.comment-reply { margin-left: 28px; width: calc(100% - 28px); border-left: 4px solid #bfdbfe; }
+.comments .comment-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.comments .comment-inline-form { display: block; width: 100%; margin-top: 14px; padding: 14px; border-radius: 10px; background: #f8fafc; }
+.comments .comment-inline-form label { display: grid; gap: 7px; width: 100%; }
+.comments .comment-inline-form textarea { width: 100%; min-height: 92px; }
+@media (max-width: 560px) {
+  .comments .comment.comment-reply { margin-left: 10px; width: calc(100% - 10px); }
+  .comments .comment-actions { gap: 6px; }
+  .comments .comment-inline-form { padding: 12px; }
+}
+
+/* Production interactions */
+.author-link { color: #1d4ed8; font-weight: 700; text-decoration: none; }
+.save-control { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.field-error { color: #b91c1c; max-width: 220px; }
+.notification-bell { position: relative; }
+.notification-bell > span { position: absolute; top: -5px; right: -7px; min-width: 18px; height: 18px; padding-inline: 4px; border: 2px solid #fff; border-radius: 999px; background: #c2410c; color: #fff; font-size: 10px; font-weight: 800; line-height: 14px; text-align: center; }
+.author-link:hover { text-decoration: underline; }
+.attachment-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding-block: 8px; }
+.attachment-row > a { display: inline-flex; align-items: center; gap: 7px; }
+.shop-title-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.shop-title-row h1 { margin-right: auto; }
+.shop-title-row > span { color: #475569; font-size: .9rem; }
+.comment { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-block: 12px; background: #fff; }
+.comment-reply { margin-left: 28px; border-left: 4px solid #bfdbfe; }
+.comment-actions, .inline-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.comment-actions small { margin-right: auto; color: #64748b; }
+.comments-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.comments-head h2 { display: flex; align-items: center; gap: 8px; margin: 0; }
+.comment-sort { display: flex; gap: 4px; padding: 3px; border-radius: 10px; background: #e2e8f0; }
+.comment-sort button { min-height: 38px; padding: 5px 13px; border: 0; border-radius: 8px; background: transparent; color: #475569; }
+.comment-sort button.selected { background: #fff; color: #1d4ed8; font-weight: 800; box-shadow: 0 1px 4px rgba(15,23,42,.12); }
+.like-button { min-height: 36px; padding: 5px 10px; border: 1px solid #cbd5e1; border-radius: 999px; background: #fff; color: #334155; }
+.like-button.selected { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; font-weight: 800; }
+.deleted-comment { color: #64748b; font-style: italic; }
+.delete-confirm { margin-top: 12px; padding: 14px; border: 1px solid #fed7aa; border-radius: 10px; background: #fff7ed; }
+.danger-button { border-color: #b91c1c; background: #b91c1c; color: #fff; }
+.comment-inline-form { margin-top: 14px; padding: 14px; border-radius: 10px; background: #f8fafc; }
+.comment-inline-form label { display: grid; gap: 7px; font-weight: 700; }
+.comment-inline-form textarea { min-height: 92px; resize: vertical; }
+.comments > form { margin-top: 24px; padding: 20px; border: 1px solid #dbeafe; border-radius: 14px; background: #f8fbff; }
+.comments > form label { display: grid; gap: 8px; font-weight: 700; }
+.comments > form textarea { min-height: 120px; resize: vertical; }
+.markdown-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 7px; padding: 8px; border: 1px solid #cbd5e1; border-bottom: 0; border-radius: 10px 10px 0 0; background: #f8fafc; }
+.markdown-toolbar button, .toolbar-upload { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 7px 11px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b; cursor: pointer; }
+.toolbar-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.markdown-toolbar + .editor-textarea { border-top-left-radius: 0; border-top-right-radius: 0; }
+.public-profile { max-width: 1050px; padding-block: 48px; }
+.profile-hero { display: flex; align-items: center; gap: 18px; margin-bottom: 40px; padding: 24px; border-radius: 16px; background: #eff6ff; }
+.profile-hero .avatar { flex: 0 0 54px; width: 54px; height: 54px; font-size: 1.3rem; }
+.profile-hero h1, .profile-hero p { margin: 0 0 6px; }
+.public-profile > section { margin-block: 36px; }
+.pdf-modal { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(15, 23, 42, .72); }
+.pdf-dialog { display: flex; flex-direction: column; width: min(1100px, 100%); height: min(92vh, 900px); overflow: hidden; border-radius: 16px; background: #fff; box-shadow: 0 25px 70px rgba(0,0,0,.3); }
+.pdf-dialog > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; }
+.pdf-toolbar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; padding: 10px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+.pdf-toolbar button, .pdf-toolbar a { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-height: 40px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b; text-decoration: none; }
+.pdf-toolbar button:disabled { opacity: .45; }
+.pdf-stage { position: relative; flex: 1; overflow: auto; padding: 22px; text-align: center; background: #dbe1e8; }
+.pdf-stage canvas { display: block; margin: auto; max-width: none; background: #fff; box-shadow: 0 4px 18px rgba(15,23,42,.18); }
+.pdf-loading { position: sticky; z-index: 2; top: 8px; display: inline-block; padding: 7px 12px; border-radius: 999px; background: #fff; color: #334155; }
+.pdf-error { margin: auto; text-align: center; }
+@media (max-width: 560px) {
+  .comment-reply { margin-left: 12px; }
+  .pdf-modal { padding: 0; }
+  .pdf-dialog { width: 100%; height: 100dvh; border-radius: 0; }
+  .pdf-toolbar { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
+  .pdf-toolbar > * { flex: 0 0 auto; }
+  .pdf-stage { padding: 12px; }
+  .profile-hero { align-items: flex-start; padding: 18px; }
+}
 .problem-filters {
   display: flex;
   flex-wrap: wrap;
@@ -4799,4 +4882,77 @@ select {
   .shop-facts {
     grid-template-columns: 1fr;
   }
+}
+
+/* Final specificity guard for production discussion controls. */
+.comments .comment { display: block; width: 100%; gap: 0; padding: 16px; margin-block: 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.comments .comment.comment-reply { margin-left: 28px; width: calc(100% - 28px); border-left: 4px solid #bfdbfe; }
+.comments .comment-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.comments .comment-inline-form { display: block; width: 100%; margin-top: 14px; padding: 14px; border-radius: 10px; background: #f8fafc; }
+.comments .comment-inline-form label { display: grid; gap: 7px; width: 100%; }
+.comments .comment-inline-form textarea { width: 100%; min-height: 92px; }
+@media (max-width: 560px) {
+  .comments .comment.comment-reply { margin-left: 10px; width: calc(100% - 10px); }
+  .comments .comment-actions { gap: 6px; }
+  .comments .comment-inline-form { padding: 12px; }
+}
+.reply-target { display: block; margin-bottom: 7px; color: #64748b; }
+.markdown-toolbar small { color: #64748b; }
+@media (max-width: 560px) {
+  .pdf-toolbar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 6px;
+    padding: 8px;
+  }
+  .pdf-toolbar > * { flex: 0 0 auto; }
+  .pdf-toolbar button,
+  .pdf-toolbar a { min-height: 38px; padding: 6px 9px; }
+  .pdf-stage { padding: 12px; }
+}
+
+/* Inline continuous PDF reader */
+.pdf-reader-section { margin-block: 34px; }
+.pdf-reader-heading { display:flex; align-items:end; justify-content:space-between; gap:18px; margin-bottom:12px; }
+.pdf-reader-heading h2,.pdf-reader-heading p { margin:0 0 5px; }
+.pdf-reader-heading label { display:grid; gap:5px; font-weight:700; }
+.pdf-inline-reader { overflow:hidden; border:1px solid #cbd5e1; border-radius:14px; background:#dbe1e8; }
+.pdf-inline-reader .pdf-toolbar { position:sticky; z-index:4; top:0; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; padding:10px; border-bottom:1px solid #cbd5e1; background:#f8fafc; }
+.pdf-inline-reader .pdf-toolbar > strong { max-width:260px; margin-right:auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pdf-inline-reader .pdf-toolbar label { display:flex; align-items:center; gap:5px; }
+.pdf-inline-reader .pdf-toolbar input { width:62px; min-height:40px; padding:5px; }
+.pdf-continuous { height:min(78vh,900px); overflow:auto; overscroll-behavior:auto; padding:22px; scroll-behavior:smooth; }
+.pdf-page { min-height:520px; margin:0 auto 22px; text-align:center; }
+.pdf-page-label { position:sticky; z-index:2; top:8px; display:inline-block; margin-bottom:8px; padding:5px 10px; border-radius:999px; background:rgba(255,255,255,.94); color:#475569; font-size:12px; }
+.pdf-page canvas { display:block; margin:auto; max-width:none; background:#fff; box-shadow:0 4px 18px rgba(15,23,42,.18); }
+.author-badge { display:flex; align-items:center; gap:12px; }
+.author-avatar,.comment-avatar { display:grid; place-items:center; flex:0 0 auto; width:44px; height:44px; border-radius:50%; background:#dbeafe; color:#1d4ed8; font-size:18px; font-weight:800; }
+.author-badge > div,.comment-author > div { display:grid; gap:2px; }
+.author-badge a,.comment-author a { color:#0f172a; font-size:16px; font-weight:800; text-decoration:none; }
+.author-badge small,.author-role,.comment-author span { color:#64748b; font-size:12px; }
+.comment-author { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.comment-avatar { width:38px; height:38px; font-size:15px; }
+.comment-action-spacer { flex:1; }
+@media (max-width:560px) {
+ .pdf-reader-heading { align-items:stretch; flex-direction:column; }
+ .pdf-inline-reader { margin-inline:-10px; border-radius:10px; }
+ .pdf-inline-reader .pdf-toolbar { justify-content:flex-start; }
+ .pdf-inline-reader .pdf-toolbar > strong { flex:1 0 100%; max-width:100%; }
+ .pdf-continuous { height:72vh; padding:10px; }
+ .pdf-page { min-height:360px; margin-bottom:14px; }
+ .author-badge { align-items:flex-start; }
+}
+.detail-meta { margin-block:24px; }
+.author-badge { width:min(100%,520px); padding:16px 18px; border:1px solid #bfdbfe; border-radius:14px; background:#f0f7ff; }
+.author-badge .author-avatar { width:58px; height:58px; font-size:22px; }
+.author-badge .author-name,.author-badge > div > strong { font-size:21px; line-height:1.25; }
+.author-foot { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.author-foot a { color:#1d4ed8; font-size:13px; font-weight:700; }
+.comment-author a { font-size:18px; }
+@media(max-width:560px){
+ .author-badge { padding:14px; }
+ .author-badge .author-avatar { width:48px; height:48px; font-size:18px; }
+ .author-badge .author-name,.author-badge > div > strong { font-size:18px; }
 }

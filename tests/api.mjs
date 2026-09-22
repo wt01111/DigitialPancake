@@ -246,6 +246,260 @@ try {
     body: { decision: "hidden" },
   });
   assert.equal((await request(`/api/articles/${articleId}`)).status, 404);
+  r = await request("/api/articles/drafts", {
+    method: "POST",
+    cookie: member,
+    body: { title: "Image article", body: "image draft" },
+  });
+  const imageArticleId = (await r.json()).id;
+  async function uploadImage(name) {
+    const data = new FormData();
+    data.set(
+      "image",
+      new Blob(
+        [
+          Buffer.from([
+            137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0, 73, 69, 78, 68,
+          ]),
+        ],
+        { type: "image/png" },
+      ),
+      name,
+    );
+    const response = await fetch(
+      `${base}/api/articles/drafts/${imageArticleId}/images`,
+      { method: "POST", headers: { origin, cookie: member }, body: data },
+    );
+    if (response.status !== 201)
+      assert.fail(
+        `image upload failed: ${response.status} ${await response.text()}`,
+      );
+    return response.json();
+  }
+  const firstImage = await uploadImage("首版示意图.png");
+  assert.equal((await request(firstImage.markdownUrl)).status, 404);
+  assert.equal(
+    (await request(firstImage.markdownUrl, { cookie: admin })).status,
+    200,
+  );
+  await request(`/api/articles/drafts/${imageArticleId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: { body: `首版正文\n\n${firstImage.markdown}` },
+  });
+  await request(`/api/articles/drafts/${imageArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/articles/${imageArticleId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: { decision: "approved" },
+  });
+  assert.equal((await request(firstImage.markdownUrl)).status, 200);
+  const secondImage = await uploadImage("改稿示意图.png");
+  await request(`/api/articles/drafts/${imageArticleId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: { body: `改稿正文\n\n${secondImage.markdown}` },
+  });
+  assert.equal((await request(firstImage.markdownUrl)).status, 200);
+  assert.equal((await request(secondImage.markdownUrl)).status, 404);
+
+  async function comment(cookie, body, parentId) {
+    const response = await request("/api/comments", {
+      method: "POST",
+      cookie,
+      body: {
+        targetType: "article",
+        targetId: imageArticleId,
+        body,
+        ...(parentId ? { parentId } : {}),
+      },
+    });
+    if (response.status !== 201)
+      assert.fail(
+        `comment failed: ${response.status} ${await response.text()}`,
+      );
+    return (await response.json()).id;
+  }
+  const memberRoot = await comment(member, "member root"),
+    outsiderRoot = await comment(outsider, "outsider root"),
+    outsiderReply = await comment(outsider, "reply to member", memberRoot);
+  await comment(member, "reply to outsider", outsiderRoot);
+  const emptyDeletedRoot = await comment(member, "delete without replies");
+  await request(`/api/comments/${emptyDeletedRoot}`, {
+    method: "DELETE",
+    cookie: member,
+    body: {},
+  });
+  r = await request(`/api/comments/${memberRoot}/like`, {
+    method: "POST",
+    cookie: outsider,
+    body: {},
+  });
+  assert.deepEqual(await r.json(), { liked: true, likeCount: 1 });
+  r = await request(`/api/comments/${memberRoot}/like`, {
+    method: "POST",
+    cookie: outsider,
+    body: {},
+  });
+  assert.deepEqual(await r.json(), { liked: false, likeCount: 0 });
+  await request(`/api/comments/${memberRoot}/like`, {
+    method: "POST",
+    cookie: outsider,
+    body: {},
+  });
+  let comments = await (
+    await request(
+      `/api/comments?targetType=article&targetId=${imageArticleId}&sort=popular&page=1&pageSize=1`,
+      { cookie: outsider },
+    )
+  ).json();
+  assert.equal(comments.items[0].id, memberRoot);
+  assert.ok(comments.items.some((x) => x.id === outsiderReply));
+  assert.equal(comments.total, 2);
+  r = await request(`/api/comments/${memberRoot}/report`, {
+    method: "POST",
+    cookie: outsider,
+    body: { reason: "内容需要审核" },
+  });
+  assert.equal(r.status, 201);
+  assert.equal(
+    (
+      await request(`/api/comments/${memberRoot}/report`, {
+        method: "POST",
+        cookie: outsider,
+        body: { reason: "重复举报" },
+      })
+    ).status,
+    409,
+  );
+  assert.equal(
+    (
+      await request(`/api/comments/${memberRoot}`, {
+        method: "DELETE",
+        cookie: outsider,
+        body: {},
+      })
+    ).status,
+    403,
+  );
+  await request(`/api/comments/${memberRoot}`, {
+    method: "DELETE",
+    cookie: member,
+    body: {},
+  });
+  comments = await (
+    await request(
+      `/api/comments?targetType=article&targetId=${imageArticleId}&focus=${outsiderReply}`,
+      { cookie: outsider },
+    )
+  ).json();
+  assert.equal(comments.focused, true);
+  assert.equal(comments.items[0].deleted, true);
+  assert.equal(comments.items[0].body, null);
+  assert.ok(comments.items.some((x) => x.id === outsiderReply));
+  const memberNotifications = await (
+    await request("/api/me/notifications", { cookie: member })
+  ).json();
+  assert.ok(memberNotifications.unreadCount > 0);
+  assert.ok(
+    memberNotifications.items.some((x) =>
+      x.href?.includes(`#comment-${outsiderRoot}`),
+    ),
+  );
+  await request("/api/me/notifications/read", {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.equal(
+    (await (await request("/api/me/notifications", { cookie: member })).json())
+      .unreadCount,
+    0,
+  );
+  await request(`/api/admin/reviews/${ownReviews.items[0].id}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: { decision: "approved" },
+  });
+  await request("/api/me", {
+    method: "PATCH",
+    cookie: member,
+    body: { nickname: "Member", bio: "嵌入式与电源方向" },
+  });
+  const profile = await (await request(`/api/users/${memberId}`)).json();
+  assert.equal(profile.email, undefined);
+  assert.equal(profile.role, undefined);
+  assert.equal(profile.bio, "嵌入式与电源方向");
+  assert.ok(profile.articles.some((x) => x.id === imageArticleId));
+  assert.ok(profile.comments.every((x) => x.body !== "member root"));
+  assert.ok(profile.reviews.length > 0);
+  assert.ok(profile.reviews.every((x) => !x.proofFileId));
+  await request(`/api/me/bookmarks/shop/${seeded.id}`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.ok(
+    (
+      await (await request("/api/me/bookmarks", { cookie: member })).json()
+    ).items.some((x) => x.type === "shop" && x.id === seeded.id),
+  );
+  for (const [type, targetId] of [
+    ["article", imageArticleId],
+    [
+      "problem",
+      one("SELECT problem_id FROM official_problem_files LIMIT 1").problem_id,
+    ],
+  ]) {
+    await request(`/api/me/bookmarks/${type}/${targetId}`, {
+      method: "POST",
+      cookie: member,
+      body: {},
+    });
+    assert.equal(
+      (
+        await (
+          await request(`/api/${type}s/${targetId}`, { cookie: member })
+        ).json()
+      ).bookmarked,
+      true,
+    );
+    await request(`/api/me/bookmarks/${type}/${targetId}`, {
+      method: "DELETE",
+      cookie: member,
+      body: {},
+    });
+    assert.equal(
+      (
+        await (
+          await request(`/api/${type}s/${targetId}`, { cookie: member })
+        ).json()
+      ).bookmarked,
+      false,
+    );
+  }
+  await request(`/api/articles/drafts/${imageArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/articles/${imageArticleId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: { decision: "approved" },
+  });
+  assert.equal((await request(secondImage.markdownUrl)).status, 200);
+  assert.equal((await request(firstImage.markdownUrl)).status, 404);
+  await request(`/api/admin/articles/${imageArticleId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: { decision: "hidden" },
+  });
+  assert.equal((await request(secondImage.markdownUrl)).status, 404);
   r = await request("/api/admin/problems", {
     method: "POST",
     cookie: owner,
@@ -340,7 +594,9 @@ try {
   assert.ok(problemPage.total >= 24);
   assert.ok(problemPage.facets.years.includes(2024));
   assert.ok(problemPage.facets.groups.includes("all"));
-  const officialFile = one("SELECT id FROM official_problem_files LIMIT 1");
+  const officialFile = one(
+    "SELECT id,problem_id FROM official_problem_files LIMIT 1",
+  );
   assert.ok(officialFile);
   assert.equal(
     (await request(`/api/official-files/${officialFile.id}`)).status,
@@ -354,6 +610,12 @@ try {
     ).status,
     200,
   );
+  const rangedPdf = await request(`/api/official-files/${officialFile.id}`, {
+    cookie: member,
+    headers: { range: "bytes=0-15" },
+  });
+  assert.equal(rangedPdf.status, 206);
+  assert.match(rangedPdf.headers.get("content-range") || "", /^bytes 0-15\//);
   await request(`/api/articles/drafts/${articleId}`, {
     method: "PATCH",
     cookie: member,

@@ -9,8 +9,9 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 - `POST /api/auth/register` `{email,code,password,nickname}`.
 - `POST /api/auth/login` `{email,password}`. All users, including the owner, log in with a verified email address.
 - `POST /api/auth/logout`; `POST /api/auth/change-password` `{currentPassword,newPassword}`; `POST /api/auth/reset-password` `{email,code,newPassword}`.
-- `GET /api/me`; `PATCH /api/me` `{nickname}`.
-- `GET /api/me/reviews|shops|submissions|drafts|notifications|bookmarks`; `POST /api/me/notifications/read` `{ids?:string[]}`.
+- `GET /api/me`; `PATCH /api/me` `{nickname,bio?}`.
+- `GET /api/users/:id` returns only public `id,nickname,bio,articles,comments,reviews`; it never includes email, role, permissions, drafts, private reviews, or proof metadata.
+- `GET /api/me/reviews|shops|submissions|drafts|notifications|bookmarks`; notifications return `{items,unreadCount}`. `POST /api/me/notifications/read` `{ids?:string[]}` persists read state.
 - `POST|DELETE /api/me/bookmarks/:type/:id`, where type is `article|problem|shop`.
 
 ## Shops and reviews
@@ -26,9 +27,11 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 - `GET /api/articles?q=&category=` / `GET /api/articles/:id`. Article fields: `id,title,body,category,tags,excerpt,author,date,status` (public endpoints only published).
 - `POST /api/articles/drafts` JSON `{title,body,category?,tags?:string[],excerpt?}`; `PATCH /api/articles/drafts/:id` same fields; `POST /api/articles/drafts/:id/submit`.
 - `POST /api/articles/drafts/:id/attachments` multipart field `file` (50 MiB); owner and content reviewers only.
+- `POST /api/articles/drafts/:id/images` multipart field `image` (PNG/JPEG/WebP, 5 MiB) returns `{id,name,markdownUrl,markdown}`. `GET /api/article-images/:id` lets the author/content reviewers preview a draft image and anonymously serves an image only while the current visible published snapshot references it. PDFs and ordinary attachments remain authenticated through `/api/files/:id`.
 - `GET /api/problems?q=&year=&category=&group=&competitionType=` / `GET /api/problems/:id`; categories are `signal`, `control`, `power`, `other`, competition types are `national`, `provincial`, and fields include `id,title,year,category,group,competitionType,competitionName,problemCode,body,sourcePage,sourceUrl,letter`.
-- `POST /api/comments` `{targetType:"article"|"problem",targetId,parentId?,body}`. Replies use `parentId`.
-- `GET /api/comments?targetType=&targetId=`; `POST /api/comments/:id/report` `{reason?}`.
+- `POST /api/comments` `{targetType:"article"|"problem",targetId,parentId?,body}`. Replies use `parentId` and notify the parent/visible article author without duplicates or self-notifications.
+- `GET /api/comments?targetType=&targetId=&sort=popular|latest&page=1&pageSize=20` returns `{items,sort,page,pageSize,total,focused}`. `focus=commentId` loads that comment's complete thread for notification anchors. Items include `likeCount,liked,deleted,canDelete,canReply`; deleted parents are content-free placeholders while visible replies remain threaded.
+- `POST /api/comments/:id/like` toggles one vote per user. `DELETE /api/comments/:id` soft-deletes for the author or reports moderator. `POST /api/comments/:id/report` requires `{reason}` of 2–500 characters and rejects duplicate pending reports.
 
 ## Administration
 

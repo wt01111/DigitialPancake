@@ -52,7 +52,7 @@ npm run test:ui
 
 建议规格为 4 GB RAM、6 Mbps 带宽、50 GB 磁盘。6 Mbps 理论峰值约 0.75 MB/s，一个 50 MiB 文件单用户下载至少约 70 秒，实际还会受线路和并发影响。
 
-以下步骤由运维人员逐条检查后手动执行。示例域名必须替换，且不要把 `/etc/electronic-pancake/app.env` 放进代码包。
+以下内容是部署概要；第一次开站请按根目录《服务器开站流程.md》的完整顺序执行。示例域名必须替换，且不要把 `/etc/electronic-pancake/app.env` 放进代码包。
 
 1. 更新系统并安装基础软件：
 
@@ -61,8 +61,7 @@ sudo apt update
 sudo apt install git nginx sqlite3 rsync curl unzip xz-utils ca-certificates certbot python3-certbot-nginx
 ```
 
-2. 检查脚本内容，执行 `chmod 0755 deploy/*.sh`，再以 root 手动运行 `deploy/install-node24.sh`。它从 nodejs.org 下载固定 Node 24 LTS 二进制并核对 SHA-256，不使用 Ubuntu 可能较旧的默认 Node 包。
-3. 创建不可登录的系统账号和目录。代码由 root 发布且全局只读；数据库和上传目录只允许服务账号访问；环境文件目录和备份目录只允许 root 访问：
+2. 创建不可登录的系统账号和目录。代码由 root 发布且全局只读；数据库和上传目录只允许服务账号访问；环境文件目录和备份目录只允许 root 访问：
 
 ```sh
 sudo useradd --system --home-dir /var/lib/electronic-pancake \
@@ -76,7 +75,7 @@ sudo install -d -o root -g root -m 0700 \
 ```
 
 如果账号已经存在，`useradd` 会提示已存在，可核对 `getent passwd electronic-pancake` 后继续，不要创建第二个运行账号。
-4. 推荐从受控 Git 仓库检出明确的已验收提交或标签，再在服务器构建。不要直接部署会继续变化的分支头，也不要把服务器环境文件提交到 Git：
+3. 推荐从受控 Git 仓库检出明确的已验收提交或标签，再安装 Node.js 并构建。不要直接部署会继续变化的分支头，也不要把服务器环境文件提交到 Git：
 
 ```sh
 release_id="$(date -u +%Y%m%dT%H%M%SZ)"
@@ -84,13 +83,14 @@ release_dir="/opt/electronic-pancake/releases/$release_id"
 sudo git clone --branch '<已验收标签或分支>' --single-branch '<仓库URL>' "$release_dir"
 cd "$release_dir"
 sudo git checkout --detach '<已验收提交SHA>'
-sudo /usr/local/bin/npm ci
-sudo /usr/local/bin/npm run build
-sudo /usr/local/bin/npm prune --omit=dev
 sudo chown -R root:root "$release_dir"
 sudo find "$release_dir" -type d -exec chmod 0755 {} +
 sudo find "$release_dir" -type f -exec chmod 0644 {} +
 sudo chmod 0755 "$release_dir"/deploy/*.sh
+sudo "$release_dir"/deploy/install-node24.sh
+sudo /usr/local/bin/npm ci
+sudo /usr/local/bin/npm run build
+sudo /usr/local/bin/npm prune --omit=dev
 sudo ln -sfn "$release_dir" /opt/electronic-pancake/current.new
 sudo mv -Tf /opt/electronic-pancake/current.new /opt/electronic-pancake/current
 ```
@@ -107,20 +107,20 @@ test -f "$release_zip"
 sudo install -d -o root -g root -m 0755 "$release_dir"
 sudo unzip "$release_zip" -d "$release_dir"
 cd "$release_dir"
-sudo /usr/local/bin/npm ci --omit=dev
 sudo chown -R root:root "$release_dir"
 sudo find "$release_dir" -type d -exec chmod 0755 {} +
 sudo find "$release_dir" -type f -exec chmod 0644 {} +
 sudo chmod 0755 "$release_dir"/deploy/*.sh
+sudo /usr/local/bin/npm ci --omit=dev
 sudo ln -sfn "$release_dir" /opt/electronic-pancake/current.new
 sudo mv -Tf /opt/electronic-pancake/current.new /opt/electronic-pancake/current
 ```
 
 必须把 `release_zip` 改成本次上传文件的准确名称。发布包不要包含 `.env`、数据库、上传目录、`node_modules` 或本地日志。
-5. 由 `deploy/app.env.example` 创建 `/etc/electronic-pancake/app.env`，设置真实 HTTPS `PUBLIC_ORIGIN`、随机会话密钥、绝对数据路径和最高管理员邮箱 `OWNER_EMAIL`，再执行 `sudo chown root:root /etc/electronic-pancake/app.env && sudo chmod 0600 /etc/electronic-pancake/app.env`。`PUBLIC_ORIGIN` 只能填写一个主域名，例如 `https://example.com`，且必须与 Nginx canonical `server_name` 完全一致。正式数据库会在首次启动时由服务账号创建为 `/var/lib/electronic-pancake/site.sqlite`；不要预先用 root 在项目目录运行后端或初始化命令。
+4. 由 `deploy/app.env.example` 创建 `/etc/electronic-pancake/app.env`，设置真实 HTTPS `PUBLIC_ORIGIN`、随机会话密钥、绝对数据路径和最高管理员邮箱 `OWNER_EMAIL`，再执行 `sudo chown root:root /etc/electronic-pancake/app.env && sudo chmod 0600 /etc/electronic-pancake/app.env`。`PUBLIC_ORIGIN` 只能填写一个主域名，例如 `https://example.com`，且必须与 Nginx canonical `server_name` 完全一致。正式数据库会在首次启动时由服务账号创建为 `/var/lib/electronic-pancake/site.sqlite`；不要预先用 root 在项目目录运行后端或初始化命令。
 
    邮件建议使用域名邮箱或云邮件服务商：先在服务商控制台验证发信域名和 `SMTP_FROM`，再按其给出的值添加 SPF TXT、DKIM TXT/CNAME，并添加 DMARC TXT（初次可用服务商建议的监控策略，确认投递报告后再收紧）。同一域名只能合并为一条有效 SPF 记录。等待服务商确认 DNS 验证通过后，把 SMTP 主机、端口、加密方式、用户名、发件地址写入环境文件；密码或应用专用密钥只写 `SMTP_PASS`，不得进入 Git。端口 465 通常设置 `SMTP_SECURE=true`，STARTTLS 端口通常设置为 `false`，但必须以服务商文档为准。重启服务后，用专用测试邮箱完成注册验证码、密码重置和退信检查，再查看 SPF、DKIM、DMARC 验证结果。SMTP 未准备好时保持相关值为空。
-6. 安装并校验 API 服务；确认 `systemd-analyze verify` 没有错误后再启动。只运行一个 API 实例；SQLite WAL 不使用 Node cluster、PM2 多实例或多台共享写入。
+5. 安装并校验 API 服务；确认 `systemd-analyze verify` 没有错误后再启动。只运行一个 API 实例；SQLite WAL 不使用 Node cluster、PM2 多实例或多台共享写入。
 
 ```sh
 sudo install -o root -g root -m 0644 deploy/electronic-pancake.service /etc/systemd/system/
@@ -130,7 +130,7 @@ sudo systemctl enable --now electronic-pancake.service
 sudo systemctl status electronic-pancake.service --no-pager
 ```
 
-7. 先手工把 `deploy/nginx/electronic-pancake.conf` 中的 `example.com` 全部替换为唯一主域名。模板将可选的 `www` 别名放在独立 server 块，并永久重定向到主域名，避免浏览器从另一个 Origin 发起 POST。只使用一个域名时，删除整个 `www` 别名 server 块，并且不要创建对应 DNS 记录或申请别名证书。不要把示例域名原样启用。
+6. 先手工把 `deploy/nginx/electronic-pancake.conf` 中的 `example.com` 全部替换为唯一主域名。模板将可选的 `www` 别名放在独立 server 块，并永久重定向到主域名，避免浏览器从另一个 Origin 发起 POST。只使用一个域名时，删除整个 `www` 别名 server 块，并且不要创建对应 DNS 记录或申请别名证书。不要把示例域名原样启用。
 
 ```sh
 sudo install -o root -g root -m 0644 deploy/nginx/electronic-pancake.conf \
@@ -142,8 +142,8 @@ sudo systemctl reload nginx
 ```
 
 Nginx 提供 `dist`，只把 `/api/` 原样代理到 `127.0.0.1:3001`；Node 自身提供 `dist` 作为直连兜底，私有上传目录不对外暴露。
-8. DNS 的 A/AAAA 记录生效且 80/443 开放后获取真实证书。保留 `www` 别名时执行 `certbot --nginx -d example.com -d www.example.com`，确保两个 HTTPS 主机名都能在证书校验后重定向；只有主域名时执行 `certbot --nginx -d example.com`。随后用 `certbot renew --dry-run` 验证续期。拿到真实域名和证书前不要把 `PUBLIC_ORIGIN` 当成已上线地址。
-9. 检查 `curl http://127.0.0.1:3001/healthz` 和 HTTPS 站点，并确认环境文件中的 `OWNER_EMAIL` 是站长用于登录的真实邮箱，再用下列临时 systemd 单元初始化最高管理员。它以服务账号运行、读取与正式服务相同的 EnvironmentFile，并通过当前终端私密输入密码，避免连接错误数据库或留下 root 所有权文件。不要直接在生产目录运行普通 `npm run init-owner`，也不要在公开终端或聊天中传递实际密码。
+7. DNS 的 A/AAAA 记录生效且 80/443 开放后获取真实证书。保留 `www` 别名时执行 `certbot --nginx -d example.com -d www.example.com`，确保两个 HTTPS 主机名都能在证书校验后重定向；只有主域名时执行 `certbot --nginx -d example.com`。随后用 `certbot renew --dry-run` 验证续期。拿到真实域名和证书前不要把 `PUBLIC_ORIGIN` 当成已上线地址。
+8. 检查 `curl http://127.0.0.1:3001/healthz` 和 HTTPS 站点，并确认环境文件中的 `OWNER_EMAIL` 是站长用于登录的真实邮箱，再用下列临时 systemd 单元初始化最高管理员。它以服务账号运行、读取与正式服务相同的 EnvironmentFile，并通过当前终端私密输入密码，避免连接错误数据库或留下 root 所有权文件。不要直接在生产目录运行普通 `npm run init-owner`，也不要在公开终端或聊天中传递实际密码。
 
 ```sh
 sudo systemd-run --pty --wait --collect \
@@ -170,4 +170,4 @@ sudo /opt/electronic-pancake/current/deploy/restore.sh \
 
 脚本先验证清单、SQLite 完整性并拒绝上传目录中的链接或特殊文件，在服务仍运行时准备恢复数据，再短暂停服并用同一文件系统内的重命名切换。任何一步失败会尝试回滚并恢复原服务状态；成功后原文件保留在脚本输出的 `.restore-rollback-*` 目录，验收无误后由运维人员明确删除以释放空间。每月至少在隔离测试机演练一次：还原最近备份，检查 `PRAGMA integrity_check`、附件数量与抽样哈希，启动单实例，检查 `/healthz`、登录、搜索、审核及鉴权下载，并记录耗时和结果。
 
-每次发布后检查服务、健康接口、首页与 API。失败时把 `current` 链接切回上一版并重启；数据库迁移若不可逆，先备份并单独准备回滚方案。应用构建、API、邮件流程、浏览器 UI、端到端流程和内容清单已在 Windows 环境测试；Ubuntu 部署脚本只完成了静态审查。`nginx -t`、`systemd-analyze verify`、备份和故障恢复必须在目标 Ubuntu 24.04 服务器或同版本隔离测试机实际演练后才能启用定时任务。
+每次发布后检查服务、健康接口、首页与 API。失败时把 `current` 链接切回上一版并重启；数据库迁移若不可逆，先备份并单独准备回滚方案。应用构建、API、邮件流程、浏览器 UI、端到端流程和内容清单已通过 Windows 本地测试及 Ubuntu 24.04 GitHub CI；真实 Nginx、systemd、证书、备份和故障恢复仍未在服务器演练。它们必须在目标 Ubuntu 24.04 服务器或同版本隔离测试机实际验证后才能启用定时任务。

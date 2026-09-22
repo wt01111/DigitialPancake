@@ -16,7 +16,9 @@
     "test:api": "node tests/api.mjs",
     "test:mail": "node tests/auth-mail.mjs",
     "test:integration": "node tests/production-integration.mjs",
-    "test:e2e": "node tests/production-e2e.mjs"
+    "test:e2e": "node tests/production-e2e.mjs",
+    "test:persistence": "node tests/persistence.mjs",
+    "test:community": "node tests/community-e2e.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",
@@ -25,6 +27,7 @@
     "lucide-react": "^0.468.0",
     "multer": "^2.0.2",
     "nodemailer": "^10.0.10",
+    "pdfjs-dist": "^5.4.624",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",

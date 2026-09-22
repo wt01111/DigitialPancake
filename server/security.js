@@ -95,6 +95,7 @@ export const publicUser = (u, self = false) =>
     ? {
         id: u.id,
         nickname: u.nickname,
+        bio: u.bio || "",
         ...(self
           ? {
               email: u.email,
