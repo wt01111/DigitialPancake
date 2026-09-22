@@ -765,9 +765,6 @@ function Detail({ type }) {
                 </a>
               )}
             </div>
-            <p className="classification-note">
-              “信号、控制、电源、其他”由本站按学习方向整理，可能与官方题目类别不同；题目原文与竞赛归属以官网资料为准。
-            </p>
           </>
         )}
         <div className="article-meta detail-meta">
@@ -778,10 +775,16 @@ function Detail({ type }) {
             initial={x.bookmarked}
           />
         </div>
+        <PdfAttachments files={x.attachments} />
+        {!article && (
+          <p className="classification-note">
+            “信号、控制、电源、其他”由本站按学习方向整理，可能与官方题目类别不同；题目原文与竞赛归属以官网资料为准。
+          </p>
+        )}
         {x.body || x.content || x.description ? (
           <MD>{x.body || x.content || x.description}</MD>
         ) : !article ? (
-          <p className="official-body-note">题目原文可直接阅读下方 PDF，也可下载后查看。</p>
+          <p className="official-body-note">题目原文可直接阅读上方 PDF，也可下载后查看。</p>
         ) : null}
         {!article && x.classificationReason && (
           <details className="classification-reason">
@@ -817,7 +820,6 @@ function Detail({ type }) {
             ))}
           </section>
         )}
-        <PdfAttachments files={x.attachments} />
         {!article && x.externalFiles?.length > 0 && (
           <section className="attachments external-files">
             <h2>官网原始文件</h2>

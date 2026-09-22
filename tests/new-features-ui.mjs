@@ -93,6 +93,10 @@ await expect(page.getByRole("button", { name: "重试" })).toBeVisible();
 
 await page.goto(`${base}/problems/p1`);
 await expect(page.getByLabel(/PDF 阅读器/)).toBeVisible();
+assert.equal(await page.evaluate(() => {
+  const reader = document.querySelector(".pdf-reader-section"), body = document.querySelector(".official-body-note"), downloads = document.querySelector(".attachments");
+  return !!reader && !!body && !!downloads && !!(reader.compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING) && !!(reader.compareDocumentPosition(downloads) & Node.DOCUMENT_POSITION_FOLLOWING);
+}), true, "online reader must precede body notes and download list");
 await expect(page.getByText("第 1 页 · 已显示")).toBeVisible({ timeout: 15000 });
 await expect.poll(() => page.locator('.pdf-page[data-page="1"] canvas').evaluate((c) => c.width > 0 && c.height > 0)).toBeTruthy();
 await mkdir("test-results/new-features-ui", { recursive: true });
