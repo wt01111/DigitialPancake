@@ -12,6 +12,21 @@ if (process.argv[2] === "write") {
     created,
   );
   run(
+    `INSERT INTO reviews(id,shop_id,user_id,source_type,rating,pros,cons,purchase_experience,status,created_at,updated_at,published_payload,published_visible)
+     VALUES('persist-site-review',?,'persist-user','site',5,'live draft','','purchase','approved',?,?,NULL,0)`,
+    one("SELECT id FROM shops WHERE status='approved' LIMIT 1").id,
+    created,
+    created,
+  );
+  run(
+    `INSERT INTO reviews(id,shop_id,user_id,source_type,rating,pros,cons,purchase_experience,status,created_at,updated_at,published_payload,published_visible)
+     VALUES('persist-hidden-site-review',?,'persist-user','site',1,'','hidden','purchase','hidden',?,?,?,0)`,
+    one("SELECT id FROM shops WHERE status='approved' LIMIT 1").id,
+    created,
+    created,
+    JSON.stringify({ rating: 5, pros: "previous public version" }),
+  );
+  run(
     "INSERT INTO comments VALUES('persist-comment','persist-user','problem',?,NULL,'','deleted',?)",
     problem.id,
     created,
@@ -28,5 +43,15 @@ if (process.argv[2] === "write") {
   );
   if (comment?.status !== "deleted" || comment.body !== "")
     throw new Error("soft-deleted comment did not persist after restart");
+  const siteReview = one(
+    "SELECT published_payload,published_visible FROM reviews WHERE id='persist-site-review'",
+  );
+  if (siteReview?.published_payload !== null || siteReview.published_visible !== 0)
+    throw new Error("one-time snapshot migration restored a deliberately private review");
+  const hiddenSiteReview = one(
+    "SELECT status,published_visible FROM reviews WHERE id='persist-hidden-site-review'",
+  );
+  if (hiddenSiteReview?.status !== "hidden" || hiddenSiteReview.published_visible !== 0)
+    throw new Error("hidden site review became public after restart");
 }
 db.close();

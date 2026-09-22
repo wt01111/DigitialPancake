@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,owner_id TEXT NOT NULL,kind
 CREATE TABLE IF NOT EXISTS bookmarks(user_id TEXT NOT NULL,item_type TEXT NOT NULL,item_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(user_id,item_type,item_id));
 CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,title TEXT NOT NULL,href TEXT,read_at TEXT,created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,actor_id TEXT,action TEXT NOT NULL,entity_type TEXT,entity_id TEXT,detail TEXT,created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS schema_migrations(id TEXT PRIMARY KEY,applied_at TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_shops_status_name ON shops(status,name); CREATE INDEX IF NOT EXISTS idx_reviews_shop_status ON reviews(shop_id,status); CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status); CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at); CREATE INDEX IF NOT EXISTS idx_comments_target_thread ON comments(target_type,target_id,parent_id,created_at);`);
 for (const sql of [
   "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 1",
@@ -39,11 +40,31 @@ for (const sql of [
   "ALTER TABLE articles ADD COLUMN published_payload TEXT",
   "ALTER TABLE articles ADD COLUMN published_version INTEGER NOT NULL DEFAULT 0",
   "ALTER TABLE articles ADD COLUMN published_visible INTEGER NOT NULL DEFAULT 0",
+  "ALTER TABLE articles ADD COLUMN cover_image_id TEXT",
+  "ALTER TABLE reviews ADD COLUMN published_payload TEXT",
+  "ALTER TABLE reviews ADD COLUMN published_visible INTEGER NOT NULL DEFAULT 0",
 ]) {
   try {
     db.exec(sql);
   } catch (error) {
     if (!String(error.message).includes("duplicate column")) throw error;
+  }
+}
+if (!db.prepare("SELECT 1 FROM schema_migrations WHERE id=?").get("review-published-snapshot-v1")) {
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    db.exec(`UPDATE reviews SET published_payload=json_object(
+      'rating',rating,'pros',pros,'cons',cons,'purchaseExperience',purchase_experience,
+      'purchasedAt',purchased_at,'orderPlatform',order_platform,'date',created_at
+    ),published_visible=1 WHERE source_type='site' AND status='approved' AND published_payload IS NULL;`);
+    db.prepare("INSERT INTO schema_migrations VALUES(?,?)").run(
+      "review-published-snapshot-v1",
+      new Date().toISOString(),
+    );
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
   }
 }
 

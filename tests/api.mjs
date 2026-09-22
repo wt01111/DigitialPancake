@@ -80,6 +80,15 @@ async function login(email, password) {
   assert.equal(r.status, 200);
   return r.headers.get("set-cookie").split(";")[0];
 }
+function decisionBody(table, id, decision, extra = {}) {
+  return {
+    decision,
+    ...(decision === "hidden"
+      ? {}
+      : { expectedUpdatedAt: one(`SELECT updated_at FROM ${table} WHERE id=?`, id).updated_at }),
+    ...extra,
+  };
+}
 try {
   assert.equal((await request("/healthz")).status, 200);
   assert.deepEqual((await (await request("/api/shops?q=")).json()).items, []);
@@ -168,7 +177,7 @@ try {
   r = await request(`/api/admin/shops/${shopId}/decision`, {
     method: "POST",
     cookie: owner,
-    body: { decision: "approved" },
+    body: decisionBody("shops", shopId, "approved"),
   });
   assert.equal(r.status, 200);
   assert.equal(
@@ -224,7 +233,7 @@ try {
   r = await request(`/api/admin/articles/${articleId}/decision`, {
     method: "POST",
     cookie: owner,
-    body: { decision: "approved" },
+    body: decisionBody("articles", articleId, "approved"),
   });
   assert.equal(r.status, 200);
   assert.equal(
@@ -285,8 +294,15 @@ try {
   await request(`/api/articles/drafts/${imageArticleId}`, {
     method: "PATCH",
     cookie: member,
-    body: { body: `首版正文\n\n${firstImage.markdown}` },
+    body: {
+      body: `首版正文\n\n${firstImage.markdown}`,
+      coverImageId: firstImage.id,
+    },
   });
+  assert.equal(
+    (await (await request(`/api/articles/drafts/${imageArticleId}`, { cookie: member })).json()).cover.id,
+    firstImage.id,
+  );
   await request(`/api/articles/drafts/${imageArticleId}/submit`, {
     method: "POST",
     cookie: member,
@@ -295,17 +311,60 @@ try {
   await request(`/api/admin/articles/${imageArticleId}/decision`, {
     method: "POST",
     cookie: owner,
-    body: { decision: "approved" },
+    body: decisionBody("articles", imageArticleId, "approved"),
   });
   assert.equal((await request(firstImage.markdownUrl)).status, 200);
+  assert.equal(
+    (await (await request(`/api/articles/${imageArticleId}`)).json()).cover.id,
+    firstImage.id,
+  );
+  await request(`/api/articles/drafts/${imageArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  const beforeAttachmentUpload = one(
+    "SELECT updated_at FROM articles WHERE id=?",
+    imageArticleId,
+  ).updated_at;
   const secondImage = await uploadImage("改稿示意图.png");
+  assert.equal(
+    (
+      await request(`/api/admin/articles/${imageArticleId}/decision`, {
+        method: "POST",
+        cookie: owner,
+        body: {
+          decision: "approved",
+          expectedUpdatedAt: beforeAttachmentUpload,
+        },
+      })
+    ).status,
+    409,
+  );
   await request(`/api/articles/drafts/${imageArticleId}`, {
     method: "PATCH",
     cookie: member,
-    body: { body: `改稿正文\n\n${secondImage.markdown}` },
+    body: {
+      body: `改稿正文\n\n${secondImage.markdown}`,
+      coverImageId: secondImage.id,
+    },
   });
   assert.equal((await request(firstImage.markdownUrl)).status, 200);
   assert.equal((await request(secondImage.markdownUrl)).status, 404);
+  assert.equal(
+    (await (await request(`/api/articles/${imageArticleId}`)).json()).cover.id,
+    firstImage.id,
+  );
+  assert.equal(
+    (
+      await request(`/api/admin/articles/${imageArticleId}/decision`, {
+        method: "POST",
+        cookie: owner,
+        body: decisionBody("articles", imageArticleId, "approved"),
+      })
+    ).status,
+    409,
+  );
 
   async function comment(cookie, body, parentId) {
     const response = await request("/api/comments", {
@@ -423,8 +482,84 @@ try {
   await request(`/api/admin/reviews/${ownReviews.items[0].id}/decision`, {
     method: "POST",
     cookie: owner,
-    body: { decision: "approved" },
+    body: decisionBody("reviews", ownReviews.items[0].id, "approved"),
   });
+  const reviewId = ownReviews.items[0].id;
+  let publicShop = await (await request(`/api/shops/${seeded.id}`)).json();
+  const publicBefore = publicShop.reviews.find((x) => x.id === reviewId);
+  assert.equal(publicBefore.pros, "authentic");
+  assert.equal(publicBefore.proofFileId, undefined);
+  r = await request(`/api/reviews/${reviewId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: {
+      rating: 2,
+      pros: "",
+      cons: "revision pending",
+      purchaseExperience: "updated private experience",
+    },
+  });
+  assert.equal(r.status, 200);
+  await request(`/api/reviews/${reviewId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  publicShop = await (await request(`/api/shops/${seeded.id}`)).json();
+  assert.equal(
+    publicShop.reviews.find((x) => x.id === reviewId).pros,
+    "authentic",
+  );
+  assert.equal(
+    (await (await request(`/api/reviews/${reviewId}/edit`, { cookie: member })).json()).proofFileId,
+    proofId,
+  );
+  assert.equal(
+    (await request(`/api/reviews/${reviewId}/edit`, { cookie: outsider })).status,
+    404,
+  );
+  await request(`/api/admin/reviews/${reviewId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("reviews", reviewId, "rejected", {
+      reason: "仅审核员可见的退回原因",
+    }),
+  });
+  publicShop = await (await request(`/api/shops/${seeded.id}`)).json();
+  assert.equal(
+    publicShop.reviews.find((x) => x.id === reviewId).pros,
+    "authentic",
+  );
+  assert.equal(
+    publicShop.reviews.find((x) => x.id === reviewId).decisionReason,
+    undefined,
+  );
+  await request(`/api/reviews/${reviewId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: {
+      rating: 2,
+      pros: "",
+      cons: "revision pending",
+      purchaseExperience: "updated private experience",
+    },
+  });
+  await request(`/api/reviews/${reviewId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/reviews/${reviewId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("reviews", reviewId, "approved"),
+  });
+  publicShop = await (await request(`/api/shops/${seeded.id}`)).json();
+  assert.equal(publicShop.reviews.filter((x) => x.id === reviewId).length, 1);
+  assert.equal(
+    publicShop.reviews.find((x) => x.id === reviewId).cons,
+    "revision pending",
+  );
   await request("/api/me", {
     method: "PATCH",
     cookie: member,
@@ -490,10 +625,60 @@ try {
   await request(`/api/admin/articles/${imageArticleId}/decision`, {
     method: "POST",
     cookie: owner,
-    body: { decision: "approved" },
+    body: decisionBody("articles", imageArticleId, "approved"),
   });
   assert.equal((await request(secondImage.markdownUrl)).status, 200);
   assert.equal((await request(firstImage.markdownUrl)).status, 404);
+  assert.equal(
+    (await (await request(`/api/articles/${imageArticleId}`)).json()).cover.id,
+    secondImage.id,
+  );
+  const coverOnlyImage = await uploadImage("仅封面图片.png");
+  await request(`/api/articles/drafts/${imageArticleId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: { coverImageId: coverOnlyImage.id },
+  });
+  assert.equal((await request(coverOnlyImage.markdownUrl)).status, 404);
+  await request(`/api/articles/drafts/${imageArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/articles/${imageArticleId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("articles", imageArticleId, "approved"),
+  });
+  assert.equal((await request(coverOnlyImage.markdownUrl)).status, 200);
+  assert.equal(
+    (await (await request(`/api/articles/${imageArticleId}`)).json()).cover.id,
+    coverOnlyImage.id,
+  );
+  await request(`/api/articles/drafts/${imageArticleId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: { coverImageId: null },
+  });
+  assert.equal(
+    (await (await request(`/api/articles/${imageArticleId}`)).json()).cover.id,
+    coverOnlyImage.id,
+  );
+  await request(`/api/articles/drafts/${imageArticleId}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  await request(`/api/admin/articles/${imageArticleId}/decision`, {
+    method: "POST",
+    cookie: owner,
+    body: decisionBody("articles", imageArticleId, "approved"),
+  });
+  assert.equal(
+    (await (await request(`/api/articles/${imageArticleId}`)).json()).cover,
+    null,
+  );
+  assert.equal((await request(coverOnlyImage.markdownUrl)).status, 404);
   await request(`/api/admin/articles/${imageArticleId}/decision`, {
     method: "POST",
     cookie: owner,

@@ -28,13 +28,16 @@ import {
   Store,
   Image,
   Link2,
+  LayoutGrid,
+  List,
   X,
 } from "lucide-react";
 import { Provider, api, asItems, useSite } from "./store";
 import { topics, starterMarkdown } from "./data";
-import { Photo, PhotoCredit, PhotoCredits, photoForArticle } from "./Photos";
+import { Photo, PhotoCredit, PhotoCredits } from "./Photos";
 const Markdown = lazy(() => import("./Markdown"));
 const fmt = (v) => (v ? new Date(v).toLocaleDateString("zh-CN") : "");
+const storedArticleLayout = () => { try { const value = localStorage.getItem("article-layout"); return value === "cards" ? "cards" : "list"; } catch { return "list"; } };
 const fileSize = (value) => {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) return String(value || "");
@@ -47,6 +50,7 @@ const fileSize = (value) => {
         : `${n} B`;
 };
 const permit = (u, p) => u?.role === "owner" || u?.permissions?.includes(p);
+const downloadableFiles = (files = []) => files.filter((f) => !f.publicImage && !f.isCover && f.kind !== "article-image" && f.kind !== "cover");
 function Loading() {
   return (
     <div className="state" aria-live="polite">
@@ -288,11 +292,10 @@ function Save({ type, id, initial = false, showLabel = false }) {
 }
 function Card({ a }) {
   const authorId = a.author?.id || a.authorId;
+  const cover = a.cover?.url;
   return (
-    <article className="article-card">
-      <Link className="article-photo" to={`/articles/${a.id}`}>
-        <Photo id={photoForArticle(a)} decorative />
-      </Link>
+    <article className={`article-card ${cover ? "has-cover" : "no-cover"}`}>
+      {cover && <Link className="article-photo" to={`/articles/${a.id}`}><img src={cover} alt="" loading="lazy" /></Link>}
       <div className="article-copy">
         <div className="eyebrow">{a.category || "学习文章"}</div>
         <Link className="article-title" to={`/articles/${a.id}`}>
@@ -313,6 +316,14 @@ function Card({ a }) {
       </div>
     </article>
   );
+}
+function ArticleRow({ a }) {
+  const authorId = a.author?.id || a.authorId;
+  const cover = a.cover?.url;
+  return <article className={`article-list-row ${cover ? "has-cover" : "no-cover"}`}>
+    <div className="article-list-copy"><div className="eyebrow">{a.category || "学习文章"}</div><Link className="article-title" to={`/articles/${a.id}`}>{a.title}</Link><p>{a.excerpt || ""}</p><div className="article-meta">{authorId ? <Link to={`/users/${authorId}`} className="author-link">{a.author?.nickname || a.author || "站内作者"}</Link> : <span>{a.author?.nickname || a.author || "站内作者"}</span>}<span>{fmt(a.date || a.createdAt)}</span><Save type="article" id={a.id} initial={a.bookmarked} /></div></div>
+    {cover && <Link className="article-list-cover" to={`/articles/${a.id}`}><img src={cover} alt="" loading="lazy" /></Link>}
+  </article>;
 }
 function Problem({ p }) {
   const typeName =
@@ -355,7 +366,7 @@ function Problem({ p }) {
     </article>
   );
 }
-function Rows({ type, items }) {
+function Rows({ type, items, layout = "cards" }) {
   if (!items.length)
     return (
       <Empty
@@ -364,10 +375,10 @@ function Rows({ type, items }) {
       />
     );
   return (
-    <div className={type === "articles" ? "article-grid" : "problem-list"}>
+    <div className={type === "articles" ? layout === "list" ? "article-list" : "article-grid" : "problem-list"}>
       {items.map((x) =>
         type === "articles" ? (
-          <Card key={x.id} a={x} />
+          layout === "list" ? <ArticleRow key={x.id} a={x} /> : <Card key={x.id} a={x} />
         ) : (
           <Problem key={x.id} p={x} />
         ),
@@ -458,6 +469,8 @@ function Listing({ type }) {
     page,
   ]);
   const article = type === "articles";
+  const [articleLayout, setArticleLayout] = useState(storedArticleLayout);
+  function chooseArticleLayout(next) { setArticleLayout(next); try { localStorage.setItem("article-layout", next); } catch {} }
   return (
     <div className="container page">
       <div className="page-heading">
@@ -485,7 +498,7 @@ function Listing({ type }) {
         }
       />
       {article && (
-        <div className="chips">
+        <><div className="article-layout-switch" aria-label="文章布局"><button aria-pressed={articleLayout === "list"} className={articleLayout === "list" ? "selected" : ""} onClick={() => chooseArticleLayout("list")}><List />逐行列表</button><button aria-pressed={articleLayout === "cards"} className={articleLayout === "cards" ? "selected" : ""} onClick={() => chooseArticleLayout("cards")}><LayoutGrid />卡片</button></div><div className="chips">
           <button
             className={!category ? "selected" : ""}
             onClick={() => setSp(q ? { q } : {})}
@@ -501,7 +514,7 @@ function Listing({ type }) {
               {t.short}
             </button>
           ))}
-        </div>
+        </div></>
       )}
       {!article && (
         <div className="problem-filters" aria-label="赛题筛选">
@@ -616,7 +629,7 @@ function Listing({ type }) {
       ) : r.error ? (
         <Err error={r.error} retry={r.reload} />
       ) : (
-        <Rows type={type} items={asItems(r.data)} />
+        <Rows type={type} items={asItems(r.data)} layout={article ? articleLayout : "cards"} />
       )}
       {!article && !r.loading && !r.error && (
         <div className="pagination">
@@ -775,7 +788,7 @@ function Detail({ type }) {
             initial={x.bookmarked}
           />
         </div>
-        <PdfAttachments files={x.attachments} />
+        <PdfAttachments files={downloadableFiles(x.attachments)} />
         {!article && (
           <p className="classification-note">
             “信号、控制、电源、其他”由本站按学习方向整理，可能与官方题目类别不同；题目原文与竞赛归属以官网资料为准。
@@ -812,10 +825,10 @@ function Detail({ type }) {
             )}
           </section>
         )}
-        {x.attachments?.length > 0 && (
+        {downloadableFiles(x.attachments).length > 0 && (
           <section className="attachments">
             <h2>附件</h2>
-            {x.attachments.map((f) => (
+            {downloadableFiles(x.attachments).map((f) => (
               <Attachment f={f} key={f.id} />
             ))}
           </section>
@@ -1307,6 +1320,21 @@ function ReviewForm({ id, reload }) {
     </section>
   );
 }
+function ReviewEdit() {
+  const { user } = useSite();
+  const { id } = useParams();
+  const nav = useNavigate();
+  const r = useLoad(`/reviews/${id}/edit`, [id]);
+  const [loaded, setLoaded] = useState(null), [error, setError] = useState(""), [saved, setSaved] = useState(""), [busy, setBusy] = useState(false);
+  const f = loaded?.id === id ? loaded.data : null;
+  const setF = (next) => setLoaded((current) => ({ id, data: typeof next === "function" ? next(current?.id === id ? current.data : {}) : next }));
+  useEffect(() => { if (r.data) setLoaded({ id, data: { rating: r.data.rating || 5, pros: r.data.pros || "", cons: r.data.cons || "", purchaseExperience: r.data.purchaseExperience || "", purchasedAt: r.data.purchasedAt || "", orderPlatform: r.data.orderPlatform || "" } }); }, [id, r.data]);
+  if (!user) return <Navigate to="/auth" />;
+  if (r.loading || !f && !r.error) return <Loading />;
+  if (r.error) return <div className="container page"><Err error={r.error} retry={r.reload} /></div>;
+  async function save(submit) { if (busy) return; setBusy(true); setError(""); setSaved(""); try { await api(`/reviews/${id}`, { method: "PATCH", body: f }); if (submit) { await api(`/reviews/${id}/submit`, { method: "POST" }); nav("/account?tab=reviews"); } else setSaved("评价修改已保存，提交审核前不会替换公开版本"); } catch (x) { setError(x.message); } finally { setBusy(false); } }
+  return <div className="container page review-edit"><Link className="back-link" to="/account?tab=reviews">← 返回我的评价</Link><h1>编辑店铺评价</h1><p className="lead">已公开评价在修改审核期间继续展示旧版；审核通过后以同一条评价更新。</p><p className="muted">原购买凭证会继续保留，仅本人和有权限的审核员可见。</p>{r.data?.status === "pending" && <div className="status status-pending">修改正在审核中</div>}<Err error={error} />{saved && <div className="success-box"><Check />{saved}</div>}<div className="panel form-stack"><label>评分<select value={f.rating} onChange={(e) => setF({ ...f, rating: Number(e.target.value) })}>{[5,4,3,2,1].map((n) => <option key={n} value={n}>{n} 分</option>)}</select></label><label>优点<textarea required value={f.pros} onChange={(e) => setF({ ...f, pros: e.target.value })} /></label><label>不足<textarea required value={f.cons} onChange={(e) => setF({ ...f, cons: e.target.value })} /></label><label>购买体验<textarea required value={f.purchaseExperience} onChange={(e) => setF({ ...f, purchaseExperience: e.target.value })} /></label><label>购买日期<input type="date" value={f.purchasedAt || ""} onChange={(e) => setF({ ...f, purchasedAt: e.target.value })} /></label><label>下单平台<input value={f.orderPlatform} onChange={(e) => setF({ ...f, orderPlatform: e.target.value })} /></label><div className="action-row"><button className="button secondary" disabled={busy} onClick={() => save(false)}>保存修改</button><button className="button primary" disabled={busy} onClick={() => save(true)}>{busy ? "处理中…" : "提交重新审核"}</button></div></div></div>;
+}
 function ShopSubmit() {
   const { user } = useSite();
   const [f, setF] = useState({
@@ -1558,6 +1586,8 @@ function Write() {
     }),
     [id, setId] = useState(draftParam),
     [files, setFiles] = useState([]),
+    [cover, setCover] = useState(null),
+    [draggingImage, setDraggingImage] = useState(false),
     [error, setError] = useState(""),
     [saved, setSaved] = useState(""),
     [imageBusy, setImageBusy] = useState(false),
@@ -1568,13 +1598,23 @@ function Write() {
   const editorRef = useRef(null);
   const loadedDraft = useRef(null);
   const seenDraftParam = useRef(draftParam);
+  const editorSession = useRef(0);
+  const editorSessionParam = useRef(draftParam);
+  const pendingDraftParam = useRef(null);
+  const uploadLock = useRef(false);
+  const savingRef = useRef(false);
+  if (editorSessionParam.current !== draftParam) {
+    editorSessionParam.current = draftParam;
+    if (pendingDraftParam.current === draftParam) pendingDraftParam.current = null;
+    else editorSession.current += 1;
+  }
   const nav = useNavigate();
   useEffect(() => {
     if (draftParam === seenDraftParam.current) return;
     seenDraftParam.current = draftParam;
     if (draftParam === id) return;
     loadedDraft.current = null;
-    setError(""); setDraftLoadError(""); setSaved(""); setFiles([]); setId(draftParam);
+    setError(""); setDraftLoadError(""); setSaved(""); setFiles([]); setCover(null); setId(draftParam);
     if (draftParam) setLoadingDraft(true);
     else {
       setLoadingDraft(false);
@@ -1589,7 +1629,7 @@ function Write() {
       api(`/articles/drafts/${id}`).then((d) => {
         if (live && loadedDraft.current !== requestedId) {
           loadedDraft.current = requestedId;
-          setF({ ...d, tags: (d.tags || []).join(",") });
+          setF({ ...d, tags: (d.tags || []).join(",") }); setCover(d.cover || null);
           setLoadingDraft(false);
         }
       }).catch((x) => { if (live) { setDraftLoadError(x.message); setLoadingDraft(false); } });
@@ -1610,43 +1650,61 @@ function Write() {
   );
   async function ensureDraft() {
     if (id) return id;
-    const body = { ...f, tags: f.tags.split(/[，,]/).map((x) => x.trim()).filter(Boolean) };
+    const startingSession = editorSession.current;
+    const { cover: _cover, ...draftFields } = f;
+    const body = { ...draftFields, tags: f.tags.split(/[，,]/).map((x) => x.trim()).filter(Boolean) };
     const created = await api("/articles/drafts", { method: "POST", body });
+    if (startingSession !== editorSession.current) return null;
     const did = created.id || created.draft?.id;
     loadedDraft.current = did;
+    pendingDraftParam.current = did;
+    editorSession.current += 1;
     setId(did);
     nav(`/write?draft=${did}`, { replace: true });
     return did;
   }
-  function insertMarkdown(text, selectStart = 0, selectLength = 0) {
+  function insertMarkdown(text, selectStart = 0, selectLength = 0, fixedRange) {
     const el = editorRef.current;
-    const start = el?.selectionStart ?? f.body.length;
-    const end = el?.selectionEnd ?? start;
+    const start = fixedRange?.start ?? el?.selectionStart ?? f.body.length;
+    const end = fixedRange?.end ?? el?.selectionEnd ?? start;
     setF((current) => ({ ...current, body: `${current.body.slice(0, start)}${text}${current.body.slice(end)}` }));
     requestAnimationFrame(() => {
       el?.focus();
       el?.setSelectionRange(start + selectStart, start + selectStart + selectLength);
     });
   }
-  async function uploadImage(file) {
+  async function uploadImage(file, asCover = false) {
     if (!file) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { setError("仅支持 PNG、JPEG 或 WebP 图片"); return; }
+    if (uploadLock.current || savingRef.current) { setError("请等待当前保存或图片上传完成"); return; }
+    uploadLock.current = true;
+    const startingSession = editorSession.current;
+    let session = startingSession;
+    const range = asCover ? null : { start: editorRef.current?.selectionStart ?? f.body.length, end: editorRef.current?.selectionEnd ?? f.body.length };
     setImageBusy(true); setError(""); setSaved("");
     try {
       const did = await ensureDraft();
+      if (!did) return;
+      session = id ? startingSession : editorSession.current;
       const fd = new FormData(); fd.append("image", file);
       const result = await api(`/articles/drafts/${did}/images`, { method: "POST", body: fd });
-      insertMarkdown(`\n${result.markdown || `![${result.name}](${result.markdownUrl})`}\n`);
-      setSaved("图片已上传并插入正文，请继续保存草稿");
-    } catch (x) { setError(x.message); } finally { setImageBusy(false); }
+      if (session !== editorSession.current) return;
+      if (asCover) { setCover({ id: result.id, name: result.name, url: result.markdownUrl }); setF((current) => ({ ...current, coverImageId: result.id })); setSaved("封面已选择，请保存草稿"); }
+      else { insertMarkdown(`\n${result.markdown || `![${result.name}](${result.markdownUrl})`}\n`, 0, 0, range); setSaved("图片已上传并插入正文，请继续保存草稿"); }
+    } catch (x) { if (session === editorSession.current) setError(x.message); } finally { uploadLock.current = false; setImageBusy(false); }
   }
+  function pastedImage(event) { const file = [...(event.clipboardData?.files || [])].find((x) => x.type.startsWith("image/")); if (file) { event.preventDefault(); uploadImage(file); } }
+  function droppedImage(event) { const files = [...(event.dataTransfer?.files || [])]; const file = files.find((x) => x.type.startsWith("image/")); setDraggingImage(false); if (files.length) event.preventDefault(); if (file) uploadImage(file); else if (files.length) setError("请拖入 PNG、JPEG 或 WebP 图片"); }
   async function save(submit) {
-    if (saving || imageBusy) return;
+    if (savingRef.current || uploadLock.current) return;
+    savingRef.current = true;
     setSaving(true);
     setError("");
     setSaved("");
     try {
+      const { cover: _cover, ...draftFields } = f;
       const body = {
-        ...f,
+        ...draftFields,
         tags: f.tags
           .split(/[，,]/)
           .map((x) => x.trim())
@@ -1676,14 +1734,14 @@ function Write() {
       }
     } catch (x) {
       setError(x.message);
-    } finally { setSaving(false); }
+    } finally { savingRef.current = false; setSaving(false); }
   }
   return (
     <div className="container editor-page">
       <div className="editor-head">
         <div>
           <h1>写文章</h1>
-          <p>Markdown 草稿可反复保存，提交后进入审核。</p>
+          <p>Markdown 草稿可反复保存；已发布内容修改后重新审核，审核期间旧公开版继续展示。</p>
         </div>
         <div>
           <button className="button secondary" disabled={saving || imageBusy} onClick={() => save(false)}>
@@ -1726,7 +1784,13 @@ function Write() {
             ))}
           </select>
         </label>
-        <label>
+        <div className="cover-editor">
+          <strong>文章封面（可选）</strong>
+          <small>只有主动选择封面的文章才展示图片，不会从正文自动推断。</small>
+          {cover?.url && <img src={cover.url} alt="当前文章封面预览" />}
+          <div className="cover-actions"><label className="button secondary small">{cover ? "替换封面" : "选择封面"}<input hidden type="file" accept="image/png,image/jpeg,image/webp" disabled={imageBusy || saving} onChange={(e) => { uploadImage(e.target.files?.[0], true); e.target.value = ""; }} /></label>{(cover || f.coverImageId) && <button type="button" disabled={imageBusy || saving} className="text-button danger" onClick={() => { setCover(null); setF((current) => ({ ...current, coverImageId: null })); setSaved("封面已移除，请保存草稿"); }}>移除封面</button>}</div>
+        </div>
+        <label className="editor-attachment-field">
           附件（单个不超过{" "}
           {Math.round((config.maxUploadBytes || 52428800) / 1048576)} MiB）
           <input
@@ -1750,9 +1814,13 @@ function Write() {
           <textarea
             id="markdown-body"
             ref={editorRef}
-            className="editor-textarea"
             value={f.body}
             onChange={(e) => setF({ ...f, body: e.target.value })}
+            onPaste={pastedImage}
+            onDragOver={(e) => { if ([...(e.dataTransfer?.items || [])].some((x) => x.type.startsWith("image/"))) { e.preventDefault(); setDraggingImage(true); } }}
+            onDragLeave={() => setDraggingImage(false)}
+            onDrop={droppedImage}
+            className={`editor-textarea ${draggingImage ? "editor-drop-active" : ""}`}
           />
         </div>
         <section className="preview">
@@ -1961,6 +2029,8 @@ function Mine({ tab }) {
               {tab === "drafts" && (
                 <Link to={`/write?draft=${x.id}`}>继续编辑</Link>
               )}
+              {tab === "submissions" && (x.editUrl || x.draftId || x.id) && <Link to={x.editUrl || `/write?draft=${x.draftId || x.id}`}>{x.published ? "编辑已发表文章" : "编辑投稿"}</Link>}
+              {tab === "reviews" && x.id && <Link to={`/reviews/${x.id}/edit`}>编辑评价</Link>}
               {tab === "shops" && <Link to={`/shops/${x.id}`}>查看店铺</Link>}
               {tab === "bookmarks" && (
                 <Link
@@ -2037,23 +2107,25 @@ function Admin() {
 }
 function Moderation({ type }) {
   const [status, setStatus] = useState("pending");
+  const [moderationError, setModerationError] = useState("");
   const r = useLoad(`/admin/queue?type=${type}&status=${status}`, [
     type,
     status,
   ]);
-  async function decide(id, decision) {
+  async function decide(item, decision) {
     const reason =
       decision === "approved" || decision === "dismissed"
         ? ""
         : prompt("请填写原因") || "";
     try {
-      await api(`/admin/${type}/${id}/decision`, {
+      setModerationError("");
+      await api(`/admin/${type}/${item.id}/decision`, {
         method: "POST",
-        body: { decision, reason },
+        body: { decision, reason, ...(decision !== "hidden" && item.updatedAt ? { expectedUpdatedAt: item.updatedAt } : {}) },
       });
       r.reload();
     } catch (x) {
-      alert(x.message);
+      setModerationError(x.code === "STALE_REVIEW" || x.status === 409 ? "该内容已被作者更新，请刷新队列并重新审核，当前决定未提交。" : x.message);
     }
   }
   return (
@@ -2066,6 +2138,7 @@ function Moderation({ type }) {
           ]
         }
       </h1>
+      <Err error={moderationError} retry={() => { setModerationError(""); r.reload(); }} />
       <div className="chips">
         {["pending", "approved", "rejected", "hidden", "all"].map((s) => (
           <button
@@ -2098,10 +2171,10 @@ function Moderation({ type }) {
               </strong>
               <p>{x.excerpt || x.description || ""}</p>
               {x.body && <MD>{x.body}</MD>}
-              {type === "articles" && x.attachments?.length > 0 && (
+              {type === "articles" && downloadableFiles(x.attachments).length > 0 && (
                 <div className="attachments">
                   <strong>投稿附件</strong>
-                  {x.attachments.map((f) => (
+                  {downloadableFiles(x.attachments).map((f) => (
                     <FileLink key={f.id} f={f} />
                   ))}
                 </div>
@@ -2200,7 +2273,7 @@ function Moderation({ type }) {
               <button
                 className="button primary small"
                 onClick={() =>
-                  decide(x.id, type === "reports" ? "dismissed" : "approved")
+                  decide(x, type === "reports" ? "dismissed" : "approved")
                 }
               >
                 {type === "reports" ? "驳回举报" : "通过"}
@@ -2208,7 +2281,7 @@ function Moderation({ type }) {
               <button
                 className="button secondary small"
                 onClick={() =>
-                  decide(x.id, type === "reports" ? "removed" : "rejected")
+                  decide(x, type === "reports" ? "removed" : "rejected")
                 }
               >
                 {type === "reports" ? "移除内容" : "拒绝"}
@@ -2216,7 +2289,7 @@ function Moderation({ type }) {
               {type !== "reports" && status !== "hidden" && (
                 <button
                   className="button secondary small"
-                  onClick={() => decide(x.id, "hidden")}
+                  onClick={() => decide(x, "hidden")}
                 >
                   下架
                 </button>
@@ -2928,6 +3001,7 @@ function RoutesView() {
         <Route path="/shops" element={<Shops />} />
         <Route path="/shops/submit" element={<ShopSubmit />} />
         <Route path="/shops/:id" element={<ShopDetail />} />
+        <Route path="/reviews/:id/edit" element={<ReviewEdit />} />
         <Route path="/write" element={<Write />} />
         <Route path="/account" element={<Account />} />
         <Route path="/admin" element={<Admin />} />

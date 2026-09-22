@@ -94,6 +94,11 @@ const mailer = smtpEnabled
     })
   : null;
 const now = () => new Date().toISOString();
+const nextUpdatedAt = (previous) => {
+  const current = Date.now(),
+    prior = Date.parse(previous || "") || 0;
+  return new Date(Math.max(current, prior + 1)).toISOString();
+};
 const id = (prefix) => `${prefix}-${crypto.randomUUID()}`;
 const parseCookies = (header = "") =>
   Object.fromEntries(
@@ -564,6 +569,7 @@ app.get("/api/users/:id", (req, res, next) => {
         excerpt: p.excerpt,
         category: p.category,
         tags: p.tags || [],
+        cover: p.cover || null,
         date: a.published_at,
       };
     }),
@@ -583,11 +589,12 @@ app.get("/api/users/:id", (req, res, next) => {
     })),
     reviews = all(
       `SELECT r.*,s.name shop_name,u.nickname FROM reviews r JOIN shops s ON s.id=r.shop_id AND s.status='approved'
-       JOIN users u ON u.id=r.user_id WHERE r.user_id=? AND r.status='approved' AND r.source_type='site'
+       JOIN users u ON u.id=r.user_id WHERE r.user_id=? AND r.source_type='site'
+         AND r.published_payload IS NOT NULL AND r.published_visible=1
        ORDER BY r.created_at DESC LIMIT 100`,
       user.id,
     ).map((r) => {
-      const result = reviewOut(r);
+      const result = reviewOut(r, true);
       delete result.proofFileId;
       delete result.decisionReason;
       return result;
@@ -599,7 +606,7 @@ app.get("/api/me/reviews", auth, (req, res) =>
     items: all(
       "SELECT r.*,s.name shop_name,f.original_name proof_name,f.mime proof_mime FROM reviews r JOIN shops s ON s.id=r.shop_id LEFT JOIN files f ON f.id=r.proof_file_id WHERE r.user_id=? ORDER BY r.created_at DESC",
       req.user.id,
-    ).map(reviewOut),
+    ).map((review) => reviewOut(review)),
   }),
 );
 app.get("/api/me/shops", auth, (req, res) =>
@@ -718,7 +725,7 @@ app.delete("/api/me/bookmarks/:type/:id", auth, (req, res) => {
   res.json({ ok: true });
 });
 
-function reviewOut(r) {
+function reviewOut(r, published = false) {
   const source = json(r.source_payload, {});
   return r.source_type === "workbook"
     ? {
@@ -728,7 +735,11 @@ function reviewOut(r) {
         status: r.status,
         ...source,
       }
-    : {
+    : (() => {
+        const snapshot =
+          published && r.published_payload ? json(r.published_payload, {}) : null;
+        const rating = snapshot ? snapshot.rating : r.rating;
+        return {
         id: r.id,
         sourceType: "site",
         shopId: r.shop_id,
@@ -736,22 +747,31 @@ function reviewOut(r) {
         author: r.nickname
           ? publicUser({ id: r.user_id, nickname: r.nickname })
           : undefined,
-        rating: r.rating,
+        rating,
         sentiment:
-          r.sentiment ||
-          (r.rating >= 4 ? "positive" : r.rating <= 2 ? "negative" : "neutral"),
-        pros: r.pros,
-        cons: r.cons,
-        purchaseExperience: r.purchase_experience,
-        purchasedAt: r.purchased_at,
-        orderPlatform: r.order_platform,
-        status: r.status,
-        decisionReason: r.decision_reason,
-        date: r.created_at,
-        proofFileId: r.proof_file_id,
-        proofName: r.proof_name,
-        proofMime: r.proof_mime,
+          (snapshot ? snapshot.sentiment : r.sentiment) ||
+          (rating >= 4 ? "positive" : rating <= 2 ? "negative" : "neutral"),
+        pros: snapshot ? snapshot.pros : r.pros,
+        cons: snapshot ? snapshot.cons : r.cons,
+        purchaseExperience: snapshot
+          ? snapshot.purchaseExperience
+          : r.purchase_experience,
+        purchasedAt: snapshot ? snapshot.purchasedAt : r.purchased_at,
+        orderPlatform: snapshot ? snapshot.orderPlatform : r.order_platform,
+        status: published ? "approved" : r.status,
+        published: Boolean(r.published_payload && r.published_visible),
+        ...(!published
+          ? {
+              decisionReason: r.decision_reason,
+              updatedAt: r.updated_at,
+              proofFileId: r.proof_file_id,
+              proofName: r.proof_name,
+              proofMime: r.proof_mime,
+            }
+          : {}),
+        date: snapshot ? snapshot.date : r.created_at,
       };
+      })();
 }
 function shopOut(s) {
   return {
@@ -771,14 +791,16 @@ function shopOut(s) {
     siteReviewCount: Number(s.site_review_count || 0),
   };
 }
-const shopStats = `SELECT s.*,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND r.status='approved' AND (r.sentiment='positive' OR r.source_type='site' AND r.rating>=4)) positive_count,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND r.status='approved' AND (r.sentiment='negative' OR r.source_type='site' AND r.rating<=2)) negative_count,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND r.status='approved' AND (r.sentiment='neutral' OR r.source_type='site' AND r.rating=3)) neutral_count,(SELECT AVG(r.rating) FROM reviews r WHERE r.shop_id=s.id AND r.status='approved' AND r.source_type='site') site_average,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND r.status='approved' AND r.source_type='site') site_review_count FROM shops s`;
+const publicReview = `(r.source_type='workbook' AND r.status='approved' OR r.source_type='site' AND r.published_payload IS NOT NULL AND r.published_visible=1)`;
+const publicRating = `CAST(json_extract(r.published_payload,'$.rating') AS INTEGER)`;
+const shopStats = `SELECT s.*,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND ${publicReview} AND (r.source_type='workbook' AND r.sentiment='positive' OR r.source_type='site' AND ${publicRating}>=4)) positive_count,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND ${publicReview} AND (r.source_type='workbook' AND r.sentiment='negative' OR r.source_type='site' AND ${publicRating}<=2)) negative_count,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND ${publicReview} AND (r.source_type='workbook' AND r.sentiment='neutral' OR r.source_type='site' AND ${publicRating}=3)) neutral_count,(SELECT AVG(${publicRating}) FROM reviews r WHERE r.shop_id=s.id AND r.source_type='site' AND r.published_payload IS NOT NULL AND r.published_visible=1) site_average,(SELECT COUNT(*) FROM reviews r WHERE r.shop_id=s.id AND r.source_type='site' AND r.published_payload IS NOT NULL AND r.published_visible=1) site_review_count FROM shops s`;
 app.get("/api/shops", (req, res) => {
   const q = String(req.query.q || "").trim();
   if (!q) return res.json({ items: [], total: 0 });
   const like = `%${q.replace(/[\\%_]/g, "\\$&")}%`;
   const rows = all(
-    `${shopStats} WHERE s.status='approved' AND (s.name LIKE ? ESCAPE '\\' OR s.aliases LIKE ? ESCAPE '\\' OR COALESCE(s.owner_ref,'') LIKE ? ESCAPE '\\' OR COALESCE(s.platform,'') LIKE ? ESCAPE '\\' OR COALESCE(s.business_scope,'') LIKE ? ESCAPE '\\' OR EXISTS(SELECT 1 FROM reviews r WHERE r.shop_id=s.id AND r.status='approved' AND (COALESCE(r.source_payload,'') LIKE ? ESCAPE '\\' OR COALESCE(r.pros,'') LIKE ? ESCAPE '\\' OR COALESCE(r.cons,'') LIKE ? ESCAPE '\\' OR COALESCE(r.purchase_experience,'') LIKE ? ESCAPE '\\'))) ORDER BY s.name LIMIT 100`,
-    ...Array(9).fill(like),
+    `${shopStats} WHERE s.status='approved' AND (s.name LIKE ? ESCAPE '\\' OR s.aliases LIKE ? ESCAPE '\\' OR COALESCE(s.owner_ref,'') LIKE ? ESCAPE '\\' OR COALESCE(s.platform,'') LIKE ? ESCAPE '\\' OR COALESCE(s.business_scope,'') LIKE ? ESCAPE '\\' OR EXISTS(SELECT 1 FROM reviews r WHERE r.shop_id=s.id AND ${publicReview} AND (COALESCE(CASE WHEN r.source_type='workbook' THEN r.source_payload ELSE r.published_payload END,'') LIKE ? ESCAPE '\\'))) ORDER BY s.name LIMIT 100`,
+    ...Array(6).fill(like),
   );
   res.json({ items: rows.map(shopOut), total: rows.length });
 });
@@ -789,10 +811,10 @@ app.get("/api/shops/:id", (req, res, next) => {
   );
   if (!s) return next(fail(404, "店铺不存在", "NOT_FOUND"));
   const reviews = all(
-    "SELECT r.*,u.nickname FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.shop_id=? AND r.status='approved' ORDER BY r.created_at DESC",
+    `SELECT r.*,u.nickname FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.shop_id=? AND ${publicReview} ORDER BY r.created_at DESC`,
     s.id,
   ).map((r) => {
-    const o = reviewOut(r);
+    const o = reviewOut(r, r.source_type === "site");
     delete o.proofFileId;
     delete o.proofName;
     delete o.proofMime;
@@ -828,7 +850,7 @@ app.post("/api/shops", auth, submitLimit, (req, res, next) => {
         throw fail(400, "店铺链接仅支持 HTTP 或 HTTPS", "INVALID_URL");
     }
     const duplicate = one(
-      "SELECT id,status FROM shops WHERE lower(name)=lower(?) OR (? IS NOT NULL AND url=?)",
+      "SELECT id,status,updated_at FROM shops WHERE lower(name)=lower(?) OR (? IS NOT NULL AND url=?)",
       name,
       url,
       url,
@@ -849,7 +871,7 @@ app.post("/api/shops", auth, submitLimit, (req, res, next) => {
           url,
           req.body.condition || null,
           req.body.businessScope || null,
-          now(),
+          nextUpdatedAt(duplicate.updated_at),
           duplicate.id,
         );
         audit(req.user, "重新提交店铺", "shop", duplicate.id);
@@ -980,6 +1002,87 @@ app.post(
   },
 );
 
+function editableReview(req, next) {
+  const review = one(
+    `SELECT r.*,s.name shop_name,f.original_name proof_name,f.mime proof_mime
+     FROM reviews r JOIN shops s ON s.id=r.shop_id
+     LEFT JOIN files f ON f.id=r.proof_file_id
+     WHERE r.id=? AND r.user_id=? AND r.source_type='site'`,
+    req.params.id,
+    req.user.id,
+  );
+  if (!review) next(fail(404, "评价不存在", "NOT_FOUND"));
+  return review;
+}
+function validateReviewInput(body, current = {}) {
+  const rating = Number(body.rating ?? current.rating),
+    pros = String(body.pros ?? current.pros ?? "").trim(),
+    cons = String(body.cons ?? current.cons ?? "").trim(),
+    purchaseExperience = String(
+      body.purchaseExperience ?? current.purchase_experience ?? "",
+    ).trim();
+  if (
+    !Number.isInteger(rating) ||
+    rating < 1 ||
+    rating > 5 ||
+    (!pros && !cons) ||
+    !purchaseExperience
+  )
+    throw fail(400, "请完整填写评分、优点或缺点及购买经历", "INVALID_INPUT");
+  return {
+    rating,
+    pros,
+    cons,
+    purchaseExperience,
+    purchasedAt: body.purchasedAt ?? current.purchased_at ?? null,
+    orderPlatform: body.orderPlatform ?? current.order_platform ?? null,
+  };
+}
+app.get("/api/reviews/:id/edit", auth, (req, res, next) => {
+  const review = editableReview(req, next);
+  if (!review) return;
+  res.json(reviewOut(review));
+});
+app.patch("/api/reviews/:id", auth, submitLimit, (req, res, next) => {
+  try {
+    const review = editableReview(req, next);
+    if (!review) return;
+    const input = validateReviewInput(req.body, review);
+    run(
+      `UPDATE reviews SET rating=?,pros=?,cons=?,purchase_experience=?,purchased_at=?,order_platform=?,
+       status='draft',decision_reason=NULL,updated_at=? WHERE id=?`,
+      input.rating,
+      input.pros,
+      input.cons,
+      input.purchaseExperience,
+      input.purchasedAt,
+      input.orderPlatform,
+      nextUpdatedAt(review.updated_at),
+      review.id,
+    );
+    audit(req.user, "修改店铺评价", "review", review.id);
+    res.json({ id: review.id, status: "draft", published: Boolean(review.published_payload && review.published_visible) });
+  } catch (error) {
+    next(error);
+  }
+});
+app.post("/api/reviews/:id/submit", auth, submitLimit, (req, res, next) => {
+  try {
+    const review = editableReview(req, next);
+    if (!review) return;
+    validateReviewInput({}, review);
+    run(
+      "UPDATE reviews SET status='pending',decision_reason=NULL,updated_at=? WHERE id=?",
+      nextUpdatedAt(review.updated_at),
+      review.id,
+    );
+    audit(req.user, "重新提交店铺评价", "review", review.id);
+    res.json({ id: review.id, status: "pending", published: Boolean(review.published_payload && review.published_visible) });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function articleOut(a, published = false) {
   const p =
     published && a.published_payload ? json(a.published_payload, {}) : null;
@@ -992,6 +1095,22 @@ function articleOut(a, published = false) {
         category: a.category,
         tags: json(a.tags),
         excerpt: a.excerpt,
+        coverImageId: a.cover_image_id,
+        cover: a.cover_image_id
+          ? (() => {
+              const f = one(
+                "SELECT id,original_name name FROM files WHERE id=? AND entity_id=? AND kind IN ('article-image-draft','article-image-published')",
+                a.cover_image_id,
+                a.id,
+              );
+              return f
+                ? { ...f, url: `/api/article-images/${f.id}` }
+                : null;
+            })()
+          : null,
+        published: Boolean(a.published_payload && a.published_visible),
+        draftId: a.id,
+        editUrl: `/write?draft=${a.id}`,
         status: a.status,
         decisionReason: a.decision_reason,
         updatedAt: a.updated_at,
@@ -1083,14 +1202,29 @@ app.patch("/api/articles/drafts/:id", auth, (req, res, next) => {
     req.user.id,
   );
   if (!a) return next(fail(404, "草稿不存在", "NOT_FOUND"));
+  let coverImageId = a.cover_image_id;
+  if (Object.hasOwn(req.body, "coverImageId")) {
+    coverImageId = req.body.coverImageId || null;
+    if (
+      coverImageId &&
+      !one(
+        "SELECT 1 FROM files WHERE id=? AND owner_id=? AND entity_id=? AND kind IN ('article-image-draft','article-image-published') AND mime LIKE 'image/%'",
+        coverImageId,
+        req.user.id,
+        a.id,
+      )
+    )
+      return next(fail(400, "封面图片不属于当前文章", "INVALID_COVER"));
+  }
   run(
-    "UPDATE articles SET title=?,body=?,category=?,tags=?,excerpt=?,status='draft',updated_at=? WHERE id=?",
+    "UPDATE articles SET title=?,body=?,category=?,tags=?,excerpt=?,cover_image_id=?,status='draft',updated_at=? WHERE id=?",
     req.body.title ?? a.title,
     req.body.body ?? a.body,
     req.body.category ?? a.category,
     JSON.stringify(req.body.tags ?? json(a.tags)),
     req.body.excerpt ?? a.excerpt,
-    now(),
+    coverImageId,
+    nextUpdatedAt(a.updated_at),
     a.id,
   );
   res.json({ ok: true });
@@ -1113,7 +1247,7 @@ app.post(
   (req, res, next) => {
     try {
       const a = one(
-        "SELECT id FROM articles WHERE id=? AND user_id=?",
+        "SELECT * FROM articles WHERE id=? AND user_id=?",
         req.params.id,
         req.user.id,
       );
@@ -1131,6 +1265,11 @@ app.post(
         req.file.mimetype,
         req.file.size,
         now(),
+      );
+      run(
+        "UPDATE articles SET status='draft',decision_reason=NULL,updated_at=? WHERE id=?",
+        nextUpdatedAt(a.updated_at),
+        a.id,
       );
       res.status(201).json({ id: fid, name: req.file.originalname });
     } catch (e) {
@@ -1157,7 +1296,13 @@ app.post(
   uploadedCapacity,
   (req, res, next) => {
     try {
+      const a = one(
+        "SELECT * FROM articles WHERE id=? AND user_id=?",
+        req.params.id,
+        req.user.id,
+      );
       if (
+        !a ||
         !req.file ||
         req.file.size > 5 * 1024 * 1024 ||
         !["image/png", "image/jpeg", "image/webp"].includes(
@@ -1182,6 +1327,11 @@ app.post(
         req.file.mimetype,
         req.file.size,
         now(),
+      );
+      run(
+        "UPDATE articles SET status='draft',decision_reason=NULL,updated_at=? WHERE id=?",
+        nextUpdatedAt(a.updated_at),
+        a.id,
       );
       const markdownUrl = `/api/article-images/${fid}`;
       res.status(201).json({
@@ -1211,7 +1361,7 @@ app.post(
       return next(fail(400, "文章标题与正文不能为空", "INVALID_INPUT"));
     run(
       "UPDATE articles SET status='pending',decision_reason=NULL,updated_at=? WHERE id=?",
-      now(),
+      nextUpdatedAt(a.updated_at),
       a.id,
     );
     audit(req.user, "提交文章", "article", a.id);
@@ -1765,6 +1915,7 @@ app.get("/api/admin/queue", auth, (req, res, next) => {
         decisionReason: s.decision_reason,
         submitterId: s.submitter_id,
         createdAt: s.created_at,
+        updatedAt: s.updated_at,
       })),
     });
   if (type === "reviews" && can(req.user, "shop_reviews"))
@@ -1806,7 +1957,34 @@ function decisionRoute(table, permission) {
           throw fail(400, "退回时必须填写原因", "REASON_REQUIRED");
         const row = one(`SELECT * FROM ${table} WHERE id=?`, req.params.id);
         if (!row) throw fail(404, "记录不存在", "NOT_FOUND");
-        if (table === "articles" && decision === "approved") {
+        if (decision !== "hidden" && row.status !== "pending")
+          throw fail(409, "内容已发生变化，请刷新审核队列", "STALE_REVIEW");
+        if (
+          decision !== "hidden" &&
+          (!req.body.expectedUpdatedAt ||
+            req.body.expectedUpdatedAt !== row.updated_at)
+        )
+          throw fail(409, "内容已发生变化，请刷新审核队列", "STALE_REVIEW");
+        if (table === "reviews" && decision === "approved" && row.source_type === "site") {
+          const rating = Number(row.rating);
+          const payload = JSON.stringify({
+            rating,
+            sentiment:
+              rating >= 4 ? "positive" : rating <= 2 ? "negative" : "neutral",
+            pros: row.pros,
+            cons: row.cons,
+            purchaseExperience: row.purchase_experience,
+            purchasedAt: row.purchased_at,
+            orderPlatform: row.order_platform,
+            date: now(),
+          });
+          run(
+            "UPDATE reviews SET status='approved',published_payload=?,published_visible=1,decision_reason=NULL,updated_at=? WHERE id=?",
+            payload,
+            nextUpdatedAt(row.updated_at),
+            row.id,
+          );
+        } else if (table === "articles" && decision === "approved") {
           const author = one(
             "SELECT id,nickname FROM users WHERE id=?",
             row.user_id,
@@ -1818,7 +1996,8 @@ function decisionRoute(table, permission) {
             .filter(
               (f) =>
                 !f.kind.startsWith("article-image") ||
-                row.body.includes(`/api/article-images/${f.id}`),
+                row.body.includes(`/api/article-images/${f.id}`) ||
+                f.id === row.cover_image_id,
             )
             .map((f) => {
               const publicImage = f.kind.startsWith("article-image");
@@ -1840,13 +2019,19 @@ function decisionRoute(table, permission) {
             tags: json(row.tags),
             excerpt: row.excerpt,
             author: publicUser(author),
+            cover: row.cover_image_id
+              ? attachments.find(
+                  (file) =>
+                    file.id === row.cover_image_id && file.publicImage,
+                ) || null
+              : null,
             attachments,
           });
           run(
             "UPDATE articles SET status='approved',published_payload=?,published_visible=1,published_version=published_version+1,published_at=?,decision_reason=NULL,updated_at=? WHERE id=?",
             payload,
             now(),
-            now(),
+            nextUpdatedAt(row.updated_at),
             row.id,
           );
           run(
@@ -1858,11 +2043,13 @@ function decisionRoute(table, permission) {
             `UPDATE ${table} SET status=?,decision_reason=?,updated_at=? WHERE id=?`,
             decision,
             req.body.reason || null,
-            now(),
+            nextUpdatedAt(row.updated_at),
             row.id,
           );
           if (table === "articles" && decision === "hidden")
             run("UPDATE articles SET published_visible=0 WHERE id=?", row.id);
+          if (table === "reviews" && decision === "hidden")
+            run("UPDATE reviews SET published_visible=0 WHERE id=?", row.id);
         }
         audit(
           req.user,

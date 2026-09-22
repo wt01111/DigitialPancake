@@ -117,7 +117,13 @@ await api(`/articles/drafts/${articleId}/submit`, {
 await api(`/admin/articles/${articleId}/decision`, {
   method: "POST",
   cookie: ownerCookie,
-  body: { decision: "approved" },
+  body: {
+    decision: "approved",
+    expectedUpdatedAt: one(
+      "SELECT updated_at FROM articles WHERE id=?",
+      articleId,
+    ).updated_at,
+  },
 });
 const shop = one("SELECT id FROM shops WHERE status='approved' LIMIT 1"),
   [pdf, pdf2] = all(

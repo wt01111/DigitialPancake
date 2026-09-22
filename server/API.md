@@ -20,12 +20,13 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 - `GET /api/shops/:id` → shop plus `reviews`; only approved reviews are public. Workbook reviews include `sourceType,sentiment,reason,notes,supplements,questions,date,sourceSheet,sourceRow`. Site reviews include `author,rating,pros,cons,purchaseExperience,purchasedAt,orderPlatform,date`; no proof metadata is public.
 - `POST /api/shops` JSON `{name,aliases?:string[],ownerId?,platform?,url?,condition?,businessScope}` → pending shop.
 - `POST /api/shops/:id/reviews` multipart fields `rating,pros?,cons?,purchaseExperience,purchasedAt?,orderPlatform?,proof?`. `proof` accepts PNG/JPEG/WebP/PDF up to 50 MiB.
+- `GET /api/reviews/:id/edit` returns the author's editable site review and private proof metadata. `PATCH /api/reviews/:id` accepts `{rating,pros?,cons?,purchaseExperience,purchasedAt?,orderPlatform?}` and preserves the existing proof; `POST /api/reviews/:id/submit` sends that same review ID back to moderation. Workbook reviews cannot be edited. An approved revision stays public from its immutable snapshot until the new revision is approved; proof metadata is never copied into that snapshot.
 - `GET /api/files/:id` returns a private attachment only to its owner or a currently authorized reviewer.
 
 ## Articles, problems, comments
 
-- `GET /api/articles?q=&category=` / `GET /api/articles/:id`. Article fields: `id,title,body,category,tags,excerpt,author,date,status` (public endpoints only published).
-- `POST /api/articles/drafts` JSON `{title,body,category?,tags?:string[],excerpt?}`; `PATCH /api/articles/drafts/:id` same fields; `POST /api/articles/drafts/:id/submit`.
+- `GET /api/articles?q=&category=` / `GET /api/articles/:id`. Article fields: `id,title,body,category,tags,excerpt,author,date,status,cover`; `cover` is `null` or `{id,name,url}` from the currently approved snapshot, with no generated fallback image.
+- `POST /api/articles/drafts` JSON `{title,body,category?,tags?:string[],excerpt?}`; `GET /api/articles/drafts/:id` includes `coverImageId` and `cover`; `PATCH /api/articles/drafts/:id` accepts the same fields plus `coverImageId:string|null`; `POST /api/articles/drafts/:id/submit`. A cover must be an image uploaded by the author for that same article. Pending revisions keep the prior public snapshot, including its prior cover, until approval atomically replaces it.
 - `POST /api/articles/drafts/:id/attachments` multipart field `file` (50 MiB); owner and content reviewers only.
 - `POST /api/articles/drafts/:id/images` multipart field `image` (PNG/JPEG/WebP, 5 MiB) returns `{id,name,markdownUrl,markdown}`. `GET /api/article-images/:id` lets the author/content reviewers preview a draft image and anonymously serves an image only while the current visible published snapshot references it. PDFs and ordinary attachments remain authenticated through `/api/files/:id`.
 - `GET /api/problems?q=&year=&category=&group=&competitionType=` / `GET /api/problems/:id`; categories are `signal`, `control`, `power`, `other`, competition types are `national`, `provincial`, and fields include `id,title,year,category,group,competitionType,competitionName,problemCode,body,sourcePage,sourceUrl,letter`.
@@ -36,7 +37,7 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 ## Administration
 
 - `GET /api/admin/queue?type=shops|reviews|articles|reports&status=pending|approved|rejected|hidden|all` (status defaults to pending).
-- `POST /api/admin/shops/:id/decision`, `/reviews/:id/decision`, `/articles/:id/decision` with `{decision:"approved"|"rejected"|"hidden",reason?}`.
+- `POST /api/admin/shops/:id/decision`, `/reviews/:id/decision`, `/articles/:id/decision` with `{decision:"approved"|"rejected"|"hidden",reason?,expectedUpdatedAt?}`. Approval and rejection require the exact `updatedAt` from the queue item; stale or non-pending content returns 409 so an older moderation page can never approve a newer draft. Hiding an already public item does not require a version.
 - `POST /api/admin/reports/:id/decision` `{decision:"dismissed"|"removed",reason?}`.
 - `POST /api/admin/problems` `{title,...metadata}`.
 - `POST /api/admin/problems/:id/attachments` multipart field `file`.
