@@ -32,9 +32,16 @@ env_quote() {
 [[ ${EUID} -eq 0 ]] || die "请用 sudo 运行。"
 [[ $(. /etc/os-release; printf '%s' "${ID}:${VERSION_ID}") == "ubuntu:24.04" ]] || die "仅支持 Ubuntu 24.04 LTS。"
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-[[ -d "$repo_root/.git" ]] || die "请先克隆 GitHub 仓库，再从仓库内运行此脚本。"
-git_repo=(git -c "safe.directory=$repo_root" -C "$repo_root")
-"${git_repo[@]}" diff --quiet && "${git_repo[@]}" diff --cached --quiet || die "工作区有未提交修改；请部署已经审核并提交的版本。"
+source_kind=package
+if [[ -d "$repo_root/.git" ]]; then
+  source_kind=git
+  git_repo=(git -c "safe.directory=$repo_root" -C "$repo_root")
+  "${git_repo[@]}" diff --quiet && "${git_repo[@]}" diff --cached --quiet || die "工作区有未提交修改；请部署已经审核并提交的版本。"
+  commit="$("${git_repo[@]}" rev-parse --verify HEAD)"
+else
+  bash "$repo_root/tests/package-smoke.sh" "$repo_root" || die "发布包完整性校验失败。"
+  commit="$(tr -d '\r\n' <"$repo_root/DIGITALPANCAKE_RELEASE")"
+fi
 
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y git nginx sqlite3 rsync curl unzip xz-utils ca-certificates certbot python3-certbot-nginx
@@ -47,11 +54,18 @@ install -d -o root -g root -m 0755 "$APP_ROOT" "$APP_ROOT/releases"
 install -d -o "$APP_USER" -g "$APP_USER" -m 0700 "$STATE_DIR" "$STATE_DIR/uploads"
 install -d -o root -g root -m 0700 /etc/electronic-pancake /var/backups/electronic-pancake
 
-commit="$("${git_repo[@]}" rev-parse --verify HEAD)"
 release_dir="$APP_ROOT/releases/${commit}"
+if [[ -d "$release_dir" && ! -f "$release_dir/.deployment-built" ]]; then
+  [[ "$release_dir" == "$APP_ROOT/releases/$commit" ]] || die "拒绝清理异常发布目录。"
+  rm -rf -- "$release_dir"
+fi
 if [[ ! -d "$release_dir" ]]; then
   install -d -o root -g root -m 0755 "$release_dir"
-  "${git_repo[@]}" archive --format=tar HEAD | tar -xf - -C "$release_dir"
+  if [[ "$source_kind" == git ]]; then
+    "${git_repo[@]}" archive --format=tar HEAD | tar -xf - -C "$release_dir"
+  else
+    cp -a -- "$repo_root/." "$release_dir/"
+  fi
 fi
 find "$release_dir" -type d -exec chmod a+rx {} +
 cd "$release_dir"

@@ -1,13 +1,22 @@
 ﻿param(
-    [string]$OutputDirectory = 'C:\Users\24542\Documents\Codex\2026-09-21\google\outputs'
+    [string]$OutputDirectory = 'D:\Desktoptrue\code\Codex\digitalpancake'
 )
 
 $ErrorActionPreference = 'Stop'
 $projectRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $outputRoot = [System.IO.Path]::GetFullPath($OutputDirectory)
 $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$archivePath = Join-Path $outputRoot "electronic-pancake-source-$timestamp.zip"
-$stagingRoot = Join-Path $outputRoot ".electronic-pancake-staging-$timestamp"
+$archivePath = Join-Path $outputRoot 'digitalpancake.zip'
+$temporaryArchivePath = Join-Path $outputRoot ".digitalpancake-$timestamp.zip"
+$stagingRoot = Join-Path $outputRoot ".digitalpancake-staging-$timestamp"
+
+$gitStatus = & git -C $projectRoot status --porcelain --untracked-files=all
+if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect the Git working tree.' }
+if ($gitStatus) { throw 'The release working tree is not clean. Commit and verify all files before packaging.' }
+$commit = (& git -C $projectRoot rev-parse --verify HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $commit -notmatch '^[0-9a-f]{40,64}$') {
+    throw 'Unable to determine a valid release commit SHA.'
+}
 
 # Top-level directories are deliberately not copied wholesale. Generated data
 # under server/, legacy browser demos, local work files and secrets therefore
@@ -33,7 +42,7 @@ $files = @(
     'tests\production-integration.mjs', 'tests\production-e2e.mjs',
     'tests\community-e2e.mjs', 'tests\new-features-ui.mjs',
     'tests\persistence.mjs', 'tests\persistence-child.mjs', 'tests\real-data-ui.mjs',
-    'tests\deployment-smoke.sh',
+    'tests\deployment-smoke.sh', 'tests\package-smoke.sh',
     'deploy\app.env.example', 'deploy\backup.sh',
     'deploy\electronic-pancake-backup.service',
     'deploy\electronic-pancake-backup.timer', 'deploy\electronic-pancake.service',
@@ -76,7 +85,6 @@ foreach ($officialFile in $officialFiles) {
     if ($files -notcontains $relative) { $files += $relative }
 }
 
-if (Test-Path -LiteralPath $archivePath) { throw "Archive already exists: $archivePath" }
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 New-Item -ItemType Directory -Path $stagingRoot | Out-Null
 try {
@@ -102,7 +110,27 @@ try {
     if ($unexpectedSecrets) {
         throw "A credential-like assignment was found in staged source: $($unexpectedSecrets.Path -join ', ')"
     }
-    Compress-Archive -Path (Join-Path $stagingRoot '*') -DestinationPath $archivePath -CompressionLevel Optimal
+    [System.IO.File]::WriteAllText(
+        (Join-Path $stagingRoot 'DIGITALPANCAKE_RELEASE'),
+        "$commit`n",
+        [System.Text.UTF8Encoding]::new($false)
+    )
+    $manifestEntries = Get-ChildItem -LiteralPath $stagingRoot -File -Recurse |
+        Where-Object { $_.Name -ne 'DIGITALPANCAKE_SHA256SUMS' } |
+        ForEach-Object {
+            $relative = $_.FullName.Substring($stagingRoot.Length).TrimStart('\').Replace('\', '/')
+            $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+            [PSCustomObject]@{ Relative = $relative; Line = "$hash  $relative" }
+        } |
+        Sort-Object -Property Relative
+    $manifestText = (($manifestEntries | ForEach-Object Line) -join "`n") + "`n"
+    [System.IO.File]::WriteAllText(
+        (Join-Path $stagingRoot 'DIGITALPANCAKE_SHA256SUMS'),
+        $manifestText,
+        [System.Text.UTF8Encoding]::new($false)
+    )
+    Compress-Archive -Path (Join-Path $stagingRoot '*') -DestinationPath $temporaryArchivePath -CompressionLevel Optimal
+    Move-Item -LiteralPath $temporaryArchivePath -Destination $archivePath -Force
     $archiveHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $archivePath).Hash.ToLowerInvariant()
     $checksumPath = "$archivePath.sha256"
     $checksumLine = "$archiveHash  $([System.IO.Path]::GetFileName($archivePath))`n"
@@ -110,9 +138,12 @@ try {
     Write-Host "Release archive created: $archivePath"
     Write-Host "SHA-256 file created: $checksumPath"
 } finally {
+    if (Test-Path -LiteralPath $temporaryArchivePath) {
+        Remove-Item -LiteralPath $temporaryArchivePath -Force
+    }
     $resolvedOutput = [System.IO.Path]::GetFullPath($outputRoot).TrimEnd('\')
     $resolvedStaging = [System.IO.Path]::GetFullPath($stagingRoot)
-    if ($resolvedStaging.StartsWith($resolvedOutput + '\.electronic-pancake-staging-', [System.StringComparison]::OrdinalIgnoreCase) -and
+    if ($resolvedStaging.StartsWith($resolvedOutput + '\.digitalpancake-staging-', [System.StringComparison]::OrdinalIgnoreCase) -and
         (Test-Path -LiteralPath $resolvedStaging)) {
         for ($attempt = 1; $attempt -le 5; $attempt++) {
             try {

@@ -4,7 +4,7 @@
 
 当前仓库是可部署源代码，不代表公网已经上线。域名、DNS、SMTP 和真实 TLS 证书仍需在目标服务器配置。目标系统按 **Ubuntu 24.04 LTS** 编写；“Ubuntu 24.02”不是 Ubuntu LTS 版本号，请在购机或重装前核对镜像名称。
 
-服务器首次开站可按《服务器开站流程.md》的“最少命令的推荐流程”执行：`deploy/quick-install.sh` 先建立仅限 SSH 隧道访问的预上线环境，ICP备案通过且域名解析生效后，再运行 `deploy/enable-https.sh` 开放正式 HTTPS。脚本预填 `digitalpancake.top`、`43.142.159.194` 和腾讯企业邮箱的非秘密参数；SMTP 密码与站长信息只在服务器隐藏输入，不进入仓库。
+服务器首次开站可按《服务器开站流程.md》的“最少命令的推荐流程”执行：发布脚本生成带逐文件哈希清单的 `digitalpancake.zip`，上传并解压到 `~/digitalpancake` 后，`deploy/quick-install.sh` 会先验包再建立仅限 SSH 隧道访问的预上线环境；ICP备案通过且域名解析生效后，再运行 `deploy/enable-https.sh` 开放正式 HTTPS。脚本预填 `digitalpancake.top`、`43.142.159.194` 和腾讯企业邮箱的非秘密参数；SMTP 密码与站长信息只在服务器隐藏输入，不进入仓库。
 
 ## Windows 本地运行
 
