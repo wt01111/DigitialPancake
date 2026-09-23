@@ -1,5 +1,5 @@
 [Unit]
-Description=Back up Electronic Pancake
+Description=Back up digitalpancake
 
 [Service]
 Type=oneshot

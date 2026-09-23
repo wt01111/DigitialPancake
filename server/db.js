@@ -33,7 +33,16 @@ CREATE TABLE IF NOT EXISTS bookmarks(user_id TEXT NOT NULL,item_type TEXT NOT NU
 CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,title TEXT NOT NULL,href TEXT,read_at TEXT,created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,actor_id TEXT,action TEXT NOT NULL,entity_type TEXT,entity_id TEXT,detail TEXT,created_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS schema_migrations(id TEXT PRIMARY KEY,applied_at TEXT NOT NULL);
-CREATE INDEX IF NOT EXISTS idx_shops_status_name ON shops(status,name); CREATE INDEX IF NOT EXISTS idx_reviews_shop_status ON reviews(shop_id,status); CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status); CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at); CREATE INDEX IF NOT EXISTS idx_comments_target_thread ON comments(target_type,target_id,parent_id,created_at);`);
+CREATE INDEX IF NOT EXISTS idx_shops_status_name ON shops(status,name); CREATE INDEX IF NOT EXISTS idx_reviews_shop_status ON reviews(shop_id,status); CREATE INDEX IF NOT EXISTS idx_reviews_user_shop_source ON reviews(user_id,shop_id,source_type); CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status); CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at); CREATE INDEX IF NOT EXISTS idx_comments_target_thread ON comments(target_type,target_id,parent_id,created_at);
+CREATE TRIGGER IF NOT EXISTS limit_site_reviews_per_user_shop
+BEFORE INSERT ON reviews
+WHEN NEW.source_type='site' AND NEW.user_id IS NOT NULL AND (
+  SELECT COUNT(*) FROM reviews
+  WHERE user_id=NEW.user_id AND shop_id=NEW.shop_id AND source_type='site'
+) >= 5
+BEGIN
+  SELECT RAISE(ABORT, 'REVIEW_LIMIT_REACHED');
+END;`);
 for (const sql of [
   "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 1",
   "ALTER TABLE users ADD COLUMN bio TEXT NOT NULL DEFAULT ''",

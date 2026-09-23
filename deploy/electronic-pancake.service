@@ -1,5 +1,5 @@
 [Unit]
-Description=Electronic Pancake API
+Description=digitalpancake API
 After=network-online.target
 Wants=network-online.target
 

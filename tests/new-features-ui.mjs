@@ -25,7 +25,8 @@ await page.route("**/api/problems/p1", (r) => r.fulfill({ json: { id: "p1", titl
 const pdf = await readFile("server/seed/problems-official-files/2026/all/H.pdf");
 await page.route("**/api/official-files/f1", (r) => r.fulfill({ status: 200, headers: { "Content-Type": "application/pdf", "Content-Length": String(pdf.length) }, body: pdf }));
 await page.route("**/api/users/u2", (r) => r.fulfill({ json: { id: "u2", nickname: "公开作者", bio: "公开简介", articles: [{ id: "a1", title: "真实文章" }], comments: [{ id: "c1", body: "公开互动", targetTitle: "真实文章", href: "/articles/a1#comment-c1" }], reviews: [] } }));
-await page.route("**/api/shops/s1", (r) => r.fulfill({ json: { id: "s1", name: "真实店铺", reviews: [], bookmarked: false } }));
+let shopAtLimit = false;
+await page.route("**/api/shops/s1", (r) => r.fulfill({ json: { id: "s1", name: "真实店铺", reviews: [], bookmarked: false, reviewLimit: 5, myReviewCount: shopAtLimit ? 5 : 2, myReviewRemaining: shopAtLimit ? 0 : 3 } }));
 let bookmarked = false;
 await page.route("**/api/me/bookmarks/shop/s1", (r) => { bookmarked = r.request().method() === "POST"; return r.fulfill({ json: { ok: true } }); });
 let reviewPatch = null;
@@ -62,6 +63,8 @@ await page.getByRole("button", { name: "卡片" }).click();
 await expect(page.locator(".article-card")).toHaveCount(2);
 await expect(page.locator(".article-card .article-photo img")).toHaveCount(1);
 await page.screenshot({ path: "test-results/new-features-ui/articles-cards-desktop.png", fullPage: true });
+await page.locator(".article-card .article-title").first().evaluate((node) => { node.textContent = "用于验证长标题不会挤出卡片边界的电子设计学习文章标题".repeat(3); });
+assert.equal(await page.locator(".article-card").first().evaluate((node) => node.scrollHeight <= node.clientHeight), true, "long card content must stay inside its fixed row");
 await page.reload();
 await expect(page.getByRole("button", { name: "卡片" })).toHaveAttribute("aria-pressed", "true");
 await page.getByRole("button", { name: "逐行列表" }).click();
@@ -84,10 +87,18 @@ await page.getByRole("button", { name: "最新" }).click(); await expect.poll(()
 await page.getByRole("link", { name: "公开作者" }).first().click();
 await expect(page.getByRole("heading", { name: "公开作者", exact: true })).toBeVisible();
 await expect(page.getByText("公开互动")).toBeVisible();
+await expect(page.locator(".profile-article-list .article-list-row")).toHaveCount(1);
+await page.screenshot({ path: "test-results/new-features-ui/public-profile-desktop.png", fullPage: true });
 
 await page.goto(`${base}/shops/s1`);
+await expect(page.getByText("你已提交 2 条，还可提交 3 条。")).toBeVisible();
 await page.getByRole("button", { name: "收藏" }).click();
 await expect(page.getByRole("button", { name: "取消收藏" })).toBeVisible(); assert.equal(bookmarked, true);
+shopAtLimit = true;
+await page.reload();
+await expect(page.getByText(/已用完该店铺的 5 个评价名额/)).toBeVisible();
+await expect(page.getByRole("button", { name: "提交审核" })).toHaveCount(0);
+await expect(page.getByRole("link", { name: "管理我的评价" })).toBeVisible();
 await page.goto(`${base}/reviews/r1/edit`);
 await expect(page.getByText(/审核期间继续展示旧版/)).toBeVisible();
 await page.screenshot({ path: "test-results/new-features-ui/review-three-levels.png", fullPage: true });

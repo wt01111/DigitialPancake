@@ -231,7 +231,7 @@ await authFlow.getByLabel("邮箱", { exact: true }).fill("cooldown@example.test
 await authFlow.locator(".field-action button").click();
 await expect(authFlow.getByRole("button", { name: "发送中…" })).toBeDisabled();
 await expect.poll(() => codeRequests).toBe(1);
-await expect(authFlow.getByText("若该邮箱可用于此操作，验证码将发送，请在 1 分钟内完成验证。")).toBeVisible();
+await expect(authFlow.getByText("若该邮箱可用于注册，验证码将发送；若收件箱中没有，请检查垃圾邮件或广告邮件。")).toBeVisible();
 await expect(authFlow.getByLabel("邮箱验证码")).toHaveAttribute("inputmode", "numeric");
 await authFlow.reload();
 await authFlow.getByRole("button", { name: "注册" }).click();

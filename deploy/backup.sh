@@ -43,8 +43,10 @@ mkdir -m 0700 "$staging"
 trap 'rm -rf -- "$staging"' EXIT
 
 service_was_active=0
-systemctl is-active --quiet electronic-pancake.service && service_was_active=1
-systemctl stop electronic-pancake.service
+if systemctl is-active --quiet electronic-pancake.service; then
+  service_was_active=1
+  systemctl stop electronic-pancake.service
+fi
 restart_service() {
   if [[ $service_was_active -eq 1 ]]; then systemctl start electronic-pancake.service; fi
 }

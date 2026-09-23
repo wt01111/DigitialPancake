@@ -1230,12 +1230,18 @@ function ShopDetail() {
             title={`还没有${{ positive: "好评", neutral: "中评", negative: "差评" }[sentiment]}`}
           />
         )}
-        <ReviewForm id={id} reload={r.reload} />
+        <ReviewForm
+          id={id}
+          reload={r.reload}
+          reviewLimit={s.reviewLimit}
+          reviewCount={s.myReviewCount}
+          reviewRemaining={s.myReviewRemaining}
+        />
       </div>
     </div>
   );
 }
-function ReviewForm({ id, reload }) {
+function ReviewForm({ id, reload, reviewLimit = 5, reviewCount = 0, reviewRemaining }) {
   const { user } = useSite();
   const [f, setF] = useState({
       sentiment: "positive",
@@ -1251,6 +1257,10 @@ function ReviewForm({ id, reload }) {
         <Link to="/auth">登录</Link>后提交评价。
       </p>
     );
+  const remaining = Number.isFinite(Number(reviewRemaining))
+    ? Number(reviewRemaining)
+    : Math.max(0, Number(reviewLimit) - Number(reviewCount));
+  const atLimit = remaining <= 0;
   async function submit(e) {
     e.preventDefault();
     if (busy) return;
@@ -1271,13 +1281,19 @@ function ReviewForm({ id, reload }) {
   return (
     <section className="form-section">
       <h2>提交购买评价</h2>
-      <p className="muted">审核通过后公开并计入评分。</p>
+      <p className="muted">审核通过后公开并计入评分。每位用户对同一家店铺最多提交 {reviewLimit} 条，可分别记录不同购买经历和评价倾向。</p>
+      <p className={`review-quota ${atLimit ? "limit-reached" : ""}`} role="status">
+        {atLimit
+          ? `你已用完该店铺的 ${reviewLimit} 个评价名额。已有评价仍可在个人中心编辑或撤回。`
+          : `你已提交 ${reviewCount} 条，还可提交 ${remaining} 条。`}
+        {atLimit && <Link to="/account?tab=reviews">管理我的评价</Link>}
+      </p>
       {done ? (
         <div className="success-box">
           <Check />
           已提交审核。
         </div>
-      ) : (
+      ) : atLimit ? null : (
         <form className="form-grid" onSubmit={submit}>
           <label>评价倾向
             <select value={f.sentiment} onChange={(e) => setF({ ...f, sentiment: e.target.value })}>
@@ -1478,7 +1494,11 @@ function Auth() {
       setCooldownUntil(until);
       setCooldown(seconds);
       try { localStorage.setItem(`auth-code-until:${normalizedEmail}`, String(until)); } catch {}
-      setSuccess("若该邮箱可用于此操作，验证码将发送，请在 1 分钟内完成验证。");
+      setSuccess(
+        mode === "register"
+          ? "若该邮箱可用于注册，验证码将发送；若收件箱中没有，请检查垃圾邮件或广告邮件。"
+          : "若该邮箱可用于此操作，验证码将发送，请在 1 分钟内完成验证。",
+      );
     } catch (x) {
       setError(x.message);
       if (x.retryAfter > 0) {
@@ -1612,7 +1632,10 @@ function Auth() {
                   {codeBusy ? "发送中…" : cooldown > 0 ? `${cooldown} 秒后可重发` : sent ? "重新发送" : "发送验证码"}
                 </button>
               </div>
-              <small id="code-help">验证码为 6 位数字，发送后 1 分钟内有效。</small>
+              <small id="code-help">
+                验证码为 6 位数字，发送后 1 分钟内有效。
+                {mode === "register" && " 若收件箱中没有，请检查垃圾邮件或广告邮件。"}
+              </small>
             </label>
           )}
           <label>
@@ -2043,10 +2066,10 @@ function PublicUser() {
     <div className="container page public-profile">
       <header className="profile-hero">
         <span className="avatar">{u.nickname?.[0] || "用"}</span>
-        <div><h1>{u.nickname || "社区用户"}</h1><p>{u.bio || "这位用户还没有填写简介。"}</p></div>
+        <div className="profile-identity"><h1>{u.nickname || "社区用户"}</h1><p>{u.bio || "这位用户还没有填写简介。"}</p></div>
       </header>
       <section><h2>公开文章</h2>
-        {u.articles?.length ? <div className="article-grid">{u.articles.map((a) => <Card key={a.id} a={{ ...a, author: { id: u.id, nickname: u.nickname } }} />)}</div> : <Empty title="还没有公开文章" text="审核通过并公开的文章会显示在这里。" />}
+        {u.articles?.length ? <div className="article-list profile-article-list">{u.articles.map((a) => <ArticleRow key={a.id} a={{ ...a, author: { id: u.id, nickname: u.nickname } }} />)}</div> : <Empty title="还没有公开文章" text="审核通过并公开的文章会显示在这里。" />}
       </section>
       <section><h2>公开评论与互动</h2>
         {u.comments?.length ? <div className="record-list">{u.comments.map((c) => <article key={c.id}><strong>{c.targetTitle || "内容讨论"}</strong><p>{c.body}</p><small>{fmt(c.createdAt)}</small>{c.href && <Link to={c.href}>回到原内容</Link>}</article>)}</div> : <Empty title="还没有公开评论" text="公开内容下可见的评论会显示在这里。" />}

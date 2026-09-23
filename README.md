@@ -110,7 +110,7 @@ sudo mv -Tf /opt/electronic-pancake/current.new /opt/electronic-pancake/current
 ```sh
 release_id="$(date -u +%Y%m%dT%H%M%SZ)"
 release_dir="/opt/electronic-pancake/releases/$release_id"
-release_zip="/tmp/electronic-pancake-source-请替换为本次时间戳.zip"
+release_zip="/tmp/digitalpancake-source-请替换为本次时间戳.zip"
 test -f "$release_zip"
 sudo install -d -o root -g root -m 0755 "$release_dir"
 sudo unzip "$release_zip" -d "$release_dir"

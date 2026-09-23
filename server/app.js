@@ -117,6 +117,21 @@ const parseCookies = (header = "") =>
   );
 const fail = (status, error, code) =>
   Object.assign(new Error(error), { status, code });
+const SHOP_REVIEW_LIMIT = 5;
+const siteReviewCount = (userId, shopId) =>
+  Number(
+    one(
+      "SELECT COUNT(*) count FROM reviews WHERE user_id=? AND shop_id=? AND source_type='site'",
+      userId,
+      shopId,
+    )?.count || 0,
+  );
+const reviewLimitError = () =>
+  fail(
+    409,
+    `每位用户对同一家店铺最多可提交 ${SHOP_REVIEW_LIMIT} 条评价；已有评价仍可编辑或撤回。`,
+    "REVIEW_LIMIT_REACHED",
+  );
 const can = (u, p) =>
   u?.role === "owner" ||
   (u?.role === "admin" &&
@@ -877,9 +892,15 @@ app.get("/api/shops/:id", (req, res, next) => {
     delete o.proofMime;
     return o;
   });
+  const myReviewCount = req.user ? siteReviewCount(req.user.id, s.id) : 0;
   res.json({
     ...shopOut(s),
     reviews,
+    reviewLimit: SHOP_REVIEW_LIMIT,
+    myReviewCount,
+    myReviewRemaining: req.user
+      ? Math.max(0, SHOP_REVIEW_LIMIT - myReviewCount)
+      : null,
     bookmarked: Boolean(
       req.user &&
       one(
@@ -1086,6 +1107,10 @@ app.post(
     one("SELECT id FROM shops WHERE id=? AND status='approved'", req.params.id)
       ? next()
       : next(fail(404, "店铺不存在", "NOT_FOUND")),
+  (req, _res, next) =>
+    siteReviewCount(req.user.id, req.params.id) >= SHOP_REVIEW_LIMIT
+      ? next(reviewLimitError())
+      : next(),
   uploadCapacity,
   upload.single("proof"),
   uploadedCapacity,
@@ -1112,6 +1137,10 @@ app.post(
           "请选择好评、中评或差评，并填写评价内容",
           "INVALID_INPUT",
         );
+      // Recheck after the multipart upload. Another request may have filled the
+      // last slot while this request was receiving its optional proof file.
+      if (siteReviewCount(req.user.id, shop.id) >= SHOP_REVIEW_LIMIT)
+        throw reviewLimitError();
       const rid = id("review"),
         t = now();
       let fid = null;
@@ -1143,23 +1172,29 @@ app.post(
           t,
         );
       }
-      run(
-        "INSERT INTO reviews(id,shop_id,user_id,source_type,rating,pros,cons,purchase_experience,purchased_at,order_platform,proof_file_id,status,created_at,updated_at,sentiment,review_content) VALUES(?,?,?,'site',?,?,?,?,?,?,?,'pending',?,?,?,?)",
-        rid,
-        shop.id,
-        req.user.id,
-        rating,
-        pros,
-        cons,
-        experience,
-        req.body.purchasedAt || null,
-        req.body.orderPlatform || null,
-        fid,
-        t,
-        t,
-        sentiment,
-        content,
-      );
+      try {
+        run(
+          "INSERT INTO reviews(id,shop_id,user_id,source_type,rating,pros,cons,purchase_experience,purchased_at,order_platform,proof_file_id,status,created_at,updated_at,sentiment,review_content) VALUES(?,?,?,'site',?,?,?,?,?,?,?,'pending',?,?,?,?)",
+          rid,
+          shop.id,
+          req.user.id,
+          rating,
+          pros,
+          cons,
+          experience,
+          req.body.purchasedAt || null,
+          req.body.orderPlatform || null,
+          fid,
+          t,
+          t,
+          sentiment,
+          content,
+        );
+      } catch (error) {
+        if (String(error?.message || "").includes("REVIEW_LIMIT_REACHED"))
+          throw reviewLimitError();
+        throw error;
+      }
       audit(req.user, "提交店铺评价", "review", rid);
       res.status(201).json({ id: rid, status: "pending" });
     } catch (e) {

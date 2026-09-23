@@ -3,7 +3,7 @@ import { db } from "./db.js";
 const port = Number(process.env.PORT || 3001);
 const host = process.env.HOST || "127.0.0.1";
 const server = app.listen(port, host, () =>
-  console.log(`Electronic Pancake server listening on ${host}:${port}`),
+  console.log(`digitalpancake server listening on ${host}:${port}`),
 );
 function shutdown() {
   server.close(() => {

@@ -88,7 +88,7 @@ systemctl reload nginx
 systemctl restart electronic-pancake.service
 healthy=0
 for _ in {1..30}; do
-  if curl --fail --silent "https://$DOMAIN/" >/dev/null && \
+  if curl --fail --silent --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/" >/dev/null && \
      curl --fail --silent http://127.0.0.1:3001/healthz >/dev/null; then healthy=1; break; fi
   sleep 1
 done

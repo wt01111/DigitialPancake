@@ -1,5 +1,5 @@
 [Unit]
-Description=Daily Electronic Pancake backup
+Description=Daily digitalpancake backup
 
 [Timer]
 OnCalendar=*-*-* 03:20:00

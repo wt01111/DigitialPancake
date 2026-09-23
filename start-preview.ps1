@@ -47,7 +47,7 @@ if (Test-Path -LiteralPath $pidFile) {
 $savedBackendOk = $saved -and (Test-ProjectProcess ([int]$saved.backendPid) 'server\index.js')
 $savedFrontendOk = $saved -and (Test-ProjectProcess ([int]$saved.frontendPid) 'vite.js')
 if ($savedBackendOk -and $savedFrontendOk -and
-    (Test-Http $backendUrl '') -and (Test-Http $frontendUrl 'electronic-pancake')) {
+    (Test-Http $backendUrl '') -and (Test-Http $frontendUrl 'digitalpancake')) {
     if (-not $NoBrowser) { Start-Process $frontendUrl }
     exit 0
 }
@@ -82,10 +82,10 @@ try {
         -RedirectStandardError (Join-Path $workDirectory 'frontend-error.log') -PassThru
     for ($attempt = 0; $attempt -lt 40; $attempt++) {
         Start-Sleep -Milliseconds 250
-        if (Test-Http $frontendUrl 'electronic-pancake') { break }
+        if (Test-Http $frontendUrl 'digitalpancake') { break }
         if ($frontend.HasExited) { throw '前端启动失败，请查看 work/frontend-error.log。' }
     }
-    if (-not (Test-Http $frontendUrl 'electronic-pancake')) { throw '前端未在限定时间内就绪。' }
+    if (-not (Test-Http $frontendUrl 'digitalpancake')) { throw '前端未在限定时间内就绪。' }
 
     @{ backendPid = $backend.Id; frontendPid = $frontend.Id; projectRoot = $projectRoot } |
         ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding UTF8

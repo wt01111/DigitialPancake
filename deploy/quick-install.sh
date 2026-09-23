@@ -104,6 +104,14 @@ systemd-run --quiet --wait --collect --uid="$APP_USER" --gid="$APP_USER" \
   --property="EnvironmentFile=$ENV_FILE" --working-directory="$release_dir" \
   /usr/local/bin/node server/verify-smtp.js
 
+# An update keeps all persistent state in STATE_DIR. Take a consistent snapshot
+# before starting code that may perform a database migration. The backup script
+# briefly stops and restores the existing service by itself.
+if [[ -f "$STATE_DIR/site.sqlite" ]]; then
+  printf '检测到现有站点数据；切换版本前创建一致性备份。\n'
+  /usr/bin/bash "$release_dir/deploy/backup.sh"
+fi
+
 previous_target="$(readlink -f "$APP_ROOT/current" 2>/dev/null || true)"
 release_rollback_active=1
 rollback_release() {
@@ -128,6 +136,7 @@ mv -Tf "$APP_ROOT/current.new" "$APP_ROOT/current"
 install -o root -g root -m 0644 deploy/electronic-pancake.service /etc/systemd/system/electronic-pancake.service
 install -o root -g root -m 0644 deploy/electronic-pancake-backup.service /etc/systemd/system/electronic-pancake-backup.service
 install -o root -g root -m 0644 deploy/electronic-pancake-backup.timer /etc/systemd/system/electronic-pancake-backup.timer
+install -o root -g root -m 0644 deploy/logrotate.conf /etc/logrotate.d/electronic-pancake
 install -o root -g root -m 0644 deploy/nginx/electronic-pancake-staging.conf /etc/nginx/sites-available/electronic-pancake-staging.conf
 if [[ ! -e /etc/nginx/sites-enabled/electronic-pancake.conf ]]; then
   ln -sfn /etc/nginx/sites-available/electronic-pancake-staging.conf /etc/nginx/sites-enabled/electronic-pancake-staging.conf
