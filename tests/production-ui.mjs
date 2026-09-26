@@ -117,6 +117,7 @@ await admin.route("**/api/bootstrap", (r) =>
 );
 let moderationDecision = null;
 await admin.route("**/api/admin/articles/*/decision", (r) => { moderationDecision = r.request().postDataJSON(); return r.fulfill({ json: { ok: true } }); });
+await admin.route("**/api/admin/announcement", (r) => r.fulfill({ json: { title: "", body: "", published: false, updatedAt: null, publishedAt: null } }));
 await admin.route("**/api/admin/queue*", (r) => {
   const url = new URL(r.request().url());
   return r.fulfill({ json: url.searchParams.get("type") === "articles" ? { items: [{ id: "published-1", title: "已通过的真实帖子", excerpt: "可由管理员搜索并直接下架", body: "## 正文", status: "approved", published: true }], total: 1, page: 1, pageSize: 20 } : { items: [] } });
@@ -161,6 +162,10 @@ await admin.route("**/api/admin/accounts*", async (r) => {
 });
 await admin.goto(`${base}/admin`);
 await expect(admin.getByRole("heading", { name: "管理工作台" })).toBeVisible();
+await expect(admin.getByRole("button", { name: "公告" })).toHaveClass(/active/);
+await expect(admin.getByRole("heading", { name: "首页公告" })).toBeVisible();
+await expect(admin.getByLabel("公告标题")).toBeVisible();
+await admin.getByRole("button", { name: "文章" }).click();
 await expect(admin.getByRole("button", { name: "文章" })).toHaveClass(/active/);
 await expect(admin.getByLabel("搜索帖子")).toBeVisible();
 await expect(admin.getByText("已通过的真实帖子")).toBeVisible();
@@ -200,7 +205,7 @@ await admin.screenshot({
   path: "work/qa/production-admin.png",
   fullPage: true,
 });
-const subordinate = await browser.newPage();
+const subordinate = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: "zh-CN" });
 await subordinate.route("**/api/bootstrap", (r) =>
   r.fulfill({
     json: {
@@ -218,8 +223,15 @@ await subordinate.route("**/api/bootstrap", (r) =>
 await subordinate.route("**/api/admin/queue*", (r) =>
   r.fulfill({ json: { items: [] } }),
 );
+await subordinate.route("**/api/admin/announcement", (r) =>
+  r.fulfill({ json: { title: "已发布公告", body: "检查窄屏操作区", published: true, updatedAt: "2026-09-26T00:00:00.000Z", publishedAt: "2026-09-26T00:00:00.000Z" } }),
+);
 await subordinate.goto(`${base}/admin`);
 await expect(subordinate.getByRole("button", { name: "账号" })).toHaveCount(0);
+await subordinate.getByLabel("公告标题").fill("移动端公告");
+await subordinate.getByLabel("公告内容").fill("检查公告操作按钮在窄屏下不会溢出。");
+assert.equal(await subordinate.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "announcement admin actions must not overflow a narrow viewport");
+await subordinate.screenshot({ path: "test-results/new-features-ui/announcement-admin-mobile.png", fullPage: true });
 const authFlow = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: "zh-CN" });
 await authFlow.route("**/api/bootstrap", (r) => r.fulfill({ json: { user: null, config: { registrationEnabled: true, maxUploadBytes: 52428800 } } }));
 let codeRequests = 0, resetPayload = null;

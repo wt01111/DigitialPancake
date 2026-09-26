@@ -21,6 +21,7 @@ import {
   FolderOpen,
   LogOut,
   Menu,
+  Megaphone,
   MessageSquare,
   PenLine,
   Search,
@@ -208,7 +209,8 @@ function Header() {
   );
 }
 function Layout({ children }) {
-  const { bootstrapError } = useSite();
+  const { bootstrapError, config } = useSite();
+  const filingNumber = String(config?.filingNumber || "").trim();
   return (
     <>
       <Header />
@@ -227,6 +229,15 @@ function Layout({ children }) {
           <Link to="/shops">店铺口碑</Link>
           <Link to="/about">关于本站</Link>
           <span>© 2026 电子煎饼</span>
+        </div>
+        <div className="footer-filing">
+          {filingNumber ? (
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+              {filingNumber}
+            </a>
+          ) : (
+            "备案信息待补充"
+          )}
         </div>
       </footer>
     </>
@@ -410,6 +421,7 @@ function Home() {
         </figure>
       </section>
       <div className="container">
+        <HomeAnnouncement />
         {[
           ["最新赛题", p, "problems"],
           ["最新文章", a, "articles"],
@@ -438,6 +450,21 @@ function Home() {
         ))}
       </div>
     </>
+  );
+}
+function HomeAnnouncement() {
+  const r = useLoad("/announcement", []),
+    announcement = r.data?.announcement;
+  if (r.loading || r.error || !announcement) return null;
+  return (
+    <section className="home-announcement" aria-labelledby="home-announcement-title">
+      <div className="announcement-icon" aria-hidden="true"><Megaphone /></div>
+      <div>
+        <span>站内公告</span>
+        <h2 id="home-announcement-title">{announcement.title}</h2>
+        <p>{announcement.body}</p>
+      </div>
+    </section>
   );
 }
 function Listing({ type }) {
@@ -2180,6 +2207,7 @@ function Admin() {
   const opts = [
     ...(permit(user, "content")
       ? [
+          ["announcement", "公告"],
           ["articles", "文章"],
           ["problems", "赛题"],
         ]
@@ -2216,7 +2244,9 @@ function Admin() {
         ))}
       </aside>
       <section className="workspace-main">
-        {type === "accounts" ? (
+        {type === "announcement" ? (
+          <AnnouncementAdmin />
+        ) : type === "accounts" ? (
           <Accounts />
         ) : type === "audit" ? (
           <Records />
@@ -2227,6 +2257,98 @@ function Admin() {
         )}
       </section>
     </div>
+  );
+}
+function AnnouncementAdmin() {
+  const r = useLoad("/admin/announcement", []);
+  const [form, setForm] = useState({ title: "", body: "" }),
+    [busy, setBusy] = useState(false),
+    [message, setMessage] = useState(""),
+    [error, setError] = useState(""),
+    [confirmAction, setConfirmAction] = useState("");
+  const hydratedVersion = useRef(undefined);
+  useEffect(() => {
+    if (!r.data || r.data.updatedAt === hydratedVersion.current) return;
+    setForm({ title: r.data.title || "", body: r.data.body || "" });
+    hydratedVersion.current = r.data.updatedAt ?? null;
+  }, [r.data]);
+  async function saveDraft() {
+    const result = await api("/admin/announcement", {
+      method: "PUT",
+      body: { ...form, expectedUpdatedAt: r.data?.updatedAt ?? null },
+    });
+    setForm({ title: result.title || "", body: result.body || "" });
+    await r.reload();
+    return result;
+  }
+  async function act(action) {
+    if (busy) return;
+    setBusy(true); setError(""); setMessage("");
+    try {
+      if (action === "save") {
+        await saveDraft();
+        setMessage("公告草稿已保存，访客仍看到上一次发布的版本。");
+      } else if (action === "publish") {
+        const saved = await saveDraft();
+        await api("/admin/announcement/publish", {
+          method: "POST",
+          body: { expectedUpdatedAt: saved.updatedAt },
+        });
+        await r.reload();
+        setMessage("公告已发布到首页。");
+      } else if (action === "unpublish") {
+        await api("/admin/announcement/unpublish", {
+          method: "POST",
+          body: { expectedUpdatedAt: r.data?.updatedAt ?? null },
+        });
+        await r.reload();
+        setMessage("公告已下架，访客首页不再显示。");
+      } else if (action === "clear") {
+        await api("/admin/announcement", {
+          method: "DELETE",
+          body: { expectedUpdatedAt: r.data?.updatedAt ?? null },
+        });
+        setForm({ title: "", body: "" });
+        hydratedVersion.current = null;
+        await r.reload();
+        setMessage("公告草稿和已发布内容已清空。");
+      }
+      setConfirmAction("");
+    } catch (x) {
+      setError(x.code === "STALE_ANNOUNCEMENT" ? "公告已被其他管理员更新，请刷新后再操作。" : x.message);
+    } finally { setBusy(false); }
+  }
+  if (r.loading && !r.data) return <Loading />;
+  return (
+    <>
+      <h1>首页公告</h1>
+      <p>编辑稿只在管理后台可见；点击发布后，首页才会显示本次内容。公告按纯文本展示并保留换行。</p>
+      <Err error={r.error || error} retry={r.error ? r.reload : undefined} />
+      {message && <div className="success-box" role="status"><Check />{message}</div>}
+      <form className="panel form-stack announcement-editor" onSubmit={(e) => { e.preventDefault(); act("save"); }}>
+        <div className="announcement-state">
+          <span className={`status status-${r.data?.published ? "published" : "draft"}`}>
+            {r.data?.published ? "首页正在展示" : "当前未发布"}
+          </span>
+          {r.data?.updatedAt && <small>最后更新：{fmt(r.data.updatedAt)}</small>}
+        </div>
+        <label>公告标题
+          <input value={form.title} maxLength="120" disabled={busy} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+          <small>{form.title.length} / 120</small>
+        </label>
+        <label>公告内容
+          <textarea value={form.body} maxLength="2000" rows="8" disabled={busy} onChange={(e) => setForm({ ...form, body: e.target.value })} required />
+          <small>{form.body.length} / 2000</small>
+        </label>
+        <div className="action-row">
+          <button className="button secondary" disabled={busy}>{busy ? "处理中…" : "保存草稿"}</button>
+          <button type="button" className="button primary" disabled={busy} onClick={() => act("publish")}>保存并发布</button>
+          {r.data?.published && <button type="button" className="button secondary" disabled={busy} onClick={() => setConfirmAction("unpublish")}>下架公告</button>}
+          {r.data?.updatedAt && <button type="button" className="text-button danger" disabled={busy} onClick={() => setConfirmAction("clear")}>清空公告</button>}
+        </div>
+      </form>
+      {confirmAction && <div className="moderation-confirm"><p><strong>确认{confirmAction === "clear" ? "清空" : "下架"}公告？</strong>{confirmAction === "clear" ? " 草稿和已发布内容都会删除。" : " 访客首页将立即停止显示，草稿仍会保留。"}</p><div className="action-row"><button type="button" className="button danger small" disabled={busy} onClick={() => act(confirmAction)}>{busy ? "处理中…" : `确认${confirmAction === "clear" ? "清空" : "下架"}`}</button><button type="button" className="button secondary small" disabled={busy} onClick={() => setConfirmAction("")}>取消</button></div></div>}
+    </>
   );
 }
 function Moderation({ type }) {

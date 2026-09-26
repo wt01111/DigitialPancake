@@ -19,7 +19,8 @@
     "test:integration": "node tests/production-integration.mjs",
     "test:e2e": "node tests/production-e2e.mjs",
     "test:persistence": "node tests/persistence.mjs",
-    "test:community": "node tests/community-e2e.mjs"
+    "test:community": "node tests/community-e2e.mjs",
+    "test:announcement": "node tests/announcement.mjs"
   },
   "dependencies": {
     "express": "^5.1.0",

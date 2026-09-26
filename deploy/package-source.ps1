@@ -42,7 +42,7 @@ $files = @(
     'tests\production-integration.mjs', 'tests\production-e2e.mjs',
     'tests\community-e2e.mjs', 'tests\new-features-ui.mjs',
     'tests\persistence.mjs', 'tests\persistence-child.mjs', 'tests\real-data-ui.mjs',
-    'tests\review-limit.mjs',
+    'tests\review-limit.mjs', 'tests\announcement.mjs',
     'tests\deployment-smoke.sh', 'tests\package-smoke.sh',
     'deploy\app.env.example', 'deploy\backup.sh',
     'deploy\electronic-pancake-backup.service',

@@ -4,7 +4,7 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 
 ## Session and profile
 
-- `GET /api/bootstrap` → `{user,config:{registrationEnabled,maxUploadBytes}}`; user fields: `id,email,nickname,role,permissions`.
+- `GET /api/bootstrap` → `{user,config:{registrationEnabled,maxUploadBytes,filingNumber}}`; user fields: `id,email,nickname,role,permissions`. `filingNumber` comes from `ICP_FILING_NUMBER` and is an empty string until configured.
 - `POST /api/auth/request-code` `{email,purpose:"register"|"reset"}` returns `{ok:true,expiresIn:60,cooldownSeconds:60}`. Codes are six digits, become valid only after SMTP accepts the message, expire after 60 seconds, allow at most five incorrect attempts, and are consumed once. Register and reset share a per-email 60-second send cooldown; cooldown responses are 429 `{error,code:"CODE_COOLDOWN",retryAfter}` with `retryAfter` in seconds. General request limiting uses `RATE_LIMITED` with the same field. SMTP delivery failures return 503 `SMTP_UNAVAILABLE` without exposing provider details.
 - `POST /api/auth/register` `{email,code,password,nickname}`.
 - `POST /api/auth/login` `{email,password}`. All users, including the owner, log in with a verified email address.
@@ -36,6 +36,9 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 - `POST /api/comments/:id/like` toggles one vote per user. `DELETE /api/comments/:id` soft-deletes for the author or reports moderator. `POST /api/comments/:id/report` requires `{reason}` of 2–500 characters and rejects duplicate pending reports.
 
 ## Administration
+
+- `GET /api/announcement` is public and returns `{announcement:null}` while no announcement is published, otherwise `{announcement:{title,body,publishedAt,format:"plain_text"}}`. Clients must render the title and body as plain text; body line breaks are preserved.
+- Content administrators use `GET /api/admin/announcement`, `PUT /api/admin/announcement` `{title,body,expectedUpdatedAt}`, `POST /api/admin/announcement/publish|unpublish` `{expectedUpdatedAt}`, and `DELETE /api/admin/announcement` `{expectedUpdatedAt}`. Draft edits do not replace the public snapshot until publish. Title and body are required and limited to 120 and 2000 characters. A stale version returns 409 `STALE_ANNOUNCEMENT`; save, publish, unpublish, and clear actions are audited.
 
 - `GET /api/admin/queue?type=shops|reviews|articles|reports&status=draft|pending|approved|rejected|hidden|all` (status defaults to pending). Article queues additionally accept `q,page,pageSize`; the private search matches both current drafts and the published snapshot and returns `{items,total,page,pageSize}`.
 - `POST /api/admin/shops/:id/decision`, `/reviews/:id/decision`, `/articles/:id/decision` with `{decision:"approved"|"rejected"|"hidden",reason?,expectedUpdatedAt?}`. Approval and rejection require the exact `updatedAt` from the queue item; stale or non-pending content returns 409 so an older moderation page can never approve a newer draft. Hiding an already public item does not require a version.

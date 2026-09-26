@@ -124,6 +124,7 @@ try {
   await logout();
   await login("owner@e2e.local", "owner-e2e-password-123");
   await page.goto(`${base}/admin`);
+  await page.getByRole("button", { name: "文章", exact: true }).click();
   const articleCard = page
     .locator(".record-list article")
     .filter({ hasText: "端到端 Markdown 调试记录" });

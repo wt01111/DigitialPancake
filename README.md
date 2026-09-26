@@ -37,6 +37,7 @@ npm run test:ui
 - 店铺搜索只有在访客提交非空关键词后才返回匹配店铺；空关键词不列出全部店铺。
 - 种子数据含 76 家店、82 条已审核历史意见。历史意见标注未经本站核实，不折算为本站星级。
 - 新店铺、新评价和投稿先进入审核队列。文章初始为空，不发布占位内容。题库预置 2017—2025 年全国正式赛题及 2018—2026 年陕西省 TI 杯正式赛题；不含邀请赛、教师赛或校际赛。
+- 首页公告由内容管理员在管理工作台保存草稿、发布、下架或清空；访客只会看到已发布的纯文本快照，所有操作写入审计日志并持久化到 SQLite。
 - 私有附件最多 50 MiB，必须经 API 鉴权下载。生产 `/var/lib/electronic-pancake/uploads` 绝不能由 Nginx 直接映射。
 - Markdown 不启用原始 HTML。部署 CSP 允许文章中的 HTTPS 图片，并限制脚本、框架、表单和其他资源来源。
 
@@ -125,7 +126,7 @@ sudo mv -Tf /opt/electronic-pancake/current.new /opt/electronic-pancake/current
 ```
 
 必须把 `release_zip` 改成本次上传文件的准确名称。发布包不要包含 `.env`、数据库、上传目录、`node_modules` 或本地日志。
-4. 由 `deploy/app.env.example` 创建 `/etc/electronic-pancake/app.env`，设置真实 HTTPS `PUBLIC_ORIGIN`、随机会话密钥、绝对数据路径和最高管理员邮箱 `OWNER_EMAIL`，再执行 `sudo chown root:root /etc/electronic-pancake/app.env && sudo chmod 0600 /etc/electronic-pancake/app.env`。`PUBLIC_ORIGIN` 只能填写一个主域名，例如 `https://example.com`，且必须与 Nginx canonical `server_name` 完全一致。正式数据库会在首次启动时由服务账号创建为 `/var/lib/electronic-pancake/site.sqlite`；不要预先用 root 在项目目录运行后端或初始化命令。
+4. 由 `deploy/app.env.example` 创建 `/etc/electronic-pancake/app.env`，设置真实 HTTPS `PUBLIC_ORIGIN`、随机会话密钥、绝对数据路径和最高管理员邮箱 `OWNER_EMAIL`，再执行 `sudo chown root:root /etc/electronic-pancake/app.env && sudo chmod 0600 /etc/electronic-pancake/app.env`。`PUBLIC_ORIGIN` 只能填写一个主域名，例如 `https://example.com`，且必须与 Nginx canonical `server_name` 完全一致。备案号取得后填写可选的 `ICP_FILING_NUMBER`；留空时页脚明确显示“备案信息待补充”，不会生成虚构号码。正式数据库会在首次启动时由服务账号创建为 `/var/lib/electronic-pancake/site.sqlite`；不要预先用 root 在项目目录运行后端或初始化命令。
 
    邮件建议使用域名邮箱或云邮件服务商：先在服务商控制台验证发信域名和 `SMTP_FROM`，再按其给出的值添加 SPF TXT、DKIM TXT/CNAME，并添加 DMARC TXT（初次可用服务商建议的监控策略，确认投递报告后再收紧）。同一域名只能合并为一条有效 SPF 记录。等待服务商确认 DNS 验证通过后，把 SMTP 主机、端口、加密方式、用户名、发件地址写入环境文件；密码或应用专用密钥只写 `SMTP_PASS`，不得进入 Git。端口 465 通常设置 `SMTP_SECURE=true`，STARTTLS 端口通常设置为 `false`，但必须以服务商文档为准。重启服务后，用专用测试邮箱完成注册验证码、密码重置和退信检查，再查看 SPF、DKIM、DMARC 验证结果。SMTP 未准备好时保持相关值为空。
 5. 安装并校验 API 服务；确认 `systemd-analyze verify` 没有错误后再启动。只运行一个 API 实例；SQLite WAL 不使用 Node cluster、PM2 多实例或多台共享写入。

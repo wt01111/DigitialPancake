@@ -310,6 +310,7 @@ app.get("/api/bootstrap", (req, res) =>
     user: publicUser(req.user, true),
     config: {
       registrationEnabled: smtpEnabled,
+      filingNumber: String(process.env.ICP_FILING_NUMBER || "").trim(),
       maxUploadBytes: 50 * 1024 * 1024,
       problemCategories: [
         { value: "signal", label: "信号类" },
@@ -324,6 +325,168 @@ app.get("/api/bootstrap", (req, res) =>
     },
   }),
 );
+function announcementOut(row, includeDraft = false) {
+  if (!row) return includeDraft
+    ? { title: "", body: "", published: false, updatedAt: null, publishedAt: null }
+    : { announcement: null };
+  if (!includeDraft)
+    return row.is_published && row.published_title && row.published_body
+      ? {
+          announcement: {
+            title: row.published_title,
+            body: row.published_body,
+            publishedAt: row.published_at,
+            format: "plain_text",
+          },
+        }
+      : { announcement: null };
+  return {
+    title: row.draft_title,
+    body: row.draft_body,
+    published: Boolean(row.is_published),
+    publishedTitle: row.published_title || "",
+    publishedBody: row.published_body || "",
+    updatedAt: row.updated_at,
+    publishedAt: row.published_at,
+    format: "plain_text",
+  };
+}
+function announcementFields(body) {
+  const title = String(body.title ?? "")
+      .replace(/\0/g, "")
+      .replace(/\r\n?/g, "\n")
+      .trim(),
+    content = String(body.body ?? "")
+      .replace(/\0/g, "")
+      .replace(/\r\n?/g, "\n")
+      .trim();
+  if (!title || !content)
+    throw fail(400, "公告标题和内容不能为空", "INVALID_INPUT");
+  if (title.length > 120)
+    throw fail(400, "公告标题不能超过 120 个字符", "INVALID_INPUT");
+  if (content.length > 2000)
+    throw fail(400, "公告内容不能超过 2000 个字符", "INVALID_INPUT");
+  return { title, body: content };
+}
+function requireAnnouncementVersion(req, row) {
+  const expected = req.body?.expectedUpdatedAt ?? null;
+  if ((row?.updated_at || null) !== expected)
+    throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+}
+app.get("/api/announcement", (_req, res) =>
+  res.json(announcementOut(one("SELECT * FROM site_announcements WHERE id='home'"))),
+);
+app.get("/api/admin/announcement", auth, permit("content"), (_req, res) =>
+  res.json(
+    announcementOut(
+      one("SELECT * FROM site_announcements WHERE id='home'"),
+      true,
+    ),
+  ),
+);
+app.put("/api/admin/announcement", auth, permit("content"), (req, res, next) => {
+  try {
+    const current = one("SELECT * FROM site_announcements WHERE id='home'"),
+      value = announcementFields(req.body),
+      updatedAt = nextUpdatedAt(current?.updated_at);
+    requireAnnouncementVersion(req, current);
+    if (current) {
+      const result = run(
+        "UPDATE site_announcements SET draft_title=?,draft_body=?,updated_at=?,updated_by=? WHERE id='home' AND updated_at=?",
+        value.title,
+        value.body,
+        updatedAt,
+        req.user.id,
+        current.updated_at,
+      );
+      if (!result.changes)
+        throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+    } else {
+      try {
+        run(
+          "INSERT INTO site_announcements(id,draft_title,draft_body,is_published,updated_at,updated_by) VALUES('home',?,?,0,?,?)",
+          value.title,
+          value.body,
+          updatedAt,
+          req.user.id,
+        );
+      } catch (error) {
+        if (String(error?.message || "").includes("UNIQUE"))
+          throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+        throw error;
+      }
+    }
+    audit(req.user, "保存首页公告草稿", "announcement", "home");
+    res.json(
+      announcementOut(
+        one("SELECT * FROM site_announcements WHERE id='home'"),
+        true,
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+});
+app.post("/api/admin/announcement/publish", auth, permit("content"), (req, res, next) => {
+  try {
+    const current = one("SELECT * FROM site_announcements WHERE id='home'");
+    if (!current) throw fail(400, "请先保存公告内容", "INVALID_INPUT");
+    announcementFields({ title: current.draft_title, body: current.draft_body });
+    requireAnnouncementVersion(req, current);
+    const updatedAt = nextUpdatedAt(current.updated_at),
+      publishedAt = now(),
+      result = run(
+        "UPDATE site_announcements SET published_title=draft_title,published_body=draft_body,is_published=1,published_at=?,updated_at=?,updated_by=? WHERE id='home' AND updated_at=?",
+        publishedAt,
+        updatedAt,
+        req.user.id,
+        current.updated_at,
+      );
+    if (!result.changes)
+      throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+    audit(req.user, "发布首页公告", "announcement", "home");
+    res.json(announcementOut(one("SELECT * FROM site_announcements WHERE id='home'"), true));
+  } catch (error) {
+    next(error);
+  }
+});
+app.post("/api/admin/announcement/unpublish", auth, permit("content"), (req, res, next) => {
+  try {
+    const current = one("SELECT * FROM site_announcements WHERE id='home'");
+    if (!current) throw fail(404, "公告不存在", "NOT_FOUND");
+    requireAnnouncementVersion(req, current);
+    const updatedAt = nextUpdatedAt(current.updated_at),
+      result = run(
+        "UPDATE site_announcements SET is_published=0,updated_at=?,updated_by=? WHERE id='home' AND updated_at=?",
+        updatedAt,
+        req.user.id,
+        current.updated_at,
+      );
+    if (!result.changes)
+      throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+    audit(req.user, "下架首页公告", "announcement", "home");
+    res.json(announcementOut(one("SELECT * FROM site_announcements WHERE id='home'"), true));
+  } catch (error) {
+    next(error);
+  }
+});
+app.delete("/api/admin/announcement", auth, permit("content"), (req, res, next) => {
+  try {
+    const current = one("SELECT * FROM site_announcements WHERE id='home'");
+    if (!current) return res.json({ ok: true });
+    requireAnnouncementVersion(req, current);
+    const result = run(
+      "DELETE FROM site_announcements WHERE id='home' AND updated_at=?",
+      current.updated_at,
+    );
+    if (!result.changes)
+      throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+    audit(req.user, "清空首页公告", "announcement", "home");
+    res.json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+});
 async function issueSession(user, res) {
   const token = randomToken();
   run(
