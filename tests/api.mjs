@@ -224,9 +224,44 @@ try {
   r = await request("/api/articles/drafts", {
     method: "POST",
     cookie: member,
+    body: { title: "oversized", body: "x".repeat(500001), tags: [] },
+  });
+  assert.equal(r.status, 400);
+  assert.equal((await r.json()).code, "ARTICLE_TOO_LARGE");
+  r = await request("/api/articles/drafts", {
+    method: "POST",
+    cookie: member,
+    body: { title: ["wrong type"], body: "valid", tags: [] },
+  });
+  assert.equal(r.status, 400);
+  r = await request("/api/articles/drafts", {
+    method: "POST",
+    cookie: member,
     body: { title: "Versioned article", body: "version one", tags: ["api"] },
   });
   const articleId = (await r.json()).id;
+  r = await request(`/api/articles/drafts/${articleId}`, {
+    method: "PATCH",
+    cookie: member,
+    body: { body: "x".repeat(500001) },
+  });
+  assert.equal(r.status, 400);
+  assert.equal(
+    (await (await request(`/api/articles/drafts/${articleId}`, { cookie: member })).json()).body,
+    "version one",
+  );
+  const legacyArticle = "article-oversized-legacy";
+  run(
+    "INSERT INTO articles(id,user_id,title,body,category,tags,excerpt,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,'draft',?,?)",
+    legacyArticle, memberId, "legacy", "x".repeat(500001), null, "[]", null, created, created,
+  );
+  r = await request(`/api/articles/drafts/${legacyArticle}/submit`, {
+    method: "POST",
+    cookie: member,
+    body: {},
+  });
+  assert.equal(r.status, 400);
+  assert.equal((await r.json()).code, "ARTICLE_TOO_LARGE");
   await request(`/api/articles/drafts/${articleId}/submit`, {
     method: "POST",
     cookie: member,

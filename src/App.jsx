@@ -53,6 +53,8 @@ const fileSize = (value) => {
 const permit = (u, p) => u?.role === "owner" || u?.role === "admin" || u?.permissions?.includes(p);
 const downloadableFiles = (files = []) => files.filter((f) => !f.publicImage && !f.isCover && f.kind !== "article-image" && f.kind !== "cover");
 const statusLabel = (status) => ({ approved: "已通过", pending: "待审核", draft: "草稿", hidden: "已下架", rejected: "已退回", published: "已发布" }[status] || status || "");
+const MAX_ARTICLE_BODY_CHARS = 500000;
+const MARKDOWN_FILE_TYPES = /\.(md|markdown)$/i;
 function Loading() {
   return (
     <div className="state" aria-live="polite">
@@ -88,10 +90,10 @@ function Empty({
     </div>
   );
 }
-function MD({ children }) {
+function MD({ children, toc = false }) {
   return (
     <Suspense fallback={<Loading />}>
-      <Markdown>{children}</Markdown>
+      <Markdown toc={toc}>{children}</Markdown>
     </Suspense>
   );
 }
@@ -823,7 +825,7 @@ function Detail({ type }) {
           </p>
         )}
         {x.body || x.content || x.description ? (
-          <MD>{x.body || x.content || x.description}</MD>
+          <MD toc={article}>{x.body || x.content || x.description}</MD>
         ) : !article ? (
           <p className="official-body-note">题目原文可直接阅读上方 PDF，也可下载后查看。</p>
         ) : null}
@@ -1723,8 +1725,13 @@ function Write() {
     [loadingDraft, setLoadingDraft] = useState(!!draftParam),
     [draftLoadError, setDraftLoadError] = useState(""),
     [draftRetry, setDraftRetry] = useState(0),
-    [saving, setSaving] = useState(false);
+    [saving, setSaving] = useState(false),
+    [styleColor, setStyleColor] = useState("blue"),
+    [styleFont, setStyleFont] = useState("sans"),
+    [pendingImport, setPendingImport] = useState(null);
   const editorRef = useRef(null);
+  const editorBodyRef = useRef(f.body);
+  editorBodyRef.current = f.body;
   const loadedDraft = useRef(null);
   const seenDraftParam = useRef(draftParam);
   const editorSession = useRef(0);
@@ -1743,7 +1750,7 @@ function Write() {
     seenDraftParam.current = draftParam;
     if (draftParam === id) return;
     loadedDraft.current = null;
-    setError(""); setDraftLoadError(""); setSaved(""); setFiles([]); setCover(null); setId(draftParam);
+    setError(""); setDraftLoadError(""); setSaved(""); setFiles([]); setCover(null); setPendingImport(null); setId(draftParam);
     if (draftParam) setLoadingDraft(true);
     else {
       setLoadingDraft(false);
@@ -1802,6 +1809,62 @@ function Write() {
       el?.setSelectionRange(start + selectStart, start + selectStart + selectLength);
     });
   }
+  function wrapSelection(before, after, fallback) {
+    const el = editorRef.current;
+    const start = el?.selectionStart ?? f.body.length;
+    const end = el?.selectionEnd ?? start;
+    const selected = f.body.slice(start, end) || fallback;
+    insertMarkdown(`${before}${selected}${after}`, before.length, selected.length, { start, end });
+  }
+  function formatBlock(prefix, fallback) {
+    const el = editorRef.current;
+    const body = editorBodyRef.current;
+    const selectionStart = el?.selectionStart ?? body.length;
+    const selectionEnd = el?.selectionEnd ?? selectionStart;
+    const start = body.lastIndexOf("\n", Math.max(0, selectionStart - 1)) + 1;
+    const nextBreak = body.indexOf("\n", selectionEnd);
+    const end = nextBreak === -1 ? body.length : nextBreak;
+    const selected = body.slice(start, end) || fallback;
+    const formatted = selected.split("\n").map((line) => `${prefix}${line}`).join("\n");
+    insertMarkdown(formatted, prefix.length, Math.max(0, formatted.length - prefix.length), { start, end });
+  }
+  function importMarkdown(file) {
+    if (!file) return;
+    if (imageBusy || saving) {
+      setError("请等待当前保存或图片上传完成后再导入 Markdown");
+      return;
+    }
+    setError(""); setSaved("");
+    if (!MARKDOWN_FILE_TYPES.test(file.name)) {
+      setError("请选择 .md 或 .markdown 文件");
+      return;
+    }
+    if (file.size > MAX_ARTICLE_BODY_CHARS) {
+      setError("Markdown 文件不能超过 500 KB");
+      return;
+    }
+    const session = editorSession.current;
+    file.arrayBuffer().then((buffer) => {
+      if (session !== editorSession.current) return;
+      let body;
+      try {
+        body = new TextDecoder("utf-8", { fatal: true }).decode(buffer);
+      } catch {
+        setError("文件不是有效的 UTF-8 Markdown，请先转换编码");
+        return;
+      }
+      body = body.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+      if (!body.trim()) {
+        setError("Markdown 文件内容为空");
+        return;
+      }
+      if (body.length > MAX_ARTICLE_BODY_CHARS) {
+        setError("Markdown 正文不能超过 500,000 个字符");
+        return;
+      }
+      if (session === editorSession.current) setPendingImport({ name: file.name, body });
+    }).catch(() => { if (session === editorSession.current) setError("无法读取 Markdown 文件"); });
+  }
   async function uploadImage(file, asCover = false) {
     if (!file) return;
     if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { setError("仅支持 PNG、JPEG 或 WebP 图片"); return; }
@@ -1810,6 +1873,10 @@ function Write() {
     const startingSession = editorSession.current;
     let session = startingSession;
     const range = asCover ? null : { start: editorRef.current?.selectionStart ?? f.body.length, end: editorRef.current?.selectionEnd ?? f.body.length };
+    const replacedText = range ? f.body.slice(range.start, range.end) : "";
+    const uploadId = `digitalpancake-upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const placeholder = asCover ? null : `\n\n[图片上传中…](#${uploadId})\n\n`;
+    if (placeholder) insertMarkdown(placeholder, placeholder.length, 0, range);
     setImageBusy(true); setError(""); setSaved("");
     try {
       const did = await ensureDraft();
@@ -1819,8 +1886,21 @@ function Write() {
       const result = await api(`/articles/drafts/${did}/images`, { method: "POST", body: fd });
       if (session !== editorSession.current) return;
       if (asCover) { setCover({ id: result.id, name: result.name, url: result.markdownUrl }); setF((current) => ({ ...current, coverImageId: result.id })); setSaved("封面已选择，请保存草稿"); }
-      else { insertMarkdown(`\n${result.markdown || `![${result.name}](${result.markdownUrl})`}\n`, 0, 0, range); setSaved("图片已上传并插入正文，请继续保存草稿"); }
-    } catch (x) { if (session === editorSession.current) setError(x.message); } finally { uploadLock.current = false; setImageBusy(false); }
+      else {
+        const markdown = `\n${result.markdown || `![${result.name}](${result.markdownUrl})`}\n`;
+        if (editorBodyRef.current.includes(placeholder)) {
+          setF((current) => ({ ...current, body: current.body.replace(placeholder, markdown) }));
+          setSaved("图片已上传并插入正文，请继续保存草稿");
+        } else {
+          setSaved("图片已上传，但插入位置已被移除；需要时请重新上传");
+        }
+      }
+    } catch (x) {
+      if (session === editorSession.current) {
+        if (placeholder) setF((current) => ({ ...current, body: current.body.replace(placeholder, replacedText) }));
+        setError(x.message);
+      }
+    } finally { uploadLock.current = false; setImageBusy(false); }
   }
   function pastedImage(event) { const file = [...(event.clipboardData?.files || [])].find((x) => x.type.startsWith("image/")); if (file) { event.preventDefault(); uploadImage(file); } }
   function droppedImage(event) { const files = [...(event.dataTransfer?.files || [])]; const file = files.find((x) => x.type.startsWith("image/")); setDraggingImage(false); if (files.length) event.preventDefault(); if (file) uploadImage(file); else if (files.length) setError("请拖入 PNG、JPEG 或 WebP 图片"); }
@@ -1936,13 +2016,52 @@ function Write() {
         <div className="editor-field">
           <label htmlFor="markdown-body">Markdown</label>
           <div className="markdown-toolbar" role="toolbar" aria-label="Markdown 工具栏">
+            <button type="button" onClick={() => formatBlock("## ", "小节标题")}>二级标题</button>
+            <button type="button" onClick={() => wrapSelection("**", "**", "加粗文字")}>加粗</button>
+            <button type="button" onClick={() => wrapSelection("*", "*", "斜体文字")}>斜体</button>
+            <button type="button" onClick={() => formatBlock("> ", "引用内容")}>引用</button>
+            <button type="button" onClick={() => wrapSelection("`", "`", "代码")}>行内代码</button>
             <button type="button" onClick={() => insertMarkdown("[链接文字](https://example.com)", 1, 4)}><Link2 size={17} />插入链接</button>
+            <label className="toolbar-select">文字颜色
+              <select value={styleColor} onChange={(event) => setStyleColor(event.target.value)}>
+                <option value="blue">深蓝</option>
+                <option value="red">深红</option>
+                <option value="orange">棕橙</option>
+                <option value="green">深绿</option>
+                <option value="purple">深紫</option>
+              </select>
+            </label>
+            <label className="toolbar-select">字体
+              <select value={styleFont} onChange={(event) => setStyleFont(event.target.value)}>
+                <option value="sans">正文</option>
+                <option value="serif">衬线</option>
+                <option value="mono">等宽</option>
+              </select>
+            </label>
+            <button type="button" onClick={() => wrapSelection("[", `](dp-style:${styleColor}-${styleFont})`, "重点文字")}>应用文字样式</button>
             <label className="toolbar-upload">
               <Image size={17} />{imageBusy ? "上传中…" : "上传图片"}
               <input type="file" accept="image/png,image/jpeg,image/webp" disabled={imageBusy} onChange={(e) => { uploadImage(e.target.files?.[0]); e.target.value = ""; }} />
             </label>
-            <small>PNG / JPEG / WebP，最大 5 MiB</small>
+            <label className="toolbar-upload">
+              导入 Markdown
+              <input type="file" accept=".md,.markdown,text/markdown,text/plain" disabled={imageBusy || saving} onChange={(event) => { importMarkdown(event.target.files?.[0]); event.target.value = ""; }} />
+            </label>
+            <small>图片可粘贴或拖入；Markdown 文件限 UTF-8、500 KB</small>
           </div>
+          {pendingImport && (
+            <div className="markdown-import-confirm" role="alert">
+              <div><strong>导入 {pendingImport.name}？</strong><span>这会替换当前正文；导入后仍需保存草稿并提交审核。</span></div>
+              <div className="action-row">
+                <button type="button" className="button primary small" disabled={imageBusy || saving} onClick={() => {
+                  setF((current) => ({ ...current, body: pendingImport.body }));
+                  setSaved(`已导入 ${pendingImport.name}，请检查预览并保存草稿`);
+                  setPendingImport(null);
+                }}>确认替换正文</button>
+                <button type="button" className="button secondary small" onClick={() => setPendingImport(null)}>取消</button>
+              </div>
+            </div>
+          )}
           <textarea
             id="markdown-body"
             ref={editorRef}
@@ -1953,6 +2072,8 @@ function Write() {
             onDragLeave={() => setDraggingImage(false)}
             onDrop={droppedImage}
             className={`editor-textarea ${draggingImage ? "editor-drop-active" : ""}`}
+            maxLength={MAX_ARTICLE_BODY_CHARS}
+            aria-busy={imageBusy}
           />
         </div>
         <section className="preview">

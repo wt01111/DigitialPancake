@@ -1563,19 +1563,43 @@ app.get("/api/articles/:id", (req, res, next) => {
       })
     : next(fail(404, "文章不存在", "NOT_FOUND"));
 });
+const MAX_ARTICLE_BODY_CHARS = 500000;
+function articleFields(input = {}, current = {}) {
+  const stringField = (name, fallback, max, nullable = false) => {
+    const value = Object.hasOwn(input, name) ? input[name] : fallback;
+    if (nullable && (value === null || value === undefined || value === "")) return value || null;
+    if (value === undefined) return "";
+    if (typeof value !== "string")
+      throw fail(400, `${name} 必须是文本`, "INVALID_INPUT");
+    if (value.length > max)
+      throw fail(400, `${name} 超出长度限制`, "ARTICLE_TOO_LARGE");
+    return value;
+  };
+  const rawTags = Object.hasOwn(input, "tags") ? input.tags : json(current.tags || "[]");
+  if (!Array.isArray(rawTags) || rawTags.length > 20 || rawTags.some((tag) => typeof tag !== "string" || tag.length > 50))
+    throw fail(400, "tags 格式无效或超出长度限制", "INVALID_INPUT");
+  return {
+    title: stringField("title", current.title, 200),
+    body: stringField("body", current.body, MAX_ARTICLE_BODY_CHARS),
+    category: stringField("category", current.category, 100, true),
+    excerpt: stringField("excerpt", current.excerpt, 1000, true),
+    tags: rawTags,
+  };
+}
 app.post("/api/articles/drafts", auth, submitLimit, (req, res, next) => {
   try {
+    const fields = articleFields(req.body);
     const aid = id("article"),
       t = now();
     run(
       "INSERT INTO articles(id,user_id,title,body,category,tags,excerpt,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,'draft',?,?)",
       aid,
       req.user.id,
-      String(req.body.title || ""),
-      String(req.body.body || ""),
-      req.body.category || null,
-      JSON.stringify(req.body.tags || []),
-      req.body.excerpt || null,
+      fields.title,
+      fields.body,
+      fields.category,
+      JSON.stringify(fields.tags),
+      fields.excerpt,
       t,
       t,
     );
@@ -1597,6 +1621,12 @@ app.patch("/api/articles/drafts/:id", auth, (req, res, next) => {
     req.user.id,
   );
   if (!a) return next(fail(404, "草稿不存在", "NOT_FOUND"));
+  let fields;
+  try {
+    fields = articleFields(req.body, a);
+  } catch (error) {
+    return next(error);
+  }
   let coverImageId = a.cover_image_id;
   if (Object.hasOwn(req.body, "coverImageId")) {
     coverImageId = req.body.coverImageId || null;
@@ -1613,11 +1643,11 @@ app.patch("/api/articles/drafts/:id", auth, (req, res, next) => {
   }
   run(
     "UPDATE articles SET title=?,body=?,category=?,tags=?,excerpt=?,cover_image_id=?,status='draft',updated_at=? WHERE id=?",
-    req.body.title ?? a.title,
-    req.body.body ?? a.body,
-    req.body.category ?? a.category,
-    JSON.stringify(req.body.tags ?? json(a.tags)),
-    req.body.excerpt ?? a.excerpt,
+    fields.title,
+    fields.body,
+    fields.category,
+    JSON.stringify(fields.tags),
+    fields.excerpt,
     coverImageId,
     nextUpdatedAt(a.updated_at),
     a.id,
@@ -1752,6 +1782,11 @@ app.post(
       req.params.id,
       req.user.id,
     );
+    try {
+      if (a) articleFields({}, a);
+    } catch (error) {
+      return next(error);
+    }
     if (!a || !a.title.trim() || !a.body.trim())
       return next(fail(400, "文章标题与正文不能为空", "INVALID_INPUT"));
     run(
