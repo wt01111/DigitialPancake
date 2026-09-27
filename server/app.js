@@ -12,6 +12,7 @@ import {
   closeSync,
 } from "node:fs";
 import { createHmac, randomInt } from "node:crypto";
+import { inflateSync } from "node:zlib";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { db, all, one, run, json, seedDir } from "./db.js";
@@ -40,6 +41,11 @@ if (
 const secret =
   process.env.SESSION_SECRET ||
   "development-only-session-secret-not-for-production";
+const sessionDays = Math.min(
+  3650,
+  Math.max(1, Number.parseInt(process.env.SESSION_DAYS || "90", 10) || 90),
+);
+const sessionMaxAge = sessionDays * 864e5;
 const uploadDir = resolve(
   root,
   process.env.UPLOAD_DIR || "server/private-uploads",
@@ -77,6 +83,26 @@ const upload = multer({
           Object.assign(new Error("不支持的文件类型"), {
             status: 400,
             code: "FILE_TYPE",
+          }),
+        );
+  },
+});
+const AVATAR_MAX_BYTES = 512 * 1024;
+const AVATAR_MAX_DIMENSION = 2048;
+const avatarUpload = multer({
+  storage: multer.diskStorage({
+    destination: uploadDir,
+    filename: (_r, _f, cb) => cb(null, randomToken(24)),
+  }),
+  limits: { fileSize: AVATAR_MAX_BYTES, files: 1 },
+  fileFilter: (_r, f, cb) => {
+    f.originalname = uploadFileName(f.originalname);
+    ["image/png", "image/jpeg", "image/webp"].includes(f.mimetype)
+      ? cb(null, true)
+      : cb(
+          Object.assign(new Error("头像须为 PNG、JPEG 或 WebP 图片"), {
+            status: 400,
+            code: "INVALID_AVATAR",
           }),
         );
   },
@@ -165,15 +191,30 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use((req, _res, next) => {
+app.use((req, res, next) => {
   const token = parseCookies(req.headers.cookie).ep_session;
   if (token) {
+    const tokenHash = sha256(token);
     const s = one(
-      `SELECT u.* FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND s.version=u.session_version AND u.enabled=1`,
-      sha256(token),
+      `SELECT u.*,s.expires_at session_expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND s.version=u.session_version AND u.enabled=1`,
+      tokenHash,
       now(),
     );
     req.user = s || null;
+    if (
+      s &&
+      Date.parse(s.session_expires_at) - Date.now() < sessionMaxAge / 2
+    ) {
+      const expiresAt = new Date(Date.now() + sessionMaxAge).toISOString();
+      run("UPDATE sessions SET expires_at=? WHERE token_hash=?", expiresAt, tokenHash);
+      res.cookie("ep_session", token, {
+        httpOnly: true,
+        secure: production,
+        sameSite: "strict",
+        path: "/",
+        maxAge: sessionMaxAge,
+      });
+    }
   }
   next();
 });
@@ -300,6 +341,147 @@ function validProof(file) {
             b.subarray(8, 12).toString() === "WEBP"
           : false;
 }
+function imageDimensions(file) {
+  const bytes = readFileSync(file.path);
+  if (
+    file.mimetype === "image/png" &&
+    bytes.length >= 24 &&
+    bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) &&
+    bytes.subarray(12, 16).toString() === "IHDR"
+  )
+    return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
+  if (
+    file.mimetype === "image/webp" &&
+    bytes.length >= 30 &&
+    bytes.subarray(0, 4).toString() === "RIFF" &&
+    bytes.subarray(8, 12).toString() === "WEBP"
+  ) {
+    const kind = bytes.subarray(12, 16).toString();
+    if (kind === "VP8X")
+      return {
+        width: 1 + bytes.readUIntLE(24, 3),
+        height: 1 + bytes.readUIntLE(27, 3),
+      };
+    if (
+      kind === "VP8 " &&
+      bytes.length >= 30 &&
+      bytes[23] === 0x9d &&
+      bytes[24] === 0x01 &&
+      bytes[25] === 0x2a
+    )
+      return {
+        width: bytes.readUInt16LE(26) & 0x3fff,
+        height: bytes.readUInt16LE(28) & 0x3fff,
+      };
+    if (kind === "VP8L" && bytes.length >= 25 && bytes[20] === 0x2f)
+      return {
+        width: 1 + bytes[21] + ((bytes[22] & 0x3f) << 8),
+        height:
+          1 +
+          (bytes[22] >> 6) +
+          (bytes[23] << 2) +
+          ((bytes[24] & 0x0f) << 10),
+      };
+  }
+  if (
+    file.mimetype === "image/jpeg" &&
+    bytes.length >= 4 &&
+    bytes[0] === 0xff &&
+    bytes[1] === 0xd8
+  ) {
+    let offset = 2;
+    const startOfFrame = new Set([
+      0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd,
+      0xce, 0xcf,
+    ]);
+    while (offset + 8 < bytes.length) {
+      if (bytes[offset] !== 0xff) {
+        offset++;
+        continue;
+      }
+      while (bytes[offset] === 0xff) offset++;
+      const marker = bytes[offset++];
+      if (marker === 0xd8 || marker === 0xd9) continue;
+      if (marker === 0xda || offset + 2 > bytes.length) break;
+      const length = bytes.readUInt16BE(offset);
+      if (length < 2 || offset + length > bytes.length) break;
+      if (startOfFrame.has(marker) && length >= 7)
+        return {
+          width: bytes.readUInt16BE(offset + 5),
+          height: bytes.readUInt16BE(offset + 3),
+        };
+      offset += length;
+    }
+  }
+  return null;
+}
+function validAvatar(file) {
+  if (!validProof(file)) return false;
+  const dimensions = imageDimensions(file);
+  if (
+    !dimensions ||
+    dimensions.width <= 0 ||
+    dimensions.height <= 0 ||
+    dimensions.width > AVATAR_MAX_DIMENSION ||
+    dimensions.height > AVATAR_MAX_DIMENSION
+  )
+    return false;
+  const bytes = readFileSync(file.path);
+  if (file.mimetype === "image/jpeg")
+    return (
+      bytes.length >= 4 &&
+      bytes[bytes.length - 2] === 0xff &&
+      bytes[bytes.length - 1] === 0xd9
+    );
+  if (file.mimetype === "image/webp") {
+    if (bytes.length < 20 || bytes.readUInt32LE(4) + 8 !== bytes.length)
+      return false;
+    let offset = 12,
+      chunks = 0;
+    while (offset + 8 <= bytes.length) {
+      const size = bytes.readUInt32LE(offset + 4);
+      offset += 8 + size + (size % 2);
+      if (offset > bytes.length) return false;
+      chunks++;
+    }
+    return chunks > 0 && offset === bytes.length;
+  }
+  if (file.mimetype === "image/png") {
+    try {
+      let offset = 8,
+        sawHeader = false,
+        sawEnd = false;
+      const compressed = [];
+      while (offset + 12 <= bytes.length) {
+        const length = bytes.readUInt32BE(offset),
+          type = bytes.subarray(offset + 4, offset + 8).toString(),
+          dataStart = offset + 8,
+          dataEnd = dataStart + length,
+          chunkEnd = dataEnd + 4;
+        if (chunkEnd > bytes.length) return false;
+        if (!sawHeader) {
+          if (type !== "IHDR" || length !== 13) return false;
+          sawHeader = true;
+        }
+        if (type === "IDAT") compressed.push(bytes.subarray(dataStart, dataEnd));
+        if (type === "IEND") {
+          if (length !== 0 || chunkEnd !== bytes.length) return false;
+          sawEnd = true;
+          break;
+        }
+        offset = chunkEnd;
+      }
+      if (!sawHeader || !sawEnd || !compressed.length) return false;
+      const inflated = inflateSync(Buffer.concat(compressed), {
+        maxOutputLength: 64 * 1024 * 1024,
+      });
+      return inflated.length > dimensions.height;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
 
 app.get("/healthz", (_req, res) => {
   one("SELECT 1 ok");
@@ -312,6 +494,8 @@ app.get("/api/bootstrap", (req, res) =>
       registrationEnabled: smtpEnabled,
       filingNumber: String(process.env.ICP_FILING_NUMBER || "").trim(),
       maxUploadBytes: 50 * 1024 * 1024,
+      maxAvatarBytes: AVATAR_MAX_BYTES,
+      maxAvatarDimension: AVATAR_MAX_DIMENSION,
       problemCategories: [
         { value: "signal", label: "信号类" },
         { value: "control", label: "控制类" },
@@ -373,9 +557,26 @@ function requireAnnouncementVersion(req, row) {
   if ((row?.updated_at || null) !== expected)
     throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
 }
-app.get("/api/announcement", (_req, res) =>
-  res.json(announcementOut(one("SELECT * FROM site_announcements WHERE id='home'"))),
-);
+app.get("/api/announcement", (_req, res) => {
+  const latest = one(
+    "SELECT * FROM announcements WHERE status='published' AND published_title IS NOT NULL AND published_body IS NOT NULL ORDER BY published_at DESC,id DESC LIMIT 1",
+  );
+  if (latest)
+    return res.json({
+      announcement: {
+        id: latest.id,
+        title: latest.published_title,
+        body: latest.published_body,
+        publishedAt: latest.published_at,
+        format: "plain_text",
+      },
+    });
+  if (!one("SELECT 1 FROM announcements LIMIT 1"))
+    return res.json(
+      announcementOut(one("SELECT * FROM site_announcements WHERE id='home'")),
+    );
+  res.json({ announcement: null });
+});
 app.get("/api/admin/announcement", auth, permit("content"), (_req, res) =>
   res.json(
     announcementOut(
@@ -487,6 +688,226 @@ app.delete("/api/admin/announcement", auth, permit("content"), (req, res, next) 
     next(error);
   }
 });
+function announcementItemOut(row, admin = false) {
+  if (admin)
+    return {
+      id: row.id,
+      title: row.title,
+      body: row.body,
+      status: row.status,
+      published: row.status === "published",
+      publishedTitle: row.published_title || "",
+      publishedBody: row.published_body || "",
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      publishedAt: row.published_at,
+      format: "plain_text",
+    };
+  return {
+    id: row.id,
+    title: row.published_title,
+    body: row.published_body,
+    publishedAt: row.published_at,
+    format: "plain_text",
+  };
+}
+function requireAnnouncementItemVersion(req, row) {
+  if (!row) throw fail(404, "公告不存在", "NOT_FOUND");
+  if ((req.body?.expectedUpdatedAt ?? null) !== row.updated_at)
+    throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+}
+app.get("/api/announcements", (req, res) => {
+  const requestedLimit = Number.parseInt(req.query.limit, 10),
+    page = Math.max(1, Number.parseInt(req.query.page, 10) || 1),
+    pageSize = Math.min(
+      50,
+      Math.max(
+        1,
+        Number.isInteger(requestedLimit)
+          ? requestedLimit
+          : Number.parseInt(req.query.pageSize, 10) || 20,
+      ),
+    ),
+    total = Number(
+      one(
+        "SELECT COUNT(*) count FROM announcements WHERE status='published' AND published_title IS NOT NULL AND published_body IS NOT NULL",
+      ).count,
+    );
+  res.json({
+    items: all(
+      `SELECT * FROM announcements
+       WHERE status='published' AND published_title IS NOT NULL AND published_body IS NOT NULL
+       ORDER BY published_at DESC,id DESC LIMIT ? OFFSET ?`,
+      pageSize,
+      (page - 1) * pageSize,
+    ).map((row) => announcementItemOut(row)),
+    total,
+    page,
+    pageSize,
+  });
+});
+app.get("/api/announcements/:id", (req, res, next) => {
+  const row = one(
+    "SELECT * FROM announcements WHERE id=? AND status='published' AND published_title IS NOT NULL AND published_body IS NOT NULL",
+    req.params.id,
+  );
+  row
+    ? res.json(announcementItemOut(row))
+    : next(fail(404, "公告不存在", "NOT_FOUND"));
+});
+app.get(
+  "/api/admin/announcements",
+  auth,
+  permit("content"),
+  (_req, res) =>
+    res.json({
+      items: all(
+        "SELECT * FROM announcements ORDER BY COALESCE(published_at,created_at) DESC,id DESC",
+      ).map((row) => announcementItemOut(row, true)),
+    }),
+);
+app.post(
+  "/api/admin/announcements",
+  auth,
+  permit("content"),
+  (req, res, next) => {
+    try {
+      const value = announcementFields(req.body),
+        announcementId = id("announcement"),
+        timestamp = now();
+      run(
+        `INSERT INTO announcements
+         (id,title,body,status,created_at,updated_at,created_by,updated_by)
+         VALUES(?,?,?,'draft',?,?,?,?)`,
+        announcementId,
+        value.title,
+        value.body,
+        timestamp,
+        timestamp,
+        req.user.id,
+        req.user.id,
+      );
+      audit(req.user, "新建公告草稿", "announcement", announcementId);
+      res
+        .status(201)
+        .json(announcementItemOut(one("SELECT * FROM announcements WHERE id=?", announcementId), true));
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+function updateAnnouncementItem(req, res, next) {
+  try {
+    const current = one("SELECT * FROM announcements WHERE id=?", req.params.id),
+      value = announcementFields(req.body);
+    requireAnnouncementItemVersion(req, current);
+    const updatedAt = nextUpdatedAt(current.updated_at),
+      result = run(
+        "UPDATE announcements SET title=?,body=?,updated_at=?,updated_by=? WHERE id=? AND updated_at=?",
+        value.title,
+        value.body,
+        updatedAt,
+        req.user.id,
+        current.id,
+        current.updated_at,
+      );
+    if (!result.changes)
+      throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+    audit(req.user, "保存公告草稿", "announcement", current.id);
+    res.json(announcementItemOut(one("SELECT * FROM announcements WHERE id=?", current.id), true));
+  } catch (error) {
+    next(error);
+  }
+}
+app.put(
+  "/api/admin/announcements/:id",
+  auth,
+  permit("content"),
+  updateAnnouncementItem,
+);
+app.patch(
+  "/api/admin/announcements/:id",
+  auth,
+  permit("content"),
+  updateAnnouncementItem,
+);
+app.post(
+  "/api/admin/announcements/:id/publish",
+  auth,
+  permit("content"),
+  (req, res, next) => {
+    try {
+      const current = one("SELECT * FROM announcements WHERE id=?", req.params.id);
+      requireAnnouncementItemVersion(req, current);
+      announcementFields({ title: current.title, body: current.body });
+      const updatedAt = nextUpdatedAt(current.updated_at),
+        publishedAt = now(),
+        result = run(
+          `UPDATE announcements
+           SET published_title=title,published_body=body,status='published',published_at=?,updated_at=?,updated_by=?
+           WHERE id=? AND updated_at=?`,
+          publishedAt,
+          updatedAt,
+          req.user.id,
+          current.id,
+          current.updated_at,
+        );
+      if (!result.changes)
+        throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+      audit(req.user, "发布公告", "announcement", current.id);
+      res.json(announcementItemOut(one("SELECT * FROM announcements WHERE id=?", current.id), true));
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+app.post(
+  "/api/admin/announcements/:id/unpublish",
+  auth,
+  permit("content"),
+  (req, res, next) => {
+    try {
+      const current = one("SELECT * FROM announcements WHERE id=?", req.params.id);
+      requireAnnouncementItemVersion(req, current);
+      const updatedAt = nextUpdatedAt(current.updated_at),
+        result = run(
+          "UPDATE announcements SET status='unpublished',updated_at=?,updated_by=? WHERE id=? AND updated_at=?",
+          updatedAt,
+          req.user.id,
+          current.id,
+          current.updated_at,
+        );
+      if (!result.changes)
+        throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+      audit(req.user, "下架公告", "announcement", current.id);
+      res.json(announcementItemOut(one("SELECT * FROM announcements WHERE id=?", current.id), true));
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+app.delete(
+  "/api/admin/announcements/:id",
+  auth,
+  permit("content"),
+  (req, res, next) => {
+    try {
+      const current = one("SELECT * FROM announcements WHERE id=?", req.params.id);
+      requireAnnouncementItemVersion(req, current);
+      const result = run(
+        "DELETE FROM announcements WHERE id=? AND updated_at=?",
+        current.id,
+        current.updated_at,
+      );
+      if (!result.changes)
+        throw fail(409, "公告已被其他管理员更新，请刷新后重试", "STALE_ANNOUNCEMENT");
+      audit(req.user, "删除公告", "announcement", current.id);
+      res.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 async function issueSession(user, res) {
   const token = randomToken();
   run(
@@ -494,7 +915,7 @@ async function issueSession(user, res) {
     sha256(token),
     user.id,
     user.session_version,
-    new Date(Date.now() + 7 * 864e5).toISOString(),
+    new Date(Date.now() + sessionMaxAge).toISOString(),
     now(),
   );
   res.cookie("ep_session", token, {
@@ -502,7 +923,7 @@ async function issueSession(user, res) {
     secure: production,
     sameSite: "strict",
     path: "/",
-    maxAge: 7 * 864e5,
+    maxAge: sessionMaxAge,
   });
 }
 async function consumeCode(email, purpose, code) {
@@ -784,9 +1205,124 @@ app.patch("/api/me", auth, (req, res, next) => {
     next(e);
   }
 });
+app.post(
+  "/api/me/avatar",
+  auth,
+  submitLimit,
+  uploadCapacity,
+  avatarUpload.single("avatar"),
+  uploadedCapacity,
+  (req, res, next) => {
+    let previous;
+    try {
+      if (!req.file || !validAvatar(req.file))
+        throw fail(
+          400,
+          "头像须为有效的 PNG、JPEG 或 WebP 图片，不超过 0.5 MiB，且宽高均不超过 2048 像素",
+          "INVALID_AVATAR",
+        );
+      const fileId = id("file"),
+        createdAt = now();
+      db.exec("BEGIN IMMEDIATE");
+      try {
+        const current = one(
+          "SELECT avatar_file_id FROM users WHERE id=?",
+          req.user.id,
+        );
+        previous = current?.avatar_file_id
+          ? one(
+              "SELECT * FROM files WHERE id=? AND kind='avatar'",
+              current.avatar_file_id,
+            )
+          : null;
+        run(
+          "INSERT INTO files VALUES(?,?,?,?,?,?,?,?,?)",
+          fileId,
+          req.user.id,
+          "avatar",
+          req.user.id,
+          req.file.filename,
+          req.file.originalname,
+          req.file.mimetype,
+          req.file.size,
+          createdAt,
+        );
+        run("UPDATE users SET avatar_file_id=? WHERE id=?", fileId, req.user.id);
+        if (previous) run("DELETE FROM files WHERE id=?", previous.id);
+        db.exec("COMMIT");
+      } catch (error) {
+        db.exec("ROLLBACK");
+        throw error;
+      }
+      if (previous) {
+        const previousPath = resolve(uploadDir, previous.stored_name);
+        try {
+          if (dirname(previousPath) === uploadDir && existsSync(previousPath))
+            unlinkSync(previousPath);
+        } catch {
+          // The database already points at the new avatar; stale file cleanup is best effort.
+        }
+      }
+      const avatarUrl = `/api/avatars/${fileId}`;
+      res.status(201).json({ avatarUrl });
+    } catch (error) {
+      if (req.file?.path && existsSync(req.file.path)) unlinkSync(req.file.path);
+      next(error);
+    }
+  },
+);
+app.delete("/api/me/avatar", auth, (req, res, next) => {
+  let previous;
+  try {
+    db.exec("BEGIN IMMEDIATE");
+    try {
+      const current = one(
+        "SELECT avatar_file_id FROM users WHERE id=?",
+        req.user.id,
+      );
+      previous = current?.avatar_file_id
+        ? one(
+            "SELECT * FROM files WHERE id=? AND kind='avatar'",
+            current.avatar_file_id,
+          )
+        : null;
+      run("UPDATE users SET avatar_file_id=NULL WHERE id=?", req.user.id);
+      if (previous) run("DELETE FROM files WHERE id=?", previous.id);
+      db.exec("COMMIT");
+    } catch (error) {
+      db.exec("ROLLBACK");
+      throw error;
+    }
+    if (previous) {
+      const previousPath = resolve(uploadDir, previous.stored_name);
+      try {
+        if (dirname(previousPath) === uploadDir && existsSync(previousPath))
+          unlinkSync(previousPath);
+      } catch {
+        // The avatar is already detached; stale file cleanup is best effort.
+      }
+    }
+    res.json({ avatarUrl: null });
+  } catch (error) {
+    next(error);
+  }
+});
+app.get("/api/avatars/:id", (req, res, next) => {
+  const file = one(
+    `SELECT f.* FROM files f JOIN users u ON u.id=f.owner_id
+     WHERE f.id=? AND f.kind='avatar' AND u.enabled=1 AND u.avatar_file_id=f.id`,
+    req.params.id,
+  );
+  if (!file) return next(fail(404, "头像不存在", "NOT_FOUND"));
+  const path = resolve(uploadDir, file.stored_name);
+  if (dirname(path) !== uploadDir || !existsSync(path))
+    return next(fail(404, "头像不存在", "NOT_FOUND"));
+  res.set("Cache-Control", "public, max-age=31536000, immutable");
+  res.type(file.mime).sendFile(path);
+});
 app.get("/api/users/:id", (req, res, next) => {
   const user = one(
-    "SELECT id,nickname,bio FROM users WHERE id=? AND enabled=1",
+    "SELECT id,nickname,bio,avatar_file_id FROM users WHERE id=? AND enabled=1",
     req.params.id,
   );
   if (!user) return next(fail(404, "用户不存在", "NOT_FOUND"));
@@ -820,7 +1356,7 @@ app.get("/api/users/:id", (req, res, next) => {
       href: `/${c.targetType}s/${c.targetId}#comment-${c.id}`,
     })),
     reviews = all(
-      `SELECT r.*,s.name shop_name,u.nickname FROM reviews r JOIN shops s ON s.id=r.shop_id AND s.status='approved'
+      `SELECT r.*,s.name shop_name,u.nickname,u.avatar_file_id FROM reviews r JOIN shops s ON s.id=r.shop_id AND s.status='approved'
        JOIN users u ON u.id=r.user_id WHERE r.user_id=? AND r.source_type='site'
          AND r.published_payload IS NOT NULL AND r.published_visible=1
        ORDER BY r.created_at DESC LIMIT 100`,
@@ -977,7 +1513,11 @@ function reviewOut(r, published = false) {
         shopId: r.shop_id,
         shopName: r.shop_name,
         author: r.nickname
-          ? publicUser({ id: r.user_id, nickname: r.nickname })
+          ? publicUser({
+              id: r.user_id,
+              nickname: r.nickname,
+              avatar_file_id: r.avatar_file_id,
+            })
           : undefined,
         rating,
         sentiment:
@@ -1046,7 +1586,7 @@ app.get("/api/shops/:id", (req, res, next) => {
   );
   if (!s) return next(fail(404, "店铺不存在", "NOT_FOUND"));
   const reviews = all(
-    `SELECT r.*,u.nickname FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.shop_id=? AND ${publicReview} ORDER BY r.created_at DESC`,
+    `SELECT r.*,u.nickname,u.avatar_file_id FROM reviews r LEFT JOIN users u ON u.id=r.user_id WHERE r.shop_id=? AND ${publicReview} ORDER BY r.created_at DESC`,
     s.id,
   ).map((r) => {
     const o = reviewOut(r, r.source_type === "site");
@@ -1481,9 +2021,34 @@ app.post("/api/reviews/:id/withdraw", auth, submitLimit, (req, res, next) => {
 function articleOut(a, published = false) {
   const p =
     published && a.published_payload ? json(a.published_payload, {}) : null;
-  return p
-    ? { ...p, id: a.id, status: "published", date: a.published_at }
-    : {
+  if (p) {
+    const result = {
+      ...p,
+      id: a.id,
+      status: "published",
+      date: a.published_at,
+      starCount: Number(a.star_count || 0),
+      starred: Boolean(a.starred),
+      pinned: Boolean(a.pinned_at),
+      pinnedAt: a.pinned_at || null,
+    };
+    if (Object.hasOwn(a, "author_avatar_file_id") && result.author) {
+      result.author = {
+        ...result.author,
+        avatar: a.author_avatar_file_id
+          ? {
+              id: a.author_avatar_file_id,
+              url: `/api/avatars/${a.author_avatar_file_id}`,
+            }
+          : null,
+        avatarUrl: a.author_avatar_file_id
+          ? `/api/avatars/${a.author_avatar_file_id}`
+          : null,
+      };
+    }
+    return result;
+  }
+  return {
         id: a.id,
         title: a.title,
         body: a.body,
@@ -1509,6 +2074,10 @@ function articleOut(a, published = false) {
         status: a.status,
         decisionReason: a.decision_reason,
         updatedAt: a.updated_at,
+        starCount: Number(a.star_count || 0),
+        starred: Boolean(a.starred),
+        pinned: Boolean(a.pinned_at),
+        pinnedAt: a.pinned_at || null,
         attachments: all(
           "SELECT id,original_name name,original_name originalName,size,mime,kind FROM files WHERE entity_id=? AND kind IN ('article-draft','article-published','article-image-draft','article-image-published') ORDER BY created_at",
           a.id,
@@ -1517,9 +2086,24 @@ function articleOut(a, published = false) {
 }
 app.get("/api/articles", (req, res) => {
   const q = `%${String(req.query.q || "").trim()}%`,
-    cat = String(req.query.category || "").trim();
+    cat = String(req.query.category || "").trim(),
+    sort = req.query.sort === "stars" ? "stars" : "latest",
+    home = String(req.query.home || "") === "1",
+    order = home
+      ? "CASE WHEN a.pinned_at IS NULL THEN 1 ELSE 0 END,a.pinned_at DESC,a.published_at DESC,a.id DESC"
+      : sort === "stars"
+        ? "star_count DESC,a.published_at DESC,a.id DESC"
+        : "a.published_at DESC,a.id DESC";
   const rows = all(
-    "SELECT * FROM articles WHERE published_payload IS NOT NULL AND published_visible=1 AND (?='' OR published_payload LIKE ?) AND (?='' OR json_extract(published_payload,'$.category')=?) ORDER BY published_at DESC LIMIT 50",
+    `SELECT a.*,u.avatar_file_id author_avatar_file_id,
+      (SELECT COUNT(*) FROM article_stars ast WHERE ast.article_id=a.id) star_count,
+      EXISTS(SELECT 1 FROM article_stars ast WHERE ast.article_id=a.id AND ast.user_id=?) starred
+     FROM articles a JOIN users u ON u.id=a.user_id
+     WHERE a.published_payload IS NOT NULL AND a.published_visible=1
+       AND (?='' OR a.published_payload LIKE ?)
+       AND (?='' OR json_extract(a.published_payload,'$.category')=?)
+     ORDER BY ${order} LIMIT 50`,
+    req.user?.id || "",
     String(req.query.q || "").trim(),
     q,
     cat,
@@ -1546,7 +2130,12 @@ app.get("/api/articles", (req, res) => {
 });
 app.get("/api/articles/:id", (req, res, next) => {
   const a = one(
-    "SELECT * FROM articles WHERE id=? AND published_payload IS NOT NULL AND published_visible=1",
+    `SELECT a.*,u.avatar_file_id author_avatar_file_id,
+      (SELECT COUNT(*) FROM article_stars ast WHERE ast.article_id=a.id) star_count,
+      EXISTS(SELECT 1 FROM article_stars ast WHERE ast.article_id=a.id AND ast.user_id=?) starred
+     FROM articles a JOIN users u ON u.id=a.user_id
+     WHERE a.id=? AND a.published_payload IS NOT NULL AND a.published_visible=1`,
+    req.user?.id || "",
     req.params.id,
   );
   a
@@ -1562,6 +2151,47 @@ app.get("/api/articles/:id", (req, res, next) => {
         ),
       })
     : next(fail(404, "文章不存在", "NOT_FOUND"));
+});
+function articleStarCount(articleId) {
+  return Number(
+    one("SELECT COUNT(*) count FROM article_stars WHERE article_id=?", articleId)
+      ?.count || 0,
+  );
+}
+app.post("/api/articles/:id/star", auth, submitLimit, (req, res, next) => {
+  try {
+    const article = one(
+      "SELECT id FROM articles WHERE id=? AND published_payload IS NOT NULL AND published_visible=1",
+      req.params.id,
+    );
+    if (!article) throw fail(404, "文章不存在", "NOT_FOUND");
+    run(
+      "INSERT OR IGNORE INTO article_stars(article_id,user_id,created_at) VALUES(?,?,?)",
+      article.id,
+      req.user.id,
+      now(),
+    );
+    res.json({ starred: true, starCount: articleStarCount(article.id) });
+  } catch (error) {
+    next(error);
+  }
+});
+app.delete("/api/articles/:id/star", auth, submitLimit, (req, res, next) => {
+  try {
+    const article = one(
+      "SELECT id FROM articles WHERE id=? AND published_payload IS NOT NULL AND published_visible=1",
+      req.params.id,
+    );
+    if (!article) throw fail(404, "文章不存在", "NOT_FOUND");
+    run(
+      "DELETE FROM article_stars WHERE article_id=? AND user_id=?",
+      article.id,
+      req.user.id,
+    );
+    res.json({ starred: false, starCount: articleStarCount(article.id) });
+  } catch (error) {
+    next(error);
+  }
 });
 const MAX_ARTICLE_BODY_CHARS = 500000;
 function articleFields(input = {}, current = {}) {
@@ -1811,7 +2441,7 @@ app.post(
     if (!article) return next(fail(404, "文章不存在", "NOT_FOUND"));
     if (article.status !== "draft" || article.published_visible) {
       run(
-        "UPDATE articles SET status='draft',published_visible=0,decision_reason=NULL,updated_at=? WHERE id=?",
+        "UPDATE articles SET status='draft',published_visible=0,pinned_at=NULL,pinned_by=NULL,decision_reason=NULL,updated_at=? WHERE id=?",
         nextUpdatedAt(article.updated_at),
         article.id,
       );
@@ -2049,7 +2679,7 @@ app.get("/api/comments", (req, res, next) => {
              UNION ALL SELECT c.* FROM comments c JOIN tree t ON c.parent_id=t.id
            )
            SELECT tree.id,tree.body,tree.parent_id parentId,tree.status,tree.created_at createdAt,
-             u.id userId,u.nickname,u.bio,COUNT(l.user_id) likeCount,
+             u.id userId,u.nickname,u.bio,u.avatar_file_id avatarFileId,COUNT(l.user_id) likeCount,
              MAX(CASE WHEN l.user_id=? THEN 1 ELSE 0 END) liked
            FROM tree JOIN users u ON u.id=tree.user_id LEFT JOIN comment_likes l ON l.comment_id=tree.id
            GROUP BY tree.id`,
@@ -2090,7 +2720,14 @@ app.get("/api/comments", (req, res, next) => {
       createdAt: row.createdAt,
       author: deleted
         ? null
-        : { id: row.userId, nickname: row.nickname, bio: row.bio || "" },
+        : {
+            id: row.userId,
+            nickname: row.nickname,
+            bio: row.bio || "",
+            avatarUrl: row.avatarFileId
+              ? `/api/avatars/${row.avatarFileId}`
+              : null,
+          },
       likeCount: Number(row.likeCount),
       liked: Boolean(row.liked),
       deleted,
@@ -2472,7 +3109,7 @@ function decisionRoute(table, permission) {
           );
         } else if (table === "articles" && decision === "approved") {
           const author = one(
-            "SELECT id,nickname FROM users WHERE id=?",
+            "SELECT id,nickname,avatar_file_id FROM users WHERE id=?",
             row.user_id,
           );
           const attachments = all(
@@ -2533,7 +3170,10 @@ function decisionRoute(table, permission) {
             row.id,
           );
           if (table === "articles" && decision === "hidden")
-            run("UPDATE articles SET published_visible=0 WHERE id=?", row.id);
+            run(
+              "UPDATE articles SET published_visible=0,pinned_at=NULL,pinned_by=NULL WHERE id=?",
+              row.id,
+            );
           if (table === "reviews" && decision === "hidden")
             run("UPDATE reviews SET published_visible=0 WHERE id=?", row.id);
         }
@@ -2575,6 +3215,40 @@ app.post(
 app.post(
   "/api/admin/articles/:id/decision",
   ...decisionRoute("articles", "content"),
+);
+app.post(
+  "/api/admin/articles/:id/pin",
+  auth,
+  permit("content"),
+  (req, res, next) => {
+    try {
+      if (typeof req.body.pinned !== "boolean")
+        throw fail(400, "pinned 必须为布尔值", "INVALID_INPUT");
+      const article = one("SELECT * FROM articles WHERE id=?", req.params.id);
+      if (!article) throw fail(404, "文章不存在", "NOT_FOUND");
+      if (
+        req.body.pinned &&
+        (!article.published_payload || !article.published_visible)
+      )
+        throw fail(409, "只能置顶当前公开的文章", "ARTICLE_NOT_PUBLIC");
+      const pinnedAt = req.body.pinned ? now() : null;
+      run(
+        "UPDATE articles SET pinned_at=?,pinned_by=? WHERE id=?",
+        pinnedAt,
+        req.body.pinned ? req.user.id : null,
+        article.id,
+      );
+      audit(
+        req.user,
+        req.body.pinned ? "置顶文章" : "取消置顶文章",
+        "article",
+        article.id,
+      );
+      res.json({ id: article.id, pinned: req.body.pinned, pinnedAt });
+    } catch (error) {
+      next(error);
+    }
+  },
 );
 app.post(
   "/api/admin/reports/:id/decision",
@@ -2869,11 +3543,15 @@ if (existsSync(resolve(root, "dist/index.html"))) {
     res.sendFile(resolve(root, "dist/index.html")),
   );
 }
-app.use((err, _req, res, _next) => {
+app.use((err, req, res, _next) => {
   if (err instanceof multer.MulterError)
     return res.status(400).json({
       error:
-        err.code === "LIMIT_FILE_SIZE" ? "文件不能超过 50 MiB" : "文件上传失败",
+        err.code === "LIMIT_FILE_SIZE"
+          ? req.path === "/api/me/avatar"
+            ? "头像不能超过 0.5 MiB"
+            : "文件不能超过 50 MiB"
+          : "文件上传失败",
       code: err.code,
     });
   if (!err.status)

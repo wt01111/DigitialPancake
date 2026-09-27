@@ -4,12 +4,13 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 
 ## Session and profile
 
-- `GET /api/bootstrap` → `{user,config:{registrationEnabled,maxUploadBytes,filingNumber}}`; user fields: `id,email,nickname,role,permissions`. `filingNumber` comes from `ICP_FILING_NUMBER` and is an empty string until configured.
+- `GET /api/bootstrap` → `{user,config:{registrationEnabled,maxUploadBytes,maxAvatarBytes,filingNumber}}`; user fields include `id,email,nickname,role,permissions,avatarUrl`. `filingNumber` comes from `ICP_FILING_NUMBER` and is an empty string until configured.
 - `POST /api/auth/request-code` `{email,purpose:"register"|"reset"}` returns `{ok:true,expiresIn:60,cooldownSeconds:60}`. Codes are six digits, become valid only after SMTP accepts the message, expire after 60 seconds, allow at most five incorrect attempts, and are consumed once. Register and reset share a per-email 60-second send cooldown; cooldown responses are 429 `{error,code:"CODE_COOLDOWN",retryAfter}` with `retryAfter` in seconds. General request limiting uses `RATE_LIMITED` with the same field. SMTP delivery failures return 503 `SMTP_UNAVAILABLE` without exposing provider details.
 - `POST /api/auth/register` `{email,code,password,nickname}`.
-- `POST /api/auth/login` `{email,password}`. All users, including the owner, log in with a verified email address.
+- `POST /api/auth/login` `{email,password}`. All users, including the owner, log in with a verified email address. Sessions default to 90 days and can be configured with `SESSION_DAYS`.
 - `POST /api/auth/logout`; `POST /api/auth/change-password` `{currentPassword,newPassword}`; `POST /api/auth/reset-password` `{email,code,newPassword}`.
 - `GET /api/me`; `PATCH /api/me` `{nickname,bio?}`.
+- `POST /api/me/avatar` multipart field `avatar` uploads a PNG/JPEG/WebP image up to 0.5 MiB; `DELETE /api/me/avatar` restores the initial avatar. `GET /api/avatars/:id` serves the current public avatar.
 - `GET /api/users/:id` returns only public `id,nickname,bio,articles,comments,reviews`; it never includes email, role, permissions, drafts, private reviews, or proof metadata.
 - `GET /api/me/reviews|shops|submissions|drafts|notifications|bookmarks`; notifications return `{items,unreadCount}`. `POST /api/me/notifications/read` `{ids?:string[]}` persists read state.
 - `POST|DELETE /api/me/bookmarks/:type/:id`, where type is `article|problem|shop`.
@@ -26,7 +27,8 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 
 ## Articles, problems, comments
 
-- `GET /api/articles?q=&category=` / `GET /api/articles/:id`. Article fields: `id,title,body,category,tags,excerpt,author,date,status,cover`; `cover` is `null` or `{id,name,url}` from the currently approved snapshot, with no generated fallback image.
+- `GET /api/articles?q=&category=&sort=latest|stars&home=0|1` / `GET /api/articles/:id`. Article fields include `id,title,body,category,tags,excerpt,author,date,status,cover,starCount,starred,pinned,pinnedAt`; `home=1` places pinned articles first. `cover` is `null` or `{id,name,url}` from the currently approved snapshot, with no generated fallback image.
+- `POST /api/articles/:id/star` adds the current user's Star idempotently; `DELETE /api/articles/:id/star` removes it. Both return `{starred,starCount}`.
 - `POST /api/articles/drafts` JSON `{title,body,category?,tags?:string[],excerpt?}`; `GET /api/articles/drafts/:id` includes `coverImageId` and `cover`; `PATCH /api/articles/drafts/:id` accepts the same fields plus `coverImageId:string|null`; `POST /api/articles/drafts/:id/submit`. Draft validation shared by create, update, and submit limits title to 200 characters, body to 500,000, category to 100, excerpt to 1,000, and tags to 20 strings of at most 50 characters each. A cover must be an image uploaded by the author for that same article. Pending revisions keep the prior public snapshot, including its prior cover, until approval atomically replaces it.
 - `POST /api/articles/drafts/:id/attachments` multipart field `file` (50 MiB); owner and content reviewers only.
 - `POST /api/articles/drafts/:id/images` multipart field `image` (PNG/JPEG/WebP, 5 MiB) returns `{id,name,markdownUrl,markdown}`. `GET /api/article-images/:id` lets the author/content reviewers preview a draft image and anonymously serves an image only while the current visible published snapshot references it. PDFs and ordinary attachments remain authenticated through `/api/files/:id`.
@@ -38,10 +40,13 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 ## Administration
 
 - `GET /api/announcement` is public and returns `{announcement:null}` while no announcement is published, otherwise `{announcement:{title,body,publishedAt,format:"plain_text"}}`. Clients must render the title and body as plain text; body line breaks are preserved.
+- `GET /api/announcements?page=1&pageSize=20` returns published announcement history newest first; `limit` is accepted for compact home lists. `GET /api/announcements/:id` returns one published announcement.
+- Content administrators manage announcement history with `GET|POST /api/admin/announcements`, `PUT|PATCH /api/admin/announcements/:id`, `POST /api/admin/announcements/:id/publish|unpublish`, and `DELETE /api/admin/announcements/:id`. Mutations of an existing item require `expectedUpdatedAt`; drafts do not replace the published snapshot until publish.
 - Content administrators use `GET /api/admin/announcement`, `PUT /api/admin/announcement` `{title,body,expectedUpdatedAt}`, `POST /api/admin/announcement/publish|unpublish` `{expectedUpdatedAt}`, and `DELETE /api/admin/announcement` `{expectedUpdatedAt}`. Draft edits do not replace the public snapshot until publish. Title and body are required and limited to 120 and 2000 characters. A stale version returns 409 `STALE_ANNOUNCEMENT`; save, publish, unpublish, and clear actions are audited.
 
 - `GET /api/admin/queue?type=shops|reviews|articles|reports&status=draft|pending|approved|rejected|hidden|all` (status defaults to pending). Article queues additionally accept `q,page,pageSize`; the private search matches both current drafts and the published snapshot and returns `{items,total,page,pageSize}`.
 - `POST /api/admin/shops/:id/decision`, `/reviews/:id/decision`, `/articles/:id/decision` with `{decision:"approved"|"rejected"|"hidden",reason?,expectedUpdatedAt?}`. Approval and rejection require the exact `updatedAt` from the queue item; stale or non-pending content returns 409 so an older moderation page can never approve a newer draft. Hiding an already public item does not require a version.
+- `POST /api/admin/articles/:id/pin` `{pinned:boolean}` pins or unpins a currently public article and records the action in the audit log.
 - `POST /api/admin/reports/:id/decision` `{decision:"dismissed"|"removed",reason?}`.
 - `POST /api/admin/problems` `{title,...metadata}`.
 - `POST /api/admin/problems/:id/attachments` multipart field `file`.

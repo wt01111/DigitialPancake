@@ -37,7 +37,7 @@ for (const year of ["2018", "2026"]) {
 }
 await page.getByLabel("类型").selectOption("signal");
 await expect(page).toHaveURL(/type=signal/);
-assert.ok((await page.locator(".problem-row").count()) > 0);
+await expect(page.locator(".problem-row")).not.toHaveCount(0);
 
 await page.setViewportSize({ width: 390, height: 844 });
 await page.screenshot({
@@ -69,7 +69,7 @@ await expect(page.getByText(/地貌图.*原图大小/)).toBeVisible();
 await expect(
   page.getByRole("link", { name: /登录后下载 H题_野生动物巡查系统\.pdf/ }),
 ).toHaveAttribute("href", /\/auth\?next=/);
-await expect(page.getByText("登录后参与讨论。")).toBeVisible();
+await expect(page.getByText("登录后参与讨论、回复和点赞。")).toBeVisible();
 await expect(page.locator(".state")).toHaveCount(0);
 await page.screenshot({
   path: `${outputDir}/problem-2025-h-mobile.png`,

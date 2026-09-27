@@ -26,6 +26,8 @@ import {
   PenLine,
   Search,
   ShieldCheck,
+  Star,
+  Pin,
   Store,
   Image,
   Link2,
@@ -138,6 +140,14 @@ function Brand() {
     </Link>
   );
 }
+function UserAvatar({ user, name, className = "avatar" }) {
+  const displayName = name || user?.nickname || "用户";
+  return (
+    <span className={className} aria-hidden="true">
+      {user?.avatarUrl ? <img src={user.avatarUrl} alt="" /> : displayName[0] || "用"}
+    </span>
+  );
+}
 function NotificationBell() {
   const [count, setCount] = useState(0);
   useEffect(() => {
@@ -182,8 +192,8 @@ function Header() {
           {user ? (
             <>
               <NotificationBell />
-              <Link className="avatar" to="/account">
-                {user.nickname?.[0] || "我"}
+              <Link className="avatar-link" to="/account" aria-label="个人中心">
+                <UserAvatar user={user} />
               </Link>
               <button
                 className="icon-button"
@@ -229,6 +239,7 @@ function Layout({ children }) {
           <Link to="/problems">电赛题库</Link>
           <Link to="/articles">学习文章</Link>
           <Link to="/shops">店铺口碑</Link>
+          <Link to="/announcements">站内公告</Link>
           <Link to="/about">关于本站</Link>
           <span>© 2026 电子煎饼</span>
         </div>
@@ -304,14 +315,55 @@ function Save({ type, id, initial = false, showLabel = false }) {
     </span>
   );
 }
-function Card({ a }) {
+function ArticleStar({ id, initial = false, count: initialCount = 0, showLabel = false, onChange }) {
+  const { user } = useSite();
+  const nav = useNavigate();
+  const loc = useLocation();
+  const [starred, setStarred] = useState(!!initial);
+  const [count, setCount] = useState(Number(initialCount) || 0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    setStarred(!!initial);
+    setCount(Number(initialCount) || 0);
+    setError("");
+  }, [id, initial, initialCount, user?.id]);
+  async function toggle() {
+    if (!user) {
+      nav(`/auth?next=${encodeURIComponent(loc.pathname + loc.search)}`);
+      return;
+    }
+    if (busy) return;
+    setBusy(true); setError("");
+    try {
+      const result = await api(`/articles/${id}/star`, { method: starred ? "DELETE" : "POST" });
+      setStarred(!!result.starred);
+      setCount(Number(result.starCount) || 0);
+      await onChange?.(result);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <span className="star-control">
+      <button type="button" className={`star-button ${starred ? "starred" : ""}`} onClick={toggle} disabled={busy} aria-pressed={starred} aria-label={starred ? `取消 Star，当前 ${count}` : `Star 这篇文章，当前 ${count}`}>
+        <Star fill={starred ? "currentColor" : "none"} />
+        <span>{showLabel ? (starred ? "已 Star" : "Star") : ""}{showLabel && " · "}{count}</span>
+      </button>
+      {error && <small className="field-error" role="alert">{error}</small>}
+    </span>
+  );
+}
+function Card({ a, onStar }) {
   const authorId = a.author?.id || a.authorId;
   const cover = a.cover?.url;
   return (
     <article className={`article-card ${cover ? "has-cover" : "no-cover"}`}>
-      {cover && <Link className="article-photo" to={`/articles/${a.id}`}><img src={cover} alt="" loading="lazy" /></Link>}
+      {cover && <div className="article-photo" aria-hidden="true"><img src={cover} alt="" loading="lazy" /></div>}
       <div className="article-copy">
-        <div className="eyebrow">{a.category || "学习文章"}</div>
+        <div className="article-labels"><div className="eyebrow">{a.category || "学习文章"}</div>{a.pinned && <span className="pinned-badge"><Pin />首页必读</span>}</div>
         <Link className="article-title" to={`/articles/${a.id}`}>
           {a.title}
         </Link>
@@ -319,24 +371,26 @@ function Card({ a }) {
         <div className="article-meta">
           {authorId ? (
             <Link to={`/users/${authorId}`} className="author-link">
+              <UserAvatar user={a.author} name={a.author?.nickname || a.author} className="mini-avatar" />
               {a.author?.nickname || a.author || "站内作者"}
             </Link>
           ) : (
             <span>{a.author?.nickname || a.author || "站内作者"}</span>
           )}
           <span>{fmt(a.date || a.createdAt)}</span>
+          <ArticleStar id={a.id} initial={a.starred} count={a.starCount} onChange={onStar} />
           <Save type="article" id={a.id} initial={a.bookmarked} />
         </div>
       </div>
     </article>
   );
 }
-function ArticleRow({ a }) {
+function ArticleRow({ a, onStar }) {
   const authorId = a.author?.id || a.authorId;
   const cover = a.cover?.url;
   return <article className={`article-list-row ${cover ? "has-cover" : "no-cover"}`}>
-    <div className="article-list-copy"><div className="eyebrow">{a.category || "学习文章"}</div><Link className="article-title" to={`/articles/${a.id}`}>{a.title}</Link><p>{a.excerpt || ""}</p><div className="article-meta">{authorId ? <Link to={`/users/${authorId}`} className="author-link">{a.author?.nickname || a.author || "站内作者"}</Link> : <span>{a.author?.nickname || a.author || "站内作者"}</span>}<span>{fmt(a.date || a.createdAt)}</span><Save type="article" id={a.id} initial={a.bookmarked} /></div></div>
-    {cover && <Link className="article-list-cover" to={`/articles/${a.id}`}><img src={cover} alt="" loading="lazy" /></Link>}
+    <div className="article-list-copy"><div className="article-labels"><div className="eyebrow">{a.category || "学习文章"}</div>{a.pinned && <span className="pinned-badge"><Pin />首页必读</span>}</div><Link className="article-title" to={`/articles/${a.id}`}>{a.title}</Link><p>{a.excerpt || ""}</p><div className="article-meta">{authorId ? <Link to={`/users/${authorId}`} className="author-link"><UserAvatar user={a.author} name={a.author?.nickname || a.author} className="mini-avatar" />{a.author?.nickname || a.author || "站内作者"}</Link> : <span>{a.author?.nickname || a.author || "站内作者"}</span>}<span>{fmt(a.date || a.createdAt)}</span><ArticleStar id={a.id} initial={a.starred} count={a.starCount} onChange={onStar} /><Save type="article" id={a.id} initial={a.bookmarked} /></div></div>
+    {cover && <div className="article-list-cover" aria-hidden="true"><img src={cover} alt="" loading="lazy" /></div>}
   </article>;
 }
 const listingScrollKey = (path) => `listing-scroll:${path}`;
@@ -396,7 +450,7 @@ function Problem({ p, returnTo }) {
     </article>
   );
 }
-function Rows({ type, items, layout = "cards", returnTo }) {
+function Rows({ type, items, layout = "cards", returnTo, onStar }) {
   if (!items.length)
     return (
       <Empty
@@ -408,7 +462,7 @@ function Rows({ type, items, layout = "cards", returnTo }) {
     <div className={type === "articles" ? layout === "list" ? "article-list" : "article-grid" : "problem-list"}>
       {items.map((x) =>
         type === "articles" ? (
-          layout === "list" ? <ArticleRow key={x.id} a={x} /> : <Card key={x.id} a={x} />
+          layout === "list" ? <ArticleRow key={x.id} a={x} onStar={onStar} /> : <Card key={x.id} a={x} onStar={onStar} />
         ) : (
           <Problem key={x.id} p={x} returnTo={returnTo} />
         ),
@@ -418,7 +472,10 @@ function Rows({ type, items, layout = "cards", returnTo }) {
 }
 function Home() {
   const p = useLoad("/problems", []),
-    a = useLoad("/articles", []);
+    a = useLoad("/articles?home=1", []);
+  const homeArticles = asItems(a.data),
+    pinnedArticles = homeArticles.filter((item) => item.pinned),
+    latestArticles = homeArticles.filter((item) => !item.pinned);
   return (
     <>
       <section className="hero photo-hero">
@@ -440,10 +497,19 @@ function Home() {
       </section>
       <div className="container">
         <HomeAnnouncement />
+        {pinnedArticles.length > 0 && (
+          <section className="section-block home-required">
+            <div className="section-heading">
+              <div><span className="section-kicker">PINNED BY EDITORS</span><h2>首页必读</h2></div>
+              <Link className="text-link" to="/articles">查看全部<ArrowRight /></Link>
+            </div>
+            <Rows type="articles" items={pinnedArticles.slice(0, 4)} />
+          </section>
+        )}
         {[
           ["最新赛题", p, "problems"],
-          ["最新文章", a, "articles"],
-        ].map(([title, r, type]) => (
+          ["最新文章", { ...a, data: { ...(a.data || {}), items: latestArticles } }, "articles"],
+        ].filter(([, r, type]) => type !== "articles" || r.loading || r.error || asItems(r.data).length > 0).map(([title, r, type]) => (
           <section className="section-block" key={type}>
             <div className="section-heading">
               <div>
@@ -471,18 +537,40 @@ function Home() {
   );
 }
 function HomeAnnouncement() {
-  const r = useLoad("/announcement", []),
-    announcement = r.data?.announcement;
-  if (r.loading || r.error || !announcement) return null;
+  const r = useLoad("/announcements?limit=1", []),
+    announcements = asItems(r.data);
+  if (r.loading || r.error || !announcements.length) return null;
   return (
     <section className="home-announcement" aria-labelledby="home-announcement-title">
       <div className="announcement-icon" aria-hidden="true"><Megaphone /></div>
-      <div>
-        <span>站内公告</span>
-        <h2 id="home-announcement-title">{announcement.title}</h2>
-        <p>{announcement.body}</p>
+      <div className="announcement-stack">
+        <div className="announcement-heading"><span>站内公告</span><Link to="/announcements">查看历史公告</Link></div>
+        {announcements.map((announcement, index) => (
+          <article key={announcement.id || index}>
+            <h2 id={index === 0 ? "home-announcement-title" : undefined}>{announcement.title}</h2>
+            <p>{announcement.body}</p>
+            {(announcement.publishedAt || announcement.createdAt) && <small>{fmt(announcement.publishedAt || announcement.createdAt)}</small>}
+          </article>
+        ))}
       </div>
     </section>
+  );
+}
+function Announcements() {
+  const [sp, setSp] = useSearchParams();
+  const page = Math.max(1, Number(sp.get("page")) || 1);
+  const r = useLoad(`/announcements?page=${page}&pageSize=20`, [page]);
+  const total = Number(r.data?.total) || 0;
+  const pageSize = Number(r.data?.pageSize) || 20;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  return (
+    <div className="container page announcements-page">
+      <div className="page-heading"><span className="section-kicker">SITE UPDATES</span><h1>历史公告</h1><p>查看电子煎饼发布的站内通知与重要更新。</p></div>
+      {r.loading ? <Loading /> : r.error ? <Err error={r.error} retry={r.reload} /> : asItems(r.data).length ? (
+        <div className="announcement-history">{asItems(r.data).map((item) => <article key={item.id}><div><Megaphone aria-hidden="true" /><h2>{item.title}</h2></div><p>{item.body}</p><small>发布于 {fmt(item.publishedAt || item.createdAt)}</small></article>)}</div>
+      ) : <Empty title="暂时没有历史公告" />}
+      {pages > 1 && <div className="pagination"><button disabled={page <= 1} onClick={() => setSp({ page: String(page - 1) })}>上一页</button><span>第 {page} / {pages} 页</span><button disabled={page >= pages} onClick={() => setSp({ page: String(page + 1) })}>下一页</button></div>}
+    </div>
   );
 }
 function Listing({ type }) {
@@ -494,6 +582,7 @@ function Listing({ type }) {
     problemType = sp.get("type") || "",
     group = sp.get("group") || "",
     competitionType = sp.get("competitionType") || "",
+    articleSort = sp.get("sort") === "stars" ? "stars" : "latest",
     page = Math.max(1, Number(sp.get("page")) || 1);
   const ps = new URLSearchParams();
   if (q) ps.set("q", q);
@@ -502,6 +591,7 @@ function Listing({ type }) {
   if (problemType) ps.set("type", problemType);
   if (group) ps.set("group", group);
   if (competitionType) ps.set("competitionType", competitionType);
+  if (type === "articles") ps.set("sort", articleSort);
   if (type === "problems") {
     ps.set("page", String(page));
     ps.set("pageSize", "24");
@@ -513,6 +603,7 @@ function Listing({ type }) {
     problemType,
     group,
     competitionType,
+    articleSort,
     page,
   ]);
   const article = type === "articles";
@@ -562,15 +653,16 @@ function Listing({ type }) {
             ...(problemType && { type: problemType }),
             ...(group && { group }),
             ...(competitionType && { competitionType }),
+            ...(article && { sort: articleSort }),
             ...(v && { q: v }),
           })
         }
       />
       {article && (
-        <><div className="article-layout-switch" aria-label="文章布局"><button aria-pressed={articleLayout === "list"} className={articleLayout === "list" ? "selected" : ""} onClick={() => chooseArticleLayout("list")}><List />逐行列表</button><button aria-pressed={articleLayout === "cards"} className={articleLayout === "cards" ? "selected" : ""} onClick={() => chooseArticleLayout("cards")}><LayoutGrid />卡片</button></div><div className="chips">
+        <><div className="article-view-controls"><div className="article-sort" aria-label="文章排序"><span>排序</span><button aria-pressed={articleSort === "latest"} className={articleSort === "latest" ? "selected" : ""} onClick={() => setSp({ ...(q && { q }), ...(category && { category }), sort: "latest" })}>最新发布</button><button aria-pressed={articleSort === "stars"} className={articleSort === "stars" ? "selected" : ""} onClick={() => setSp({ ...(q && { q }), ...(category && { category }), sort: "stars" })}>最多 Star</button></div><div className="article-layout-switch" aria-label="文章布局"><button aria-pressed={articleLayout === "list"} className={articleLayout === "list" ? "selected" : ""} onClick={() => chooseArticleLayout("list")}><List />逐行列表</button><button aria-pressed={articleLayout === "cards"} className={articleLayout === "cards" ? "selected" : ""} onClick={() => chooseArticleLayout("cards")}><LayoutGrid />卡片</button></div></div><div className="chips">
           <button
             className={!category ? "selected" : ""}
-            onClick={() => setSp(q ? { q } : {})}
+            onClick={() => setSp({ ...(q && { q }), sort: articleSort })}
           >
             全部
           </button>
@@ -578,7 +670,7 @@ function Listing({ type }) {
             <button
               key={t.name}
               className={category === t.name ? "selected" : ""}
-              onClick={() => setSp({ ...(q && { q }), category: t.name })}
+              onClick={() => setSp({ ...(q && { q }), category: t.name, sort: articleSort })}
             >
               {t.short}
             </button>
@@ -703,6 +795,7 @@ function Listing({ type }) {
           items={asItems(r.data)}
           layout={article ? articleLayout : "cards"}
           returnTo={article ? undefined : returnTo}
+          onStar={article && articleSort === "stars" ? r.reload : undefined}
         />
       )}
       {!article && !r.loading && !r.error && (
@@ -780,7 +873,7 @@ function PdfAttachments({ files }) {
 function AuthorBadge({ author, date }) {
   const id = author?.id;
   const name = author?.nickname || (typeof author === "string" ? author : "站内作者");
-  return <div className="author-badge"><span className="author-avatar">{name?.[0] || "作"}</span><div><span className="author-role">本文作者 · 社区成员</span>{id ? <Link className="author-name" to={`/users/${id}`}>{name}</Link> : <strong>{name}</strong>}<span className="author-foot">{date && <small>发布于 {fmt(date)}</small>}{id && <Link to={`/users/${id}`}>查看主页 →</Link>}</span></div></div>;
+  return <div className="author-badge"><UserAvatar user={author} name={name} className="author-avatar" /><div><span className="author-role">本文作者 · 社区成员</span>{id ? <Link className="author-name" to={`/users/${id}`}>{name}</Link> : <strong>{name}</strong>}<span className="author-foot">{date && <small>发布于 {fmt(date)}</small>}{id && <Link to={`/users/${id}`}>查看主页 →</Link>}</span></div></div>;
 }
 function Detail({ type }) {
   const { id } = useParams();
@@ -881,6 +974,7 @@ function Detail({ type }) {
             id={x.id}
             initial={x.bookmarked}
           />
+          {article && <ArticleStar id={x.id} initial={x.starred} count={x.starCount} showLabel />}
         </div>
         <PdfAttachments files={downloadableFiles(x.attachments)} />
         {!article && (
@@ -974,11 +1068,36 @@ function Comments({ type, id, contentAuthorId }) {
     [active, setActive] = useState(null),
     [inline, setInline] = useState(""),
     [busy, setBusy] = useState(""),
-    [notice, setNotice] = useState("");
+    [notice, setNotice] = useState(""),
+    [expandedThreads, setExpandedThreads] = useState(() => new Set());
+  const comments = asItems(r.data),
+    commentById = new Map(comments.map((comment) => [comment.id, comment]));
+  function rootIdOf(comment) {
+    let current = comment;
+    const visited = new Set();
+    while (current?.parentId && commentById.has(current.parentId) && !visited.has(current.parentId)) {
+      visited.add(current.id);
+      current = commentById.get(current.parentId);
+    }
+    return current?.id || comment.id;
+  }
+  const replyCounts = comments.reduce((counts, comment) => {
+    if (comment.parentId) {
+      const rootId = rootIdOf(comment);
+      counts.set(rootId, (counts.get(rootId) || 0) + 1);
+    }
+    return counts;
+  }, new Map());
+  const focusedRoot = focus && commentById.has(focus) ? rootIdOf(commentById.get(focus)) : "";
+  const visibleComments = comments.filter((comment) => !comment.parentId || expandedThreads.has(rootIdOf(comment)));
   useEffect(() => { setPage(1); }, [type, id, sort]);
+  useEffect(() => { setExpandedThreads(new Set()); }, [type, id, sort, page]);
+  useEffect(() => {
+    if (focusedRoot) setExpandedThreads((current) => current.has(focusedRoot) ? current : new Set([...current, focusedRoot]));
+  }, [focusedRoot]);
   useEffect(() => {
     if (!r.loading && focus) requestAnimationFrame(() => document.getElementById(`comment-${focus}`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
-  }, [r.loading, focus]);
+  }, [r.loading, focus, expandedThreads]);
   async function submit(e) {
     e.preventDefault();
     setError(""); setBusy("main");
@@ -993,10 +1112,6 @@ function Comments({ type, id, contentAuthorId }) {
       setError(x.message);
     } finally { setBusy(""); }
   }
-  function chooseMode(next) {
-    setMode(next); setError(""); setSuccess(""); setSent(false);
-    setF((current) => ({ ...current, code: "", confirmPassword: "" }));
-  }
   async function sendInline(e, commentId, kind) {
     e.preventDefault();
     if (!inline.trim()) return;
@@ -1005,10 +1120,12 @@ function Comments({ type, id, contentAuthorId }) {
     setNotice("");
     try {
       if (kind === "reply") {
+        const repliedRoot = commentById.has(commentId) ? rootIdOf(commentById.get(commentId)) : commentId;
         await api("/comments", {
           method: "POST",
           body: { targetType: type, targetId: id, parentId: commentId, body: inline.trim() },
         });
+        setExpandedThreads((current) => new Set([...current, repliedRoot]));
         setNotice("回复已发表");
       } else {
         await api(`/comments/${commentId}/report`, {
@@ -1045,12 +1162,12 @@ function Comments({ type, id, contentAuthorId }) {
         <Loading />
       ) : r.error ? (
         <Err error={r.error} />
-      ) : asItems(r.data).length ? (
-        asItems(r.data).map((c) => (
+      ) : comments.length ? (
+        visibleComments.map((c) => (
           <article className={`comment ${c.parentId ? "comment-reply" : ""}`} id={`comment-${c.id}`} key={c.id}>
             {c.parentId && commentAuthors.get(c.parentId) && <small className="reply-target">回复 @{commentAuthors.get(c.parentId)}</small>}
             {c.deleted ? <><strong className="muted">已删除</strong><p className="deleted-comment">该评论已删除，后续回复保留。</p></> : <>
-              <div className="comment-author"><span className="comment-avatar">{(c.author?.nickname || "用户")[0]}</span><div>{c.author?.id || c.authorId ? <Link to={`/users/${c.author?.id || c.authorId}`}>{c.author?.nickname || "用户"}</Link> : <strong>{c.author?.nickname || "用户"}</strong>}<span>{(c.author?.id || c.authorId) === contentAuthorId ? "作者" : "社区成员"} · {fmt(c.createdAt)}</span></div></div>
+              <div className="comment-author"><UserAvatar user={c.author} name={c.author?.nickname || "用户"} className="comment-avatar" /><div>{c.author?.id || c.authorId ? <Link to={`/users/${c.author?.id || c.authorId}`}>{c.author?.nickname || "用户"}</Link> : <strong>{c.author?.nickname || "用户"}</strong>}<span>{(c.author?.id || c.authorId) === contentAuthorId ? "作者" : "社区成员"} · {fmt(c.createdAt)}</span></div></div>
               {!(c.author?.id || c.authorId) && <p>{c.body}</p>}
             </>}
             {!c.deleted && (c.author?.id || c.authorId) && <p>{c.body}</p>}
@@ -1079,6 +1196,12 @@ function Comments({ type, id, contentAuthorId }) {
                   <button type="button" className="button secondary small" onClick={() => { setActive(null); setInline(""); }}>取消</button>
                 </div>
               </form>
+            )}
+            {!c.parentId && replyCounts.get(c.id) > 0 && (
+              <button type="button" className="comment-thread-toggle" aria-expanded={expandedThreads.has(c.id)} onClick={() => setExpandedThreads((current) => { const next = new Set(current); if (next.has(c.id)) next.delete(c.id); else next.add(c.id); return next; })}>
+                {expandedThreads.has(c.id) ? "收起追评与回复" : `展开 ${replyCounts.get(c.id)} 条追评与回复`}
+                <ChevronRight aria-hidden="true" />
+              </button>
             )}
           </article>
         ))
@@ -1167,6 +1290,30 @@ function Shops() {
         />
       )}
     </div>
+  );
+}
+function ReviewBody({ review, followUp = false }) {
+  return (
+    <>
+      <div className="review-heading">
+        <strong>{followUp ? "追评" : review.rating
+          ? `${review.rating} / 5`
+          : ({ positive: "好评", neutral: "中评", negative: "差评", 好评: "好评", 中评: "中评", 差评: "差评" }[review.sentiment] || "中评")}</strong>
+        {(review.author?.nickname || review.nickname) && <span><UserAvatar user={review.author} name={review.author?.nickname || review.nickname} className="mini-avatar" />{review.author?.nickname || review.nickname}</span>}
+      </div>
+      {review.rating && (
+        <>
+          {review.pros && <p><b>优点：</b>{review.pros}</p>}
+          {review.cons && <p><b>不足：</b>{review.cons}</p>}
+          <p>{review.content || review.purchaseExperience}</p>
+        </>
+      )}
+      {review.reason && <p><b>理由：</b>{review.reason}</p>}
+      {review.notes && <p><b>备注：</b>{review.notes}</p>}
+      {review.supplements && <p><b>补充：</b>{review.supplements}</p>}
+      {review.questions && <p><b>疑问：</b>{review.questions}</p>}
+      <small>{fmt(review.createdAt || review.date) || review.date}</small>
+    </>
   );
 }
 function ShopDetail() {
@@ -1267,57 +1414,7 @@ function ShopDetail() {
         <h2>已审核评价</h2>
         <p className="muted">历史个人意见仅供参考，不计入站内星级评分。</p>
         {shown.length ? (
-          shown.map((x) => (
-            <article
-              className={`review ${x.rating ? "" : "history"}`}
-              key={x.id}
-            >
-              <strong>
-                {x.rating
-                  ? `${x.rating} / 5`
-                  : {
-                      positive: "好评",
-                      neutral: "中评",
-                      negative: "差评",
-                      好评: "好评",
-                      中评: "中评",
-                      差评: "差评",
-                    }[x.sentiment] || "中评"}
-              </strong>
-              {x.rating && (
-                <>
-                  {x.pros && <p><b>优点：</b>{x.pros}</p>}
-                  {x.cons && <p><b>不足：</b>{x.cons}</p>}
-                  <p>{x.content || x.purchaseExperience}</p>
-                </>
-              )}
-              {x.reason && (
-                <p>
-                  <b>理由：</b>
-                  {x.reason}
-                </p>
-              )}
-              {x.notes && (
-                <p>
-                  <b>备注：</b>
-                  {x.notes}
-                </p>
-              )}
-              {x.supplements && (
-                <p>
-                  <b>补充：</b>
-                  {x.supplements}
-                </p>
-              )}
-              {x.questions && (
-                <p>
-                  <b>疑问：</b>
-                  {x.questions}
-                </p>
-              )}
-              <small>{x.date}</small>
-            </article>
-          ))
+          shown.map((review) => <article className={`review ${review.rating ? "" : "history"}`} key={review.id}><ReviewBody review={review} /></article>)
         ) : (
           <Empty
             title={`还没有${{ positive: "好评", neutral: "中评", negative: "差评" }[sentiment]}`}
@@ -2157,7 +2254,7 @@ function Account() {
     <div className="container workspace">
       <aside>
         <div className="profile-chip">
-          <span className="avatar">{user.nickname?.[0]}</span>
+          <UserAvatar user={user} />
           <strong>{user.role === "owner" ? "Admin" : user.nickname}</strong>
           <small>{user.email}</small>
         </div>
@@ -2201,7 +2298,46 @@ function Profile({ user, refresh }) {
   const [nickname, setNickname] = useState(user.nickname),
     [bio, setBio] = useState(user.bio || ""),
     [pw, setPw] = useState({ currentPassword: "", newPassword: "" }),
-    [status, setStatus] = useState("");
+    [status, setStatus] = useState(""),
+    [avatarBusy, setAvatarBusy] = useState(false),
+    [avatarError, setAvatarError] = useState("");
+  async function uploadAvatar(file) {
+    if (!file || avatarBusy) return;
+    setAvatarError(""); setStatus("");
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      setAvatarError("头像仅支持 PNG、JPEG 或 WebP");
+      return;
+    }
+    if (file.size > 512 * 1024) {
+      setAvatarError("头像不能超过 0.5 MB");
+      return;
+    }
+    setAvatarBusy(true);
+    try {
+      const body = new FormData();
+      body.append("avatar", file);
+      await api("/me/avatar", { method: "POST", body });
+      await refresh();
+      setStatus("头像已更新");
+    } catch (x) {
+      setAvatarError(x.message);
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+  async function removeAvatar() {
+    if (avatarBusy) return;
+    setAvatarBusy(true); setAvatarError(""); setStatus("");
+    try {
+      await api("/me/avatar", { method: "DELETE" });
+      await refresh();
+      setStatus("已恢复默认头像");
+    } catch (x) {
+      setAvatarError(x.message);
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
   async function update(e) {
     e.preventDefault();
     try {
@@ -2225,6 +2361,18 @@ function Profile({ user, refresh }) {
   return (
     <>
       <h1>个人资料</h1>
+      <section className="panel avatar-editor" aria-labelledby="avatar-editor-title">
+        <UserAvatar user={user} name={nickname} className="profile-avatar-preview" />
+        <div>
+          <h2 id="avatar-editor-title">个人头像</h2>
+          <p>上传 PNG、JPEG 或 WebP 图片，文件不超过 0.5 MB。</p>
+          <div className="action-row">
+            <label className="button secondary small">{avatarBusy ? "处理中…" : user.avatarUrl ? "更换头像" : "选择头像"}<input hidden type="file" accept="image/png,image/jpeg,image/webp" disabled={avatarBusy} onChange={(event) => { uploadAvatar(event.target.files?.[0]); event.target.value = ""; }} /></label>
+            {user.avatarUrl && <button type="button" className="text-button danger" disabled={avatarBusy} onClick={removeAvatar}>移除头像</button>}
+          </div>
+          <Err error={avatarError} />
+        </div>
+      </section>
       <form className="panel form-stack" onSubmit={update}>
         <label>
           昵称
@@ -2277,7 +2425,7 @@ function PublicUser() {
   return (
     <div className="container page public-profile">
       <header className="profile-hero">
-        <span className="avatar">{u.nickname?.[0] || "用"}</span>
+        <UserAvatar user={u} />
         <div className="profile-identity"><h1>{u.nickname || "社区用户"}</h1><p>{u.bio || "这位用户还没有填写简介。"}</p></div>
       </header>
       <section><h2>公开文章</h2>
@@ -2444,7 +2592,7 @@ function Admin() {
     </div>
   );
 }
-function AnnouncementAdmin() {
+function LegacyAnnouncementAdmin() {
   const r = useLoad("/admin/announcement", []);
   const [form, setForm] = useState({ title: "", body: "" }),
     [busy, setBusy] = useState(false),
@@ -2536,10 +2684,96 @@ function AnnouncementAdmin() {
     </>
   );
 }
+function AnnouncementAdmin() {
+  const r = useLoad("/admin/announcements", []);
+  const items = asItems(r.data);
+  const [form, setForm] = useState({ id: "", title: "", body: "", updatedAt: null, published: false }),
+    [busy, setBusy] = useState(false),
+    [message, setMessage] = useState(""),
+    [error, setError] = useState(""),
+    [confirmAction, setConfirmAction] = useState("");
+  function normalize(value) {
+    const item = value?.announcement || value || {};
+    return { id: item.id || "", title: item.title || "", body: item.body || "", updatedAt: item.updatedAt ?? null, published: !!item.published, publishedAt: item.publishedAt || null };
+  }
+  function choose(item) {
+    setForm(normalize(item));
+    setMessage(""); setError(""); setConfirmAction("");
+  }
+  function createNew() {
+    setForm({ id: "", title: "", body: "", updatedAt: null, published: false });
+    setMessage(""); setError(""); setConfirmAction("");
+  }
+  async function saveDraft() {
+    const result = await api(form.id ? `/admin/announcements/${form.id}` : "/admin/announcements", {
+      method: form.id ? "PUT" : "POST",
+      body: { title: form.title, body: form.body, ...(form.id ? { expectedUpdatedAt: form.updatedAt } : {}) },
+    });
+    const saved = normalize(result);
+    setForm(saved);
+    await r.reload();
+    return saved;
+  }
+  async function act(action) {
+    if (busy) return;
+    setBusy(true); setError(""); setMessage("");
+    try {
+      if (action === "save") {
+        await saveDraft();
+        setMessage("公告草稿已保存。");
+      } else if (action === "publish") {
+        const saved = await saveDraft();
+        const result = await api(`/admin/announcements/${saved.id}/publish`, { method: "POST", body: { expectedUpdatedAt: saved.updatedAt } });
+        setForm(normalize(result));
+        await r.reload();
+        setMessage("公告已发布，首页将展示最新公告。");
+      } else if (action === "unpublish") {
+        const result = await api(`/admin/announcements/${form.id}/unpublish`, { method: "POST", body: { expectedUpdatedAt: form.updatedAt } });
+        setForm(normalize(result));
+        await r.reload();
+        setMessage("公告已下架，历史公开列表不再展示。");
+      } else if (action === "delete") {
+        await api(`/admin/announcements/${form.id}`, { method: "DELETE", body: { expectedUpdatedAt: form.updatedAt } });
+        createNew();
+        await r.reload();
+        setMessage("公告已删除。");
+      }
+      setConfirmAction("");
+    } catch (x) {
+      setError(x.code === "STALE_ANNOUNCEMENT" || x.status === 409 ? "公告已被其他管理员更新，请重新选择后再操作。" : x.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      <div className="announcement-admin-head"><div><h1>站内公告</h1><p>每条公告可独立保存、发布、下架或删除；首页展示最新公告，历史页面保留已发布记录。</p></div><button type="button" className="button secondary" onClick={createNew}>新建公告</button></div>
+      <Err error={r.error || error} retry={r.error ? r.reload : undefined} />
+      {message && <div className="success-box" role="status"><Check />{message}</div>}
+      <div className="announcement-admin-layout">
+        <aside className="announcement-admin-list" aria-label="公告列表">
+          {r.loading ? <Loading /> : items.length ? items.map((item) => <button type="button" key={item.id} className={form.id === item.id ? "selected" : ""} onClick={() => choose(item)}><strong>{item.title}</strong><span className={`status status-${item.published ? "published" : "draft"}`}>{item.published ? "已发布" : "草稿"}</span><small>{fmt(item.updatedAt)}</small></button>) : <p className="muted">还没有公告，可新建第一条。</p>}
+        </aside>
+        <form className="panel form-stack announcement-editor" onSubmit={(event) => { event.preventDefault(); act("save"); }}>
+          <div className="announcement-state"><span className={`status status-${form.published ? "published" : "draft"}`}>{form.published ? "已发布" : form.id ? "草稿" : "新公告"}</span>{form.updatedAt && <small>最后更新：{fmt(form.updatedAt)}</small>}</div>
+          <label>公告标题<input value={form.title} maxLength="120" disabled={busy} onChange={(event) => setForm({ ...form, title: event.target.value })} required /><small>{form.title.length} / 120</small></label>
+          <label>公告内容<textarea value={form.body} maxLength="2000" rows="8" disabled={busy} onChange={(event) => setForm({ ...form, body: event.target.value })} required /><small>{form.body.length} / 2000</small></label>
+          <div className="action-row">
+            <button className="button secondary" disabled={busy}>{busy ? "处理中…" : "保存草稿"}</button>
+            <button type="button" className="button primary" disabled={busy} onClick={() => act("publish")}>保存并发布</button>
+            {form.id && form.published && <button type="button" className="button secondary" disabled={busy} onClick={() => setConfirmAction("unpublish")}>下架公告</button>}
+            {form.id && <button type="button" className="text-button danger" disabled={busy} onClick={() => setConfirmAction("delete")}>删除公告</button>}
+          </div>
+        </form>
+      </div>
+      {confirmAction && <div className="moderation-confirm"><p><strong>确认{confirmAction === "delete" ? "删除" : "下架"}“{form.title}”？</strong>{confirmAction === "delete" ? " 删除后不可恢复。" : " 访客将无法继续查看这条公告。"}</p><div className="action-row"><button type="button" className="button danger small" disabled={busy} onClick={() => act(confirmAction)}>{busy ? "处理中…" : `确认${confirmAction === "delete" ? "删除" : "下架"}`}</button><button type="button" className="button secondary small" disabled={busy} onClick={() => setConfirmAction("")}>取消</button></div></div>}
+    </>
+  );
+}
 function Moderation({ type }) {
   const [status, setStatus] = useState(type === "articles" ? "all" : "pending");
   const [query, setQuery] = useState(""), [submittedQuery, setSubmittedQuery] = useState(""), [page, setPage] = useState(1);
-  const [moderationError, setModerationError] = useState(""), [moderationDone, setModerationDone] = useState(""), [pendingAction, setPendingAction] = useState(null), [reason, setReason] = useState(""), [decisionBusy, setDecisionBusy] = useState(false);
+  const [moderationError, setModerationError] = useState(""), [moderationDone, setModerationDone] = useState(""), [pendingAction, setPendingAction] = useState(null), [reason, setReason] = useState(""), [decisionBusy, setDecisionBusy] = useState(false), [pinBusy, setPinBusy] = useState("");
   const r = useLoad(`/admin/queue?type=${type}&status=${status}&q=${encodeURIComponent(type === "articles" ? submittedQuery : "")}&page=${page}&pageSize=20`, [
     type,
     status,
@@ -2564,6 +2798,19 @@ function Moderation({ type }) {
     } finally { setDecisionBusy(false); }
   }
   function ask(item, decision) { setModerationError(""); setModerationDone(""); setReason(""); setPendingAction({ item, decision }); }
+  async function togglePin(item) {
+    if (pinBusy) return;
+    setPinBusy(item.id); setModerationError(""); setModerationDone("");
+    try {
+      await api(`/admin/articles/${item.id}/pin`, { method: "POST", body: { pinned: !item.pinned } });
+      setModerationDone(item.pinned ? "已取消首页必读" : "已设为首页必读");
+      await r.reload();
+    } catch (x) {
+      setModerationError(x.message);
+    } finally {
+      setPinBusy("");
+    }
+  }
   return (
     <>
       <h1>
@@ -2609,6 +2856,7 @@ function Moderation({ type }) {
                 {x.title || x.name || x.body || x.reason || `#${x.id}`}
               </strong>
               {x.status && <span className={`status status-${x.status}`}>{statusLabel(x.status)}</span>}
+              {type === "articles" && x.pinned && <span className="pinned-badge"><Pin />首页必读</span>}
               <p>{x.excerpt || x.description || ""}</p>
               {x.body && <MD>{x.body}</MD>}
               {type === "articles" && downloadableFiles(x.attachments).length > 0 && (
@@ -2733,6 +2981,11 @@ function Moderation({ type }) {
                   onClick={() => ask(x, "hidden")}
                 >
                   下架
+                </button>
+              )}
+              {type === "articles" && (x.published || x.status === "approved") && x.status !== "hidden" && (
+                <button type="button" className="button secondary small pin-action" disabled={!!pinBusy} onClick={() => togglePin(x)}>
+                  <Pin fill={x.pinned ? "currentColor" : "none"} />{pinBusy === x.id ? "处理中…" : x.pinned ? "取消首页必读" : "设为首页必读"}
                 </button>
               )}
               {pendingAction?.item.id === x.id && <form className="moderation-confirm" onSubmit={(e) => { e.preventDefault(); decide(x, pendingAction.decision); }}><p><strong>确认{({ approved: "通过", rejected: "退回", hidden: "下架", dismissed: "驳回举报", removed: "移除内容" })[pendingAction.decision]}“{x.title || x.name || `#${x.id}`}”？</strong>{pendingAction.decision === "hidden" && " 下架后公开页面将立即不可见。"}</p><label>处理说明（可选）<textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength="500" /></label><div className="action-row"><button className="button danger small" disabled={decisionBusy}>{decisionBusy ? "处理中…" : `确认${({ approved: "通过", rejected: "退回", hidden: "下架", dismissed: "驳回举报", removed: "移除内容" })[pendingAction.decision]}`}</button><button type="button" className="button secondary small" disabled={decisionBusy} onClick={() => { setPendingAction(null); setReason(""); }}>取消</button></div></form>}
@@ -3418,6 +3671,7 @@ function RoutesView() {
         <Route path="/problems/:id" element={<Detail type="problems" />} />
         <Route path="/articles" element={<Listing type="articles" />} />
         <Route path="/articles/:id" element={<Detail type="articles" />} />
+        <Route path="/announcements" element={<Announcements />} />
         <Route path="/users/:id" element={<PublicUser />} />
         <Route path="/topics" element={<Topics />} />
         <Route path="/shops" element={<Shops />} />

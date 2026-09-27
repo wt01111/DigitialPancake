@@ -27,14 +27,16 @@ CREATE TABLE IF NOT EXISTS problems(id TEXT PRIMARY KEY,title TEXT NOT NULL,meta
 CREATE TABLE IF NOT EXISTS official_problem_files(id TEXT PRIMARY KEY,problem_id TEXT NOT NULL,relative_path TEXT NOT NULL,original_name TEXT NOT NULL,mime TEXT NOT NULL,size INTEGER NOT NULL,sha256 TEXT NOT NULL,source_url TEXT,FOREIGN KEY(problem_id) REFERENCES problems(id));
 CREATE TABLE IF NOT EXISTS comments(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,target_type TEXT NOT NULL,target_id TEXT NOT NULL,parent_id TEXT,body TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'visible',created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS comment_likes(comment_id TEXT NOT NULL,user_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(comment_id,user_id),FOREIGN KEY(comment_id) REFERENCES comments(id) ON DELETE CASCADE,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE);
+CREATE TABLE IF NOT EXISTS article_stars(article_id TEXT NOT NULL,user_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(article_id,user_id),FOREIGN KEY(article_id) REFERENCES articles(id) ON DELETE CASCADE,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE);
 CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,comment_id TEXT NOT NULL,reason TEXT,status TEXT NOT NULL DEFAULT 'pending',created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id),FOREIGN KEY(comment_id) REFERENCES comments(id));
 CREATE TABLE IF NOT EXISTS files(id TEXT PRIMARY KEY,owner_id TEXT NOT NULL,kind TEXT NOT NULL,entity_id TEXT,stored_name TEXT NOT NULL,original_name TEXT NOT NULL,mime TEXT NOT NULL,size INTEGER NOT NULL,created_at TEXT NOT NULL,FOREIGN KEY(owner_id) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS bookmarks(user_id TEXT NOT NULL,item_type TEXT NOT NULL,item_id TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(user_id,item_type,item_id));
 CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY,user_id TEXT NOT NULL,title TEXT NOT NULL,href TEXT,read_at TEXT,created_at TEXT NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,actor_id TEXT,action TEXT NOT NULL,entity_type TEXT,entity_id TEXT,detail TEXT,created_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS site_announcements(id TEXT PRIMARY KEY CHECK(id='home'),draft_title TEXT NOT NULL,draft_body TEXT NOT NULL,published_title TEXT,published_body TEXT,is_published INTEGER NOT NULL DEFAULT 0,updated_at TEXT NOT NULL,published_at TEXT,updated_by TEXT,FOREIGN KEY(updated_by) REFERENCES users(id));
+CREATE TABLE IF NOT EXISTS announcements(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT NULL,published_title TEXT,published_body TEXT,status TEXT NOT NULL DEFAULT 'draft',created_at TEXT NOT NULL,updated_at TEXT NOT NULL,published_at TEXT,created_by TEXT NOT NULL,updated_by TEXT NOT NULL,FOREIGN KEY(created_by) REFERENCES users(id),FOREIGN KEY(updated_by) REFERENCES users(id));
 CREATE TABLE IF NOT EXISTS schema_migrations(id TEXT PRIMARY KEY,applied_at TEXT NOT NULL);
-CREATE INDEX IF NOT EXISTS idx_shops_status_name ON shops(status,name); CREATE INDEX IF NOT EXISTS idx_reviews_shop_status ON reviews(shop_id,status); CREATE INDEX IF NOT EXISTS idx_reviews_user_shop_source ON reviews(user_id,shop_id,source_type); CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status); CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at); CREATE INDEX IF NOT EXISTS idx_comments_target_thread ON comments(target_type,target_id,parent_id,created_at);
+CREATE INDEX IF NOT EXISTS idx_shops_status_name ON shops(status,name); CREATE INDEX IF NOT EXISTS idx_reviews_shop_status ON reviews(shop_id,status); CREATE INDEX IF NOT EXISTS idx_reviews_user_shop_source ON reviews(user_id,shop_id,source_type); CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status); CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at); CREATE INDEX IF NOT EXISTS idx_comments_target_thread ON comments(target_type,target_id,parent_id,created_at); CREATE INDEX IF NOT EXISTS idx_article_stars_article ON article_stars(article_id,created_at); CREATE INDEX IF NOT EXISTS idx_announcements_public ON announcements(status,published_at DESC);
 CREATE TRIGGER IF NOT EXISTS limit_site_reviews_per_user_shop
 BEFORE INSERT ON reviews
 WHEN NEW.source_type='site' AND NEW.user_id IS NOT NULL AND (
@@ -47,10 +49,15 @@ END;`);
 for (const sql of [
   "ALTER TABLE users ADD COLUMN email_verified INTEGER NOT NULL DEFAULT 1",
   "ALTER TABLE users ADD COLUMN bio TEXT NOT NULL DEFAULT ''",
+  "ALTER TABLE users ADD COLUMN avatar_file_id TEXT",
   "ALTER TABLE articles ADD COLUMN published_payload TEXT",
   "ALTER TABLE articles ADD COLUMN published_version INTEGER NOT NULL DEFAULT 0",
   "ALTER TABLE articles ADD COLUMN published_visible INTEGER NOT NULL DEFAULT 0",
   "ALTER TABLE articles ADD COLUMN cover_image_id TEXT",
+  "ALTER TABLE articles ADD COLUMN pinned_at TEXT",
+  "ALTER TABLE articles ADD COLUMN pinned_by TEXT",
+  "ALTER TABLE announcements ADD COLUMN published_title TEXT",
+  "ALTER TABLE announcements ADD COLUMN published_body TEXT",
   "ALTER TABLE reviews ADD COLUMN published_payload TEXT",
   "ALTER TABLE reviews ADD COLUMN published_visible INTEGER NOT NULL DEFAULT 0",
   "ALTER TABLE reviews ADD COLUMN review_content TEXT",
@@ -59,6 +66,58 @@ for (const sql of [
     db.exec(sql);
   } catch (error) {
     if (!String(error.message).includes("duplicate column")) throw error;
+  }
+}
+if (
+  !db
+    .prepare("SELECT 1 FROM schema_migrations WHERE id=?")
+    .get("legacy-announcement-history-v1")
+) {
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    const legacyAnnouncement = db
+      .prepare("SELECT * FROM site_announcements WHERE id='home'")
+      .get();
+    if (legacyAnnouncement) {
+      const actor = legacyAnnouncement.updated_by
+        ? db.prepare("SELECT id FROM users WHERE id=?").get(legacyAnnouncement.updated_by)
+        : db
+            .prepare(
+              "SELECT id FROM users WHERE role IN ('owner','admin') ORDER BY CASE role WHEN 'owner' THEN 0 ELSE 1 END,created_at LIMIT 1",
+            )
+            .get();
+      if (!actor)
+        throw new Error("Cannot migrate legacy announcement without an administrator account");
+      db.prepare(
+        `INSERT INTO announcements
+         (id,title,body,published_title,published_body,status,created_at,updated_at,published_at,created_by,updated_by)
+         VALUES('announcement-legacy-home',?,?,?,?,?,?,?,?,?,?)
+         ON CONFLICT(id) DO UPDATE SET
+           title=excluded.title,body=excluded.body,
+           published_title=excluded.published_title,published_body=excluded.published_body,
+           status=excluded.status,updated_at=excluded.updated_at,published_at=excluded.published_at,
+           updated_by=excluded.updated_by`,
+      ).run(
+        legacyAnnouncement.draft_title,
+        legacyAnnouncement.draft_body,
+        legacyAnnouncement.published_title,
+        legacyAnnouncement.published_body,
+        legacyAnnouncement.is_published ? "published" : "draft",
+        legacyAnnouncement.published_at || legacyAnnouncement.updated_at,
+        legacyAnnouncement.updated_at,
+        legacyAnnouncement.published_at,
+        actor.id,
+        actor.id,
+      );
+    }
+    db.prepare("INSERT INTO schema_migrations VALUES(?,?)").run(
+      "legacy-announcement-history-v1",
+      new Date().toISOString(),
+    );
+    db.exec("COMMIT");
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
   }
 }
 if (!db.prepare("SELECT 1 FROM schema_migrations WHERE id=?").get("review-published-snapshot-v1")) {

@@ -27,6 +27,7 @@ npm run build
 npm start
 npm run init-owner
 npm run test:api
+npm run test:profile-community
 npm run test:ui
 ```
 

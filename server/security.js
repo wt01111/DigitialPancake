@@ -100,6 +100,12 @@ export const publicUser = (u, self = false) =>
         id: u.id,
         nickname: u.nickname,
         bio: u.bio || "",
+        avatar: u.avatar_file_id
+          ? { id: u.avatar_file_id, url: `/api/avatars/${u.avatar_file_id}` }
+          : null,
+        avatarUrl: u.avatar_file_id
+          ? `/api/avatars/${u.avatar_file_id}`
+          : null,
         ...(self
           ? {
               email: u.email,
