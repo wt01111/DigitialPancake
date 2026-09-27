@@ -73,7 +73,7 @@ foreach ($distFile in $distFiles) {
 # Official files are enumerated separately. Only reviewed document/image types
 # under the fixed seed directory may enter the release; source archives stay in work/.
 $officialRoot = Join-Path $projectRoot 'server\seed\problems-official-files'
-$allowedOfficialExtensions = @('.pdf', '.png', '.jpg', '.jpeg', '.svg', '.pptx', '.doc', '.docx', '.md')
+$allowedOfficialExtensions = @('.pdf', '.png', '.jpg', '.jpeg', '.svg', '.md')
 $officialFiles = Get-ChildItem -LiteralPath $officialRoot -File -Recurse
 foreach ($officialFile in $officialFiles) {
     if ($allowedOfficialExtensions -notcontains $officialFile.Extension.ToLowerInvariant()) {

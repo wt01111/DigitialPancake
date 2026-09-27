@@ -55,7 +55,7 @@ npm run test:ui
 
 原始题包只从全国大学生电子设计竞赛陕西赛区官网获取。维护人员可在隔离工作目录运行 `node scripts/import-national-problems.mjs --fetch`，脚本限制下载与解包总量，拒绝路径穿越、链接和特殊文件，且不执行下载内容。Windows 10/11 使用系统自带的 libarchive `tar.exe`；Ubuntu 须先安装 `libarchive-tools poppler-utils`，脚本明确调用 `bsdtar`，因为 GNU tar 不能解官方 RAR。生成后必须再次运行 `npm run validate:content`。分类依据题目正文的主要设计任务，分类值仅为 `signal`、`control`、`power`、`other`；竞赛层级由 `competitionType` 单独表示。
 
-本站收录的常规题目附件保存在 `server/seed/problems-official-files`，仍经登录鉴权下载。2025 年 H 题的两张大图不复制到本站，只在清单中保留官方 H 题附图原包链接、单文件大小与 SHA-256；访问该外链受官方网站策略影响，不经过本站下载鉴权。所有官方题目和附件的权利与许可仍归原权利人，收入本项目不构成重新授权。
+本站收录的常规题目附件保存在 `server/seed/problems-official-files`，仍经登录鉴权下载。每道题至少包含一份可在站内阅读的 PDF；官网仅提供 Word 文件的 2018、2022 年题目由维护人员使用本机 Microsoft Word 导出为 PDF，清单同时记录原始文件名、转换工具、文件大小和 SHA-256。2025 年 H 题的两张大图不复制到本站，只在清单中保留官方 H 题附图原包链接、单文件大小与 SHA-256；访问该外链受官方网站策略影响，不经过本站下载鉴权。所有官方题目和附件的权利与许可仍归原权利人，格式转换与收入本项目均不构成重新授权。
 
 ## Ubuntu 24.04 LTS 部署
 

@@ -343,7 +343,15 @@ async function copyAttachment(sourcePath, relativePath, sourceUrl) {
     sourceUrl,
     sha256: sha256(data),
     size: data.length,
-    mime: ({ ".pdf": "application/pdf", ".jpg": "image/jpeg", ".png": "image/png", ".svg": "image/svg+xml", ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation" })[extname(sourcePath).toLowerCase()],
+    mime: ({
+      ".pdf": "application/pdf",
+      ".jpg": "image/jpeg",
+      ".png": "image/png",
+      ".svg": "image/svg+xml",
+      ".doc": "application/msword",
+      ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    })[extname(sourcePath).toLowerCase()] || "application/octet-stream",
   };
 }
 async function buildSeed() {
@@ -354,9 +362,16 @@ async function buildSeed() {
   const extractedRoot = resolve(workRoot, "extracted");
   if (contentRoot !== resolve(root, "server/seed/problems-official-files"))
     throw new Error("Refusing to clean an unexpected official content directory");
+  const allFiles = await walk(extractedRoot);
+  const officeFiles = allFiles.filter((path) =>
+    [".doc", ".docx", ".ppt", ".pptx"].includes(extname(path).toLowerCase()),
+  );
+  if (officeFiles.length)
+    throw new Error(
+      `Official packages contain ${officeFiles.length} Office files. Convert them to PDF and update the reviewed manifest before rebuilding; the current PDF seed was left untouched.`,
+    );
   await rm(contentRoot, { recursive: true, force: true });
   await mkdir(contentRoot, { recursive: true });
-  const allFiles = await walk(extractedRoot);
   const problems = [];
   for (const pdf of allFiles.filter((path) => extname(path).toLowerCase() === ".pdf" && sourceForPath(path).competitionType === "national")) {
     if (/数字字模/.test(pdf)) continue;
@@ -471,7 +486,7 @@ async function buildSeed() {
   if (problems.length !== 91) throw new Error(`Expected 91 problems, found ${problems.length}`);
   await mkdir(dirname(seedPath), { recursive: true });
   await writeFile(seedPath, `${JSON.stringify({ schemaVersion: 1, retrievedAt, sources, problems }, null, 2)}\n`, "utf8");
-  await writeFile(resolve(contentRoot, "README.md"), `# 官方赛题附件\n\n来源为全国大学生电子设计竞赛陕西赛区官方网站：2017、2019、2021、2023、2025 年全国正式赛题，以及 2018、2020、2022、2024、2026 年陕西省 TI 杯正式赛题。文件保持官方原始内容，SHA-256、来源页和下载地址见 \`server/seed/problems-official.json\`。官方资料的权利与许可仍归原权利人；收入本站不表示重新授权。\n`, "utf8");
+  await writeFile(resolve(contentRoot, "README.md"), `# 官方赛题附件\n\n来源为全国大学生电子设计竞赛陕西赛区官方网站。题目主附件统一保存为 PDF，以便站内阅读；转换来源、工具、SHA-256、来源页和官方下载地址见 \`server/seed/problems-official.json\`。官方资料的权利与许可仍归原权利人；格式转换与收入本站均不表示重新授权。\n`, "utf8");
   await rm(join(workRoot, "text-current.txt"), { force: true });
   console.log(`Built ${problems.length} problems at ${seedPath}`);
 }

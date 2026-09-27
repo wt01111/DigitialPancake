@@ -339,11 +339,27 @@ function ArticleRow({ a }) {
     {cover && <Link className="article-list-cover" to={`/articles/${a.id}`}><img src={cover} alt="" loading="lazy" /></Link>}
   </article>;
 }
-function Problem({ p }) {
+const listingScrollKey = (path) => `listing-scroll:${path}`;
+function rememberListingScroll(path) {
+  if (!path) return;
+  try {
+    sessionStorage.setItem(
+      listingScrollKey(path),
+      JSON.stringify({ top: window.scrollY, savedAt: Date.now() }),
+    );
+  } catch {}
+}
+function Problem({ p, returnTo }) {
   const typeName =
     { signal: "信号", control: "控制", power: "电源", other: "其他" }[p.type] ||
     p.topic ||
     p.category;
+  const detailLink = returnTo
+    ? {
+        state: { fromProblemList: true, returnTo },
+        onClick: () => rememberListingScroll(returnTo),
+      }
+    : {};
   return (
     <article className="problem-row">
       <div className="problem-letter">{p.problemCode || p.letter || "题"}</div>
@@ -361,7 +377,7 @@ function Problem({ p }) {
             .filter(Boolean)
             .join(" · ")}
         </div>
-        <Link className="problem-title" to={`/problems/${p.id}`}>
+        <Link className="problem-title" to={`/problems/${p.id}`} {...detailLink}>
           {p.title}
         </Link>
         <div className="tags">
@@ -373,14 +389,14 @@ function Problem({ p }) {
       <div className="problem-right">
         <span>{typeName}</span>
         <Save type="problem" id={p.id} initial={p.bookmarked} />
-        <Link className="icon-button" to={`/problems/${p.id}`}>
+        <Link className="icon-button" to={`/problems/${p.id}`} {...detailLink}>
           <ChevronRight />
         </Link>
       </div>
     </article>
   );
 }
-function Rows({ type, items, layout = "cards" }) {
+function Rows({ type, items, layout = "cards", returnTo }) {
   if (!items.length)
     return (
       <Empty
@@ -394,7 +410,7 @@ function Rows({ type, items, layout = "cards" }) {
         type === "articles" ? (
           layout === "list" ? <ArticleRow key={x.id} a={x} /> : <Card key={x.id} a={x} />
         ) : (
-          <Problem key={x.id} p={x} />
+          <Problem key={x.id} p={x} returnTo={returnTo} />
         ),
       )}
     </div>
@@ -471,6 +487,7 @@ function HomeAnnouncement() {
 }
 function Listing({ type }) {
   const [sp, setSp] = useSearchParams();
+  const loc = useLocation();
   const q = sp.get("q") || "",
     category = sp.get("category") || "",
     year = sp.get("year") || "",
@@ -500,6 +517,28 @@ function Listing({ type }) {
   ]);
   const article = type === "articles";
   const [articleLayout, setArticleLayout] = useState(storedArticleLayout);
+  const returnTo = `${loc.pathname}${loc.search}`;
+  useEffect(() => {
+    if (article || r.loading || r.error) return;
+    let saved;
+    try {
+      saved = JSON.parse(
+        sessionStorage.getItem(listingScrollKey(returnTo)) || "null",
+      );
+      sessionStorage.removeItem(listingScrollKey(returnTo));
+    } catch {
+      saved = null;
+    }
+    if (
+      !saved ||
+      !Number.isFinite(saved.top) ||
+      Date.now() - saved.savedAt > 30 * 60 * 1000
+    )
+      return;
+    requestAnimationFrame(() =>
+      window.scrollTo({ top: saved.top, behavior: "auto" }),
+    );
+  }, [article, r.loading, r.error, returnTo]);
   function chooseArticleLayout(next) { setArticleLayout(next); try { localStorage.setItem("article-layout", next); } catch {} }
   return (
     <div className="container page">
@@ -659,7 +698,12 @@ function Listing({ type }) {
       ) : r.error ? (
         <Err error={r.error} retry={r.reload} />
       ) : (
-        <Rows type={type} items={asItems(r.data)} layout={article ? articleLayout : "cards"} />
+        <Rows
+          type={type}
+          items={asItems(r.data)}
+          layout={article ? articleLayout : "cards"}
+          returnTo={article ? undefined : returnTo}
+        />
       )}
       {!article && !r.loading && !r.error && (
         <div className="pagination">
@@ -740,6 +784,8 @@ function AuthorBadge({ author, date }) {
 }
 function Detail({ type }) {
   const { id } = useParams();
+  const nav = useNavigate();
+  const loc = useLocation();
   const r = useLoad(`/${type}/${id}`, [type, id]);
   if (r.loading) return <Loading />;
   if (r.error)
@@ -750,10 +796,28 @@ function Detail({ type }) {
     );
   const x = r.data,
     article = type === "articles";
+  const fromProblemList =
+    !article &&
+    loc.state?.fromProblemList === true &&
+    typeof loc.state?.returnTo === "string" &&
+    /^\/problems(?:\?|$)/.test(loc.state.returnTo);
+  const returnTo = fromProblemList ? loc.state.returnTo : `/${type}`;
+  const canGoBack = Number(window.history.state?.idx) > 0;
   return (
     <div className="container reading-page">
       <article className="reading">
-        <Link className="back-link" to={`/${type}`}>
+        <Link
+          className="back-link"
+          to={returnTo}
+          onClick={
+            canGoBack
+              ? (event) => {
+                  event.preventDefault();
+                  nav(-1);
+                }
+              : undefined
+          }
+        >
           ← 返回列表
         </Link>
         <div className="eyebrow">
@@ -3225,6 +3289,7 @@ function ProblemCreate() {
                 新增附件
                 <input
                   type="file"
+                  accept="application/pdf,.pdf"
                   onChange={(e) => setAttachment(e.target.files[0])}
                 />
               </label>

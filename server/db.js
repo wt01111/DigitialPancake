@@ -130,8 +130,18 @@ export function seedOfficialProblems() {
     insertProblem = db.prepare(
       "INSERT OR IGNORE INTO problems(id,title,metadata,status,created_by,created_at) VALUES(?,?,?,'published',NULL,?)",
     ),
-    insertFile = db.prepare(
-      "INSERT OR IGNORE INTO official_problem_files VALUES(?,?,?,?,?,?,?,?)",
+    syncFile = db.prepare(
+      `INSERT INTO official_problem_files
+        (id,problem_id,relative_path,original_name,mime,size,sha256,source_url)
+       VALUES(?,?,?,?,?,?,?,?)
+       ON CONFLICT(id) DO UPDATE SET
+         relative_path=excluded.relative_path,
+         original_name=excluded.original_name,
+         mime=excluded.mime,
+         size=excluded.size,
+         sha256=excluded.sha256,
+         source_url=excluded.source_url
+       WHERE official_problem_files.problem_id=excluded.problem_id`,
     ),
     allowedCategories = new Set(["signal", "control", "power", "other"]),
     allowedCompetitions = new Set(["national", "provincial"]);
@@ -153,12 +163,12 @@ export function seedOfficialProblems() {
       for (const [index, file] of files.entries()) {
         const relativePath = officialRelativePath(file.relativePath),
           absolutePath = resolve(seedDir, relativePath);
-        insertFile.run(
+        syncFile.run(
           file.id || `${id}-file-${index + 1}`,
           id,
           relativePath,
           file.name || relativePath.split("/").at(-1),
-          file.mime || "application/pdf",
+          file.mime || "application/octet-stream",
           Number(file.size) || 0,
           String(file.sha256 || ""),
           file.sourceUrl || null,

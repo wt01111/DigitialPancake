@@ -471,11 +471,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/A.docx",
-          "name": "2018年TI杯大学生电子设计竞赛题A-电流信号检测装置.docx",
+          "relativePath": "problems-official-files/2018/all/A.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题A-电流信号检测装置.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题A-电流信号检测装置.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "4e90cfb63e4da64836dadc67f21b085a07c58b8b4240771fd4163981baeab912",
-          "size": 395102
+          "sha256": "640ea72271794bf1ed123f560db58651dfd0d23d84cda28e014670719b6d67e6",
+          "size": 267046,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -495,11 +498,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/B.docx",
-          "name": "2018年TI杯大学生电子设计竞赛题B-灭火飞行器.docx",
+          "relativePath": "problems-official-files/2018/all/B.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题B-灭火飞行器.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题B-灭火飞行器.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "035ba8a0b9a270e04c083a31e468421f8a2ba1339c318d214b3cc683ad955343",
-          "size": 678291
+          "sha256": "e8d4aed13d38659ab7d0ba3c5b5f697ad0b477e65845b0b6da3f93e0a657402e",
+          "size": 335183,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -519,11 +525,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/C.docx",
-          "name": "2018年TI杯大学生电子设计竞赛题C-无线充电电动小车.docx",
+          "relativePath": "problems-official-files/2018/all/C.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题C-无线充电电动小车.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题C-无线充电电动小车.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "ee26703231794c4cd429e428b90a1111ce604b9a417430f82ef3df39ab3dbd87",
-          "size": 24763
+          "sha256": "6e6d12464dba5b7fd7ca2ec1d515af93f2e882c04d904342c8aa993ea4a75bac",
+          "size": 274191,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -543,11 +552,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/D.docx",
-          "name": "2018年TI杯大学生电子设计竞赛题D-手势识别.docx",
+          "relativePath": "problems-official-files/2018/all/D.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题D-手势识别.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题D-手势识别.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "d9a627a9c148856801855d5790bf284d3a7d65ba577570deaba275e06ac479d6",
-          "size": 236782
+          "sha256": "e65400b1751d1ded2efb3ae6477ea515e432cf564d4c135ddc62eb428ad55dca",
+          "size": 397586,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -567,11 +579,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/E.docx",
-          "name": "2018年TI杯大学生电子设计竞赛题E-能量回收装置.docx",
+          "relativePath": "problems-official-files/2018/all/E.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题E-能量回收装置.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题E-能量回收装置.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "bd7a9664b8779d7169c39adbf4ca33207bbb50390297b1de8381bf8eb759f866",
-          "size": 81071
+          "sha256": "8dc462bc40c36413f54eea72d4ce316fed8f48ce11ddd8ab01920e938ba0beb0",
+          "size": 343095,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -591,11 +606,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/F.docx",
-          "name": "2018年TI杯大学生电子设计竞赛题F-无线话筒扩音系统.docx",
+          "relativePath": "problems-official-files/2018/all/F.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题F-无线话筒扩音系统.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题F-无线话筒扩音系统.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "6b74f29cee3e9c70d22daba7e4d2e96e31a0f3388a0c3ca7ad9347d929cc7a79",
-          "size": 20678
+          "sha256": "290e5b1bd5ab3aafac65293b0b848520109372f5c6a260b48654fe5274e3a864",
+          "size": 188192,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -615,11 +633,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/G.doc",
-          "name": "2018年TI杯大学生电子设计竞赛题G-简易数字信号时序分析装置.doc",
+          "relativePath": "problems-official-files/2018/all/G.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题G-简易数字信号时序分析装置.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题G-简易数字信号时序分析装置.doc",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "d235f668b72ca0cf4b45c4b837248cf00bf2f75f23c97fe4d1ac881fda9abe51",
-          "size": 59392
+          "sha256": "2acce93198e903a4cd2d82348d7542ad564be392159ce13bbc3ed93e4cb05a69",
+          "size": 250740,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -639,11 +660,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2018/all/H.docx",
-          "name": "2018年TI杯大学生电子设计竞赛题H-简易功率测量装置.docx",
+          "relativePath": "problems-official-files/2018/all/H.pdf",
+          "name": "2018年TI杯大学生电子设计竞赛题H-简易功率测量装置.pdf",
+          "convertedFrom": "2018年TI杯大学生电子设计竞赛题H-简易功率测量装置.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/180720/2-1PH00K610.zip",
-          "sha256": "a4270e118649d2b21c1631a4211a56a0cdf8fe2dab587834c2cabacb86c08eab",
-          "size": 50144
+          "sha256": "f2613938a7bbc3febfd1aef54af0aecc042051ed0f079290647fb35cba95022f",
+          "size": 289452,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -1417,11 +1441,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2022/all/A.doc",
-          "name": "A题-单相交流电子负载.doc",
+          "relativePath": "problems-official-files/2022/all/A.pdf",
+          "name": "A题-单相交流电子负载.pdf",
+          "convertedFrom": "A题-单相交流电子负载.doc",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
-          "sha256": "f592d7312be5cf5fe2fea44c6de902ab873d14b0957719e414cb44377f1b287c",
-          "size": 151040
+          "sha256": "2be6887b38d2022bcd9b1396093337036f9d6529895d589a127e7be4afb6522b",
+          "size": 232052,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -1441,11 +1468,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2022/all/B.docx",
-          "name": "B题-送货无人机.docx",
+          "relativePath": "problems-official-files/2022/all/B.pdf",
+          "name": "B题-送货无人机.pdf",
+          "convertedFrom": "B题-送货无人机.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
-          "sha256": "d3c7c351dc2ad346657e906a229d025a9fb47766845bf9669dddabacda7fc0f1",
-          "size": 154577
+          "sha256": "ee3acdce7602f66f53d04bbaf805b3ec01faa36ccdaf7ab8db1fbce7e65733fc",
+          "size": 310977,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -1465,11 +1495,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2022/all/C.docx",
-          "name": "C题-小车跟随行驶系统.docx",
+          "relativePath": "problems-official-files/2022/all/C.pdf",
+          "name": "C题-小车跟随行驶系统.pdf",
+          "convertedFrom": "C题-小车跟随行驶系统.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
-          "sha256": "930ee95e04bf056634215e3e046d0ff899c0f85e7129bfbc926bc2bfb5a3f5de",
-          "size": 95882
+          "sha256": "602cd53151ff469f2d577cd8031ab727bd336855ebc006fdb7f87c40e0bbf6ba",
+          "size": 286168,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -1489,11 +1522,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2022/all/D.docx",
-          "name": "D题-混沌信号发生器.docx",
+          "relativePath": "problems-official-files/2022/all/D.pdf",
+          "name": "D题-混沌信号发生器.pdf",
+          "convertedFrom": "D题-混沌信号发生器.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
-          "sha256": "e7d1af1524422a999104d6ddfc8b07bdf410f232b2b72a92f98755b556054644",
-          "size": 84075
+          "sha256": "f5c97c06546230bba56bf73320f3b2f9c10f7841b6385afa6d896d4a280c71f3",
+          "size": 287727,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -1513,11 +1549,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2022/all/E.docx",
-          "name": "E题-声源定位跟踪系统.docx",
+          "relativePath": "problems-official-files/2022/all/E.pdf",
+          "name": "E题-声源定位跟踪系统.pdf",
+          "convertedFrom": "E题-声源定位跟踪系统.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
-          "sha256": "6f4f2a2ece854ae6c9a6484c7c93104d3b16a01e4ce8ced8338413e765feca24",
-          "size": 72180
+          "sha256": "8e1e56d2d6f20905dba4677f439163c6554715ecbe95c1f09a0675a5684e3cad",
+          "size": 269850,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -1537,11 +1576,14 @@
       "relatedNotices": [],
       "files": [
         {
-          "relativePath": "problems-official-files/2022/all/F.docx",
-          "name": "F题-信号调制度测量装置.docx",
+          "relativePath": "problems-official-files/2022/all/F.pdf",
+          "name": "F题-信号调制度测量装置.pdf",
+          "convertedFrom": "F题-信号调制度测量装置.docx",
+          "conversionTool": "Microsoft Word 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/220727/2-220HFJ458.zip",
-          "sha256": "677cec4fd2997f579f3901b37f549035c8bd1df497af8ab30468d3d8e21bd4e2",
-          "size": 53719
+          "sha256": "ee628b246e51f42066929acfba5047c456469bccf0dfc15a318d76e219ee675f",
+          "size": 237751,
+          "mime": "application/pdf"
         }
       ]
     },
@@ -2111,12 +2153,14 @@
           "mime": "image/png"
         },
         {
-          "relativePath": "problems-official-files/2024/all/D-support-25.pptx",
-          "name": "2024 D题 立体货架盘点无人机系统 附件 25.pptx",
+          "relativePath": "problems-official-files/2024/all/D-support-25.pdf",
+          "name": "2024 D题 立体货架盘点无人机系统 附件 25.pdf",
+          "convertedFrom": "2024 D题 立体货架盘点无人机系统 附件 25.pptx",
+          "conversionTool": "Microsoft PowerPoint 16.0 ExportAsFixedFormat",
           "sourceUrl": "https://nuedc.xidian.edu.cn/uploads/soft/240729/2-240HZJ217.zip",
-          "sha256": "a15348832d0c13f729286fab992577d7600fead4876b41e966c2bf674fe635e4",
-          "size": 51057,
-          "mime": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+          "sha256": "2ab011b5d82f4efb038d3c16eece40f4ef024fc67d7e17dabb59d8424d8022a3",
+          "size": 61361,
+          "mime": "application/pdf"
         }
       ]
     },

@@ -1,6 +1,7 @@
 import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
+import { resolve } from "node:path";
 const browser = await chromium.launch({ channel: "msedge", headless: true });
 const page = await browser.newPage({
   viewport: { width: 1280, height: 900 },
@@ -17,6 +18,21 @@ await page.route("**/api/bootstrap", (r) =>
   }),
 );
 const problemRequests = [];
+await page.route("**/api/problems/**", (r) =>
+  r.fulfill({
+    json: {
+      id: "p-2023-a",
+      title: "2023 全国电赛 A题",
+      year: 2023,
+      category: "signal",
+      competitionType: "national",
+      competitionName: "全国大学生电子设计竞赛",
+      group: "undergraduate",
+      problemCode: "A",
+      attachments: [],
+    },
+  }),
+);
 await page.route("**/api/problems*", (r) => {
   problemRequests.push(r.request().url());
   return r.fulfill({
@@ -45,6 +61,9 @@ await page.route("**/api/problems*", (r) => {
     },
   });
 });
+await page.route("**/api/comments*", (r) =>
+  r.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 20 } }),
+);
 await page.route("**/api/articles*", (r) => r.fulfill({ json: { items: [] } }));
 await page.route("**/api/shops*", (r) => r.fulfill({ json: { items: [] } }));
 const base = process.env.PREVIEW_BASE || "http://127.0.0.1:5173";
@@ -56,6 +75,10 @@ await page.screenshot({
   path: "work/qa/production-desktop.png",
   fullPage: true,
 });
+await page.locator(".problem-title").click();
+await expect(page).toHaveURL(/\/problems\/p-2023-a$/);
+await page.getByRole("link", { name: "← 返回列表" }).click();
+await expect(page).toHaveURL(`${base}/`);
 await page.getByRole("link", { name: "店铺口碑" }).first().click();
 await expect(
   page.getByRole("heading", { name: "输入关键词开始搜索" }),
@@ -67,6 +90,14 @@ await page.goto(`${base}/auth`);
 await expect(page.getByText("注册与找回密码暂未开放。")).toBeVisible();
 await expect(page.getByRole("button", { name: "注册" })).toBeDisabled();
 await expect(page.getByLabel("邮箱")).toHaveJSProperty("type", "email");
+await page.goto(`${base}/search?q=2023`);
+await expect(page.getByText("“2023”的搜索结果")).toBeVisible();
+await page.locator(".problem-title").click();
+await page.getByRole("link", { name: "← 返回列表" }).click();
+await expect(page).toHaveURL(`${base}/search?q=2023`);
+await page.goto(`${base}/problems/p-2023-a`);
+await page.getByRole("link", { name: "← 返回列表" }).click();
+await expect(page).toHaveURL(`${base}/problems`);
 await page.goto(`${base}/problems`);
 await page.getByLabel("竞赛").selectOption("national");
 await expect
@@ -89,6 +120,21 @@ await expect
     ),
   )
   .toBeTruthy();
+const filteredProblemsUrl = page.url();
+await page.evaluate(() => {
+  document.body.style.minHeight = "2400px";
+  window.scrollTo(0, 600);
+});
+await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+const listScrollY = await page.evaluate(() => window.scrollY);
+await page.locator(".problem-title").evaluate((element) => element.click());
+await expect(page).toHaveURL(/\/problems\/p-2023-a$/);
+await expect(page.getByRole("heading", { name: "2023 全国电赛 A题" })).toBeVisible();
+await page.getByRole("link", { name: "← 返回列表" }).click();
+await expect(page).toHaveURL(filteredProblemsUrl);
+await expect
+  .poll(() => page.evaluate(() => window.scrollY))
+  .toBeGreaterThanOrEqual(listScrollY - 2);
 await page.setViewportSize({ width: 390, height: 844 });
 await page.goto(base);
 await expect(page.getByRole("heading", { name: /让每一次探索/ })).toBeVisible();
@@ -101,6 +147,37 @@ const admin = await browser.newPage({
   viewport: { width: 1280, height: 900 },
   locale: "zh-CN",
 });
+await admin.route("**/api/problems/pdf-online", (r) =>
+  r.fulfill({
+    json: {
+      id: "pdf-online",
+      title: "在线 PDF 阅读测试题",
+      year: 2022,
+      category: "signal",
+      competitionType: "provincial",
+      competitionName: "陕西省 TI 杯",
+      group: "all",
+      problemCode: "F",
+      attachments: [
+        {
+          id: "test-pdf",
+          name: "F题-信号调制度测量装置.pdf",
+          mime: "application/pdf",
+          url: "/api/official-files/test-pdf",
+        },
+      ],
+    },
+  }),
+);
+await admin.route("**/api/official-files/test-pdf", (r) =>
+  r.fulfill({
+    path: resolve("server/seed/problems-official-files/2022/all/F.pdf"),
+    contentType: "application/pdf",
+  }),
+);
+await admin.route("**/api/comments*", (r) =>
+  r.fulfill({ json: { items: [], total: 0, page: 1, pageSize: 20 } }),
+);
 await admin.route("**/api/bootstrap", (r) =>
   r.fulfill({
     json: {
@@ -160,6 +237,12 @@ await admin.route("**/api/admin/accounts*", async (r) => {
     },
   });
 });
+await admin.goto(`${base}/problems/pdf-online`);
+await expect(admin.getByRole("heading", { name: "在线阅读" })).toBeVisible();
+await expect(admin.locator(".pdf-page")).toHaveCount(2);
+await expect
+  .poll(() => admin.locator(".pdf-page canvas").first().evaluate((canvas) => canvas.width))
+  .toBeGreaterThan(0);
 await admin.goto(`${base}/admin`);
 await expect(admin.getByRole("heading", { name: "管理工作台" })).toBeVisible();
 await expect(admin.getByRole("button", { name: "公告" })).toHaveClass(/active/);

@@ -1963,7 +1963,7 @@ app.get("/api/problems/:id", (req, res, next) => {
         ),
         attachments: [
           ...all(
-            "SELECT id,original_name name,size FROM files WHERE entity_id=? AND kind='problem-published'",
+            "SELECT id,original_name name,size,mime FROM files WHERE entity_id=? AND kind='problem-published'",
             p.id,
           ).map((f) => ({ ...f, url: `/api/files/${f.id}` })),
           ...all(
@@ -2727,6 +2727,11 @@ app.post(
   (req, res, next) => {
     try {
       if (!req.file) throw fail(400, "请选择附件", "INVALID_INPUT");
+      if (req.file.mimetype !== "application/pdf" || !validProof(req.file)) {
+        unlinkSync(req.file.path);
+        req.file = null;
+        throw fail(400, "赛题附件仅支持内容有效的 PDF", "INVALID_PROBLEM_FILE");
+      }
       const fid = id("file");
       run(
         "INSERT INTO files VALUES(?,?,?,?,?,?,?,?,?)",

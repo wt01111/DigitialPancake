@@ -46,10 +46,28 @@ export function validateOfficialManifest(entries = readOfficialManifest()) {
       throw new Error(`Invalid official problem metadata: ${item.id}`);
     if (!Array.isArray(item.files) || item.files.length === 0)
       throw new Error(`Official problem has no attachment: ${item.id}`);
+    if (
+      !item.files.some(
+        (file) =>
+          /\.pdf$/i.test(officialRelativePath(file.relativePath)) &&
+          file.mime === "application/pdf",
+      )
+    )
+      throw new Error(`Official problem has no readable PDF: ${item.id}`);
     for (const file of item.files) {
       const relativePath = officialRelativePath(file.relativePath),
         path = resolve(seedDir, relativePath),
         back = relative(seedDir, path);
+      if (
+        /\.(?:doc|docx)$/i.test(relativePath) ||
+        [
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ].includes(file.mime)
+      )
+        throw new Error(
+          `Official Word attachment must be converted to PDF: ${item.id}/${relativePath}`,
+        );
       if (
         !relativePath ||
         back.startsWith("..") ||
@@ -64,9 +82,15 @@ export function validateOfficialManifest(entries = readOfficialManifest()) {
         throw new Error(
           `Official attachment size mismatch: ${item.id}/${relativePath}`,
         );
-      const digest = createHash("sha256")
-        .update(readFileSync(path))
-        .digest("hex");
+      const contents = readFileSync(path);
+      if (
+        /\.pdf$/i.test(relativePath) &&
+        contents.subarray(0, 5).toString() !== "%PDF-"
+      )
+        throw new Error(
+          `Official PDF signature mismatch: ${item.id}/${relativePath}`,
+        );
+      const digest = createHash("sha256").update(contents).digest("hex");
       if (
         !/^[a-f0-9]{64}$/i.test(file.sha256 || "") ||
         digest !== String(file.sha256).toLowerCase()

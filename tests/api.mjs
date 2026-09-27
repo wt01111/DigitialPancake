@@ -10,7 +10,7 @@ process.env.DATABASE_PATH = join(temp, "test.sqlite");
 process.env.UPLOAD_DIR = join(temp, "uploads");
 process.env.PUBLIC_ORIGIN = "http://127.0.0.1:5173";
 process.env.SUBMIT_RATE_LIMIT = "200";
-const [{ app }, { run, one, db }, { hashPassword }] = await Promise.all([
+const [{ app }, { run, one, db, seedOfficialProblems }, { hashPassword }] = await Promise.all([
   import("../server/app.js"),
   import("../server/db.js"),
   import("../server/security.js"),
@@ -100,6 +100,22 @@ try {
     82,
   );
   assert.equal(one("SELECT COUNT(*) count FROM problems").count, 91);
+  const syncedOfficialFileId = "nuedc-shaanxi-ti-2022-all-a-file-1";
+  run(
+    "UPDATE official_problem_files SET relative_path='stale.doc',original_name='stale.doc',mime='application/msword',size=1,sha256='stale' WHERE id=?",
+    syncedOfficialFileId,
+  );
+  seedOfficialProblems();
+  const syncedOfficialFile = one(
+    "SELECT relative_path relativePath,original_name originalName,mime FROM official_problem_files WHERE id=?",
+    syncedOfficialFileId,
+  );
+  assert.equal(
+    syncedOfficialFile.relativePath,
+    "problems-official-files/2022/all/A.pdf",
+  );
+  assert.equal(syncedOfficialFile.originalName, "A题-单相交流电子负载.pdf");
+  assert.equal(syncedOfficialFile.mime, "application/pdf");
   assert.equal(
     JSON.parse(
       one(
@@ -134,6 +150,29 @@ try {
     member = await login("member@test.local", "member-test-password-123"),
     admin = await login("editor@test.local", "editor-test-password-123"),
     outsider = await login("outsider@test.local", "outsider-test-password-123");
+  for (const [year, codes] of [
+    [2018, ["a", "b", "c", "d", "e", "f", "g", "h"]],
+    [2022, ["a", "b", "c", "d", "e", "f"]],
+  ]) {
+    for (const code of codes) {
+      const problem = await (
+        await request(`/api/problems/nuedc-shaanxi-ti-${year}-all-${code}`)
+      ).json();
+      assert.equal(problem.attachments.length, 1);
+      assert.equal(problem.attachments[0].mime, "application/pdf");
+      assert.match(problem.attachments[0].name, /\.pdf$/i);
+    }
+  }
+  const officialPdf = await request(
+    `/api/official-files/${syncedOfficialFileId}`,
+    { cookie: member },
+  );
+  assert.equal(officialPdf.status, 200);
+  assert.match(officialPdf.headers.get("content-type") || "", /^application\/pdf/);
+  assert.equal(
+    Buffer.from(await officialPdf.arrayBuffer()).subarray(0, 5).toString(),
+    "%PDF-",
+  );
   assert.equal(
     (
       await request("/api/auth/login", {
