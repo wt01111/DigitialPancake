@@ -50,10 +50,15 @@ await page.route("**/api/articles/drafts/*", async (r) => {
   return r.fulfill({ json: { id: key, title: key === "draft-a" ? "A稿标题" : "B稿标题", category: "基础知识", tags: [], excerpt: "", body: key === "draft-a" ? "A稿正文" : "B稿正文" } });
 });
 let imageField = "";
+let releaseFailedImageUpload;
+const failedImageUploadGate = new Promise((resolve) => { releaseFailedImageUpload = resolve; });
 await page.route("**/api/articles/drafts/d1/images", async (r) => {
   imageField = (await r.request().postDataBuffer())?.toString("latin1") || "";
+  if (imageField.includes("failed.png")) {
+    await failedImageUploadGate;
+    return r.fulfill({ status: 500, json: { error: "模拟上传失败" } });
+  }
   await new Promise((resolve) => setTimeout(resolve, 180));
-  if (imageField.includes("failed.png")) return r.fulfill({ status: 500, json: { error: "模拟上传失败" } });
   return r.fulfill({ json: { id: "img1", name: "diagram.png", markdownUrl: "/api/article-images/img1", markdown: "![diagram.png](/api/article-images/img1)" } });
 });
 const pixel = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII=", "base64");
@@ -228,9 +233,14 @@ await page.locator("textarea.editor-textarea").fill("失败前\n失败后");
 await page.locator("textarea.editor-textarea").evaluate((node, bytes) => { node.focus(); node.setSelectionRange(3, 3); const data = Uint8Array.from(atob(bytes), (c) => c.charCodeAt(0)); const transfer = new DataTransfer(); transfer.items.add(new File([data], "failed.png", { type: "image/png" })); node.dispatchEvent(new ClipboardEvent("paste", { clipboardData: transfer, bubbles: true, cancelable: true })); }, pixel.toString("base64"));
 await page.locator("textarea.editor-textarea").press("Control+End");
 await page.locator("textarea.editor-textarea").type("仍保留");
+await expect(page.locator("textarea.editor-textarea")).toHaveValue(/图片上传中/);
+await expect(page.locator("textarea.editor-textarea")).toHaveValue(/仍保留$/);
+releaseFailedImageUpload();
 await expect(page.getByText("模拟上传失败")).toBeVisible();
 await expect(page.locator("textarea.editor-textarea")).toHaveValue("失败前\n失败后仍保留");
 await expect(page.locator("textarea.editor-textarea")).not.toHaveValue(/图片上传中/);
+await page.locator("textarea.editor-textarea").type("继续");
+await expect(page.locator("textarea.editor-textarea")).toHaveValue("失败前\n失败后仍保留继续");
 assert.equal(createdDraftReloads, 0, "newly created draft must not reload and overwrite current edits");
 await page.goto(`${base}/write?draft=draft-a`);
 await page.goto(`${base}/write?draft=draft-b`);

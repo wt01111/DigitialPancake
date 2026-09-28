@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Link,
   NavLink,
@@ -1889,6 +1889,7 @@ function Write() {
     [pendingImport, setPendingImport] = useState(null);
   const editorRef = useRef(null);
   const editorBodyRef = useRef(f.body);
+  const pendingEditorSelection = useRef(null);
   editorBodyRef.current = f.body;
   const loadedDraft = useRef(null);
   const seenDraftParam = useRef(draftParam);
@@ -1903,6 +1904,14 @@ function Write() {
     else editorSession.current += 1;
   }
   const nav = useNavigate();
+  useLayoutEffect(() => {
+    const selection = pendingEditorSelection.current;
+    if (!selection) return;
+    pendingEditorSelection.current = null;
+    const el = editorRef.current;
+    el?.focus();
+    el?.setSelectionRange(selection.start, selection.end);
+  }, [f.body]);
   useEffect(() => {
     if (draftParam === seenDraftParam.current) return;
     seenDraftParam.current = draftParam;
@@ -1961,11 +1970,11 @@ function Write() {
     const el = editorRef.current;
     const start = fixedRange?.start ?? el?.selectionStart ?? f.body.length;
     const end = fixedRange?.end ?? el?.selectionEnd ?? start;
+    pendingEditorSelection.current = {
+      start: start + selectStart,
+      end: start + selectStart + selectLength,
+    };
     setF((current) => ({ ...current, body: `${current.body.slice(0, start)}${text}${current.body.slice(end)}` }));
-    requestAnimationFrame(() => {
-      el?.focus();
-      el?.setSelectionRange(start + selectStart, start + selectStart + selectLength);
-    });
   }
   function wrapSelection(before, after, fallback) {
     const el = editorRef.current;
