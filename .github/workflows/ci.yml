@@ -52,11 +52,11 @@ jobs:
       - run: npm run test:owner-recovery
       - run: npm run test:e2e
       - run: npm run test:community
-      - name: Browser UI regressions
+      - name: Start browser preview
+        id: browser_preview
         run: |
           npm run preview > /tmp/electronic-pancake-preview.log 2>&1 &
-          preview_pid=$!
-          trap 'kill "$preview_pid"' EXIT
+          echo $! > /tmp/electronic-pancake-preview.pid
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then
               break
@@ -64,5 +64,46 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4173/ > /dev/null
-          PREVIEW_BASE=http://127.0.0.1:4173 npm run test:ui
-          PREVIEW_BASE=http://127.0.0.1:4173 npm run test:new-features-ui
+      - name: Production browser UI regressions
+        if: always() && steps.browser_preview.outcome == 'success'
+        run: |
+          set +e
+          PREVIEW_BASE=http://127.0.0.1:4173 npm run test:ui > /tmp/production-browser-ui.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/production-browser-ui.log
+          if (( status != 0 )); then
+            detail="$(tail -n 15 /tmp/production-browser-ui.log)"
+            detail="${detail:0:3000}"
+            detail="${detail//'%'/'%25'}"
+            detail="${detail//$'\r'/'%0D'}"
+            detail="${detail//$'\n'/'%0A'}"
+            echo "::error title=Production browser UI regressions failed::$detail"
+            exit "$status"
+          fi
+      - name: New feature browser UI regressions
+        if: always() && steps.browser_preview.outcome == 'success'
+        run: |
+          set +e
+          PREVIEW_BASE=http://127.0.0.1:4173 npm run test:new-features-ui > /tmp/new-feature-browser-ui.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/new-feature-browser-ui.log
+          if (( status != 0 )); then
+            detail="$(tail -n 15 /tmp/new-feature-browser-ui.log)"
+            detail="${detail:0:3000}"
+            detail="${detail//'%'/'%25'}"
+            detail="${detail//$'\r'/'%0D'}"
+            detail="${detail//$'\n'/'%0A'}"
+            echo "::error title=New feature browser UI regressions failed::$detail"
+            exit "$status"
+          fi
+      - name: Browser preview diagnostics
+        if: always()
+        run: |
+          if test -f /tmp/electronic-pancake-preview.log; then
+            cat /tmp/electronic-pancake-preview.log
+          fi
+          if test -f /tmp/electronic-pancake-preview.pid; then
+            kill "$(cat /tmp/electronic-pancake-preview.pid)" 2>/dev/null || true
+          fi
