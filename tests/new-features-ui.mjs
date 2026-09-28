@@ -68,7 +68,7 @@ await expect(page.getByRole("heading", { name: "安全公告" })).toBeVisible();
 await expect(page.getByText('<img src=x onerror="globalThis.xss=1">')).toBeVisible();
 await expect(page.locator(".home-announcement img")).toHaveCount(0);
 await expect(page.getByText("维护通知")).toHaveCount(0);
-await expect(page.getByText("备案信息待补充")).toBeVisible();
+await expect(page.getByRole("link", { name: "陕ICP备2026027288" })).toHaveAttribute("href", "https://beian.miit.gov.cn/");
 await page.getByRole("link", { name: "查看历史公告" }).click();
 await expect(page.getByRole("heading", { name: "历史公告", exact: true })).toBeVisible();
 await expect(page.getByRole("heading", { name: "安全公告" })).toBeVisible();
@@ -264,7 +264,7 @@ await page.screenshot({ path: "test-results/new-features-ui/pdf-wheel-page2.png"
 await page.setViewportSize({ width: 390, height: 844 });
 await page.goto(`${base}/`);
 await expect(page.getByRole("heading", { name: "安全公告" })).toBeVisible();
-await expect(page.getByText("备案信息待补充")).toBeVisible();
+await expect(page.getByRole("link", { name: "陕ICP备2026027288" })).toBeVisible();
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "announcement and filing footer must not overflow a narrow viewport");
 await page.screenshot({ path: "test-results/new-features-ui/home-announcement-mobile.png", fullPage: true });
 await page.goto(`${base}/problems/p1`);

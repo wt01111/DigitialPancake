@@ -90,6 +90,7 @@ if [[ ! -e "$ENV_FILE" ]]; then
     printf 'SESSION_SECRET=%s\n' "$session_secret"
     printf 'DATABASE_PATH=%s/site.sqlite\nUPLOAD_DIR=%s/uploads\n' "$STATE_DIR" "$STATE_DIR"
     printf 'OWNER_EMAIL=%s\nOWNER_NICKNAME=Admin\n' "$owner_email"
+    printf 'ICP_FILING_NUMBER=陕ICP备2026027288\n'
     printf 'SMTP_HOST=%s\nSMTP_PORT=%s\nSMTP_SECURE=%s\n' "$SMTP_HOST" "$SMTP_PORT" "$SMTP_SECURE"
     printf 'SMTP_USER=%s\nSMTP_PASS=' "$SMTP_USER"; env_quote "$smtp_pass"; printf '\nSMTP_FROM=%s\n' "$SMTP_FROM"
   } >"$ENV_FILE"

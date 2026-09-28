@@ -222,7 +222,8 @@ function Header() {
 }
 function Layout({ children }) {
   const { bootstrapError, config } = useSite();
-  const filingNumber = String(config?.filingNumber || "").trim();
+  const filingNumber =
+    String(config?.filingNumber || "").trim() || "陕ICP备2026027288";
   return (
     <>
       <Header />
@@ -244,13 +245,9 @@ function Layout({ children }) {
           <span>© 2026 电子煎饼</span>
         </div>
         <div className="footer-filing">
-          {filingNumber ? (
-            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
-              {filingNumber}
-            </a>
-          ) : (
-            "备案信息待补充"
-          )}
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+            {filingNumber}
+          </a>
         </div>
       </footer>
     </>

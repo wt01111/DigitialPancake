@@ -4,7 +4,7 @@ All endpoints are same-origin under `/api`. Lists return `{items,total?}`, detai
 
 ## Session and profile
 
-- `GET /api/bootstrap` → `{user,config:{registrationEnabled,maxUploadBytes,maxAvatarBytes,filingNumber}}`; user fields include `id,email,nickname,role,permissions,avatarUrl`. `filingNumber` comes from `ICP_FILING_NUMBER` and is an empty string until configured.
+- `GET /api/bootstrap` → `{user,config:{registrationEnabled,maxUploadBytes,maxAvatarBytes,filingNumber}}`; user fields include `id,email,nickname,role,permissions,avatarUrl`. `filingNumber` comes from `ICP_FILING_NUMBER` and defaults to `陕ICP备2026027288`.
 - `POST /api/auth/request-code` `{email,purpose:"register"|"reset"}` returns `{ok:true,expiresIn:60,cooldownSeconds:60}`. Codes are six digits, become valid only after SMTP accepts the message, expire after 60 seconds, allow at most five incorrect attempts, and are consumed once. Register and reset share a per-email 60-second send cooldown; cooldown responses are 429 `{error,code:"CODE_COOLDOWN",retryAfter}` with `retryAfter` in seconds. General request limiting uses `RATE_LIMITED` with the same field. SMTP delivery failures return 503 `SMTP_UNAVAILABLE` without exposing provider details.
 - `POST /api/auth/register` `{email,code,password,nickname}`.
 - `POST /api/auth/login` `{email,password}`. All users, including the owner, log in with a verified email address. Sessions default to 90 days and can be configured with `SESSION_DAYS`.

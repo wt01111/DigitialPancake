@@ -12,7 +12,7 @@ process.env.DATABASE_PATH = databasePath;
 process.env.UPLOAD_DIR = join(temp, "uploads");
 process.env.PUBLIC_ORIGIN = "http://127.0.0.1:5173";
 process.env.SUBMIT_RATE_LIMIT = "100";
-process.env.ICP_FILING_NUMBER = "";
+delete process.env.ICP_FILING_NUMBER;
 
 const [{ app }, { db, one, run }, { hashPassword }] = await Promise.all([
   import("../server/app.js"),
@@ -60,6 +60,8 @@ async function login(email) {
 }
 
 try {
+  const bootstrap = await (await request("/api/bootstrap")).json();
+  assert.equal(bootstrap.config.filingNumber, "陕ICP备2026027288");
   const admin = await login("announcement-admin@example.test"),
     member = await login("announcement-member@example.test");
   assert.equal((await request("/api/admin/announcement")).status, 401);

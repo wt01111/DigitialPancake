@@ -4,7 +4,7 @@
 
 当前仓库是可部署源代码，不代表公网已经上线。域名、DNS、SMTP 和真实 TLS 证书仍需在目标服务器配置。目标系统按 **Ubuntu 24.04 LTS** 编写；“Ubuntu 24.02”不是 Ubuntu LTS 版本号，请在购机或重装前核对镜像名称。
 
-服务器首次开站可按《服务器开站流程.md》的“最少命令的推荐流程”执行：发布脚本生成带逐文件哈希清单的 `digitalpancake.zip`，上传并解压到 `~/digitalpancake` 后，`deploy/quick-install.sh` 会先验包再建立仅限 SSH 隧道访问的预上线环境；ICP备案通过且域名解析生效后，再运行 `deploy/enable-https.sh` 开放正式 HTTPS。脚本预填 `digitalpancake.top`、`43.142.159.194` 和腾讯企业邮箱的非秘密参数；SMTP 密码与站长信息只在服务器隐藏输入，不进入仓库。
+服务器首次开站可按《服务器开站流程.md》的“最少命令的推荐流程”执行：发布脚本生成带逐文件哈希清单的 `digitalpancake.zip`，上传并解压到 `~/digitalpancake` 后，先运行 `deploy/quick-install.sh` 验包并建立仅限 SSH 隧道访问的预上线环境；确认域名解析生效和云安全组放行 80/443 后，再运行 `deploy/enable-https.sh` 开放正式 HTTPS，最后运行 `deploy/verify-server.sh` 验收。备案号 `陕ICP备2026027288` 已取得并预填在新发布包与快速安装配置中；脚本还预填 `digitalpancake.top`、`43.142.159.194` 和腾讯企业邮箱的非秘密参数，SMTP 密码与站长信息只在服务器隐藏输入，不进入仓库。
 
 ## Windows 本地运行
 
@@ -127,7 +127,7 @@ sudo mv -Tf /opt/electronic-pancake/current.new /opt/electronic-pancake/current
 ```
 
 必须把 `release_zip` 改成本次上传文件的准确名称。发布包不要包含 `.env`、数据库、上传目录、`node_modules` 或本地日志。
-4. 由 `deploy/app.env.example` 创建 `/etc/electronic-pancake/app.env`，设置真实 HTTPS `PUBLIC_ORIGIN`、随机会话密钥、绝对数据路径和最高管理员邮箱 `OWNER_EMAIL`，再执行 `sudo chown root:root /etc/electronic-pancake/app.env && sudo chmod 0600 /etc/electronic-pancake/app.env`。`PUBLIC_ORIGIN` 只能填写一个主域名，例如 `https://example.com`，且必须与 Nginx canonical `server_name` 完全一致。备案号取得后填写可选的 `ICP_FILING_NUMBER`；留空时页脚明确显示“备案信息待补充”，不会生成虚构号码。正式数据库会在首次启动时由服务账号创建为 `/var/lib/electronic-pancake/site.sqlite`；不要预先用 root 在项目目录运行后端或初始化命令。
+4. 由 `deploy/app.env.example` 创建 `/etc/electronic-pancake/app.env`，设置真实 HTTPS `PUBLIC_ORIGIN`、随机会话密钥、绝对数据路径和最高管理员邮箱 `OWNER_EMAIL`，再执行 `sudo chown root:root /etc/electronic-pancake/app.env && sudo chmod 0600 /etc/electronic-pancake/app.env`。`PUBLIC_ORIGIN` 只能填写一个主域名，例如 `https://example.com`，且必须与 Nginx canonical `server_name` 完全一致。`ICP_FILING_NUMBER` 已预填为 `陕ICP备2026027288`；以后备案号变更时可通过该配置覆盖。正式数据库会在首次启动时由服务账号创建为 `/var/lib/electronic-pancake/site.sqlite`；不要预先用 root 在项目目录运行后端或初始化命令。
 
    邮件建议使用域名邮箱或云邮件服务商：先在服务商控制台验证发信域名和 `SMTP_FROM`，再按其给出的值添加 SPF TXT、DKIM TXT/CNAME，并添加 DMARC TXT（初次可用服务商建议的监控策略，确认投递报告后再收紧）。同一域名只能合并为一条有效 SPF 记录。等待服务商确认 DNS 验证通过后，把 SMTP 主机、端口、加密方式、用户名、发件地址写入环境文件；密码或应用专用密钥只写 `SMTP_PASS`，不得进入 Git。端口 465 通常设置 `SMTP_SECURE=true`，STARTTLS 端口通常设置为 `false`，但必须以服务商文档为准。重启服务后，用专用测试邮箱完成注册验证码、密码重置和退信检查，再查看 SPF、DKIM、DMARC 验证结果。SMTP 未准备好时保持相关值为空。
 5. 安装并校验 API 服务；确认 `systemd-analyze verify` 没有错误后再启动。只运行一个 API 实例；SQLite WAL 不使用 Node cluster、PM2 多实例或多台共享写入。

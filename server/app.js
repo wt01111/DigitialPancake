@@ -487,12 +487,15 @@ app.get("/healthz", (_req, res) => {
   one("SELECT 1 ok");
   res.json({ ok: true });
 });
+const DEFAULT_FILING_NUMBER = "陕ICP备2026027288";
 app.get("/api/bootstrap", (req, res) =>
   res.json({
     user: publicUser(req.user, true),
     config: {
       registrationEnabled: smtpEnabled,
-      filingNumber: String(process.env.ICP_FILING_NUMBER || "").trim(),
+      filingNumber:
+        String(process.env.ICP_FILING_NUMBER || "").trim() ||
+        DEFAULT_FILING_NUMBER,
       maxUploadBytes: 50 * 1024 * 1024,
       maxAvatarBytes: AVATAR_MAX_BYTES,
       maxAvatarDimension: AVATAR_MAX_DIMENSION,
