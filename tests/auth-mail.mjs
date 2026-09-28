@@ -226,7 +226,7 @@ try {
     });
     const payload = await response.json();
     assert.equal(response.status, 200, JSON.stringify(payload));
-    assert.equal(payload.expiresIn, 60);
+    assert.equal(payload.expiresIn, 180);
     assert.equal(payload.cooldownSeconds, 60);
     return waitForCode(messageIndex);
   }
@@ -252,6 +252,17 @@ try {
   const oldPassword = "mail-test-old-password-123";
   const newPassword = "mail-test-new-password-456";
   const firstCode = await register(firstEmail, "Mail One", oldPassword, 0);
+  const firstCodeRow = db
+    .prepare(
+      "SELECT expires_at,created_at FROM verification_codes WHERE email=? ORDER BY created_at DESC LIMIT 1",
+    )
+    .get(firstEmail);
+  const validityMs =
+    Date.parse(firstCodeRow.expires_at) - Date.parse(firstCodeRow.created_at);
+  assert.ok(
+    validityMs >= 179_000 && validityMs <= 181_000,
+    `verification code validity should be 180 seconds, received ${validityMs}ms`,
+  );
 
   let result = await login(firstEmail, oldPassword);
   assert.equal(result.response.status, 200, await result.response.text());

@@ -1684,7 +1684,7 @@ function Auth() {
       setSuccess(
         mode === "register"
           ? "若该邮箱可用于注册，验证码将发送；若收件箱中没有，请检查垃圾邮件或广告邮件。"
-          : "若该邮箱可用于此操作，验证码将发送，请在 1 分钟内完成验证。",
+          : "若该邮箱可用于此操作，验证码将发送，请在 3 分钟内完成验证。",
       );
     } catch (x) {
       setError(x.message);
@@ -1820,7 +1820,7 @@ function Auth() {
                 </button>
               </div>
               <small id="code-help">
-                验证码为 6 位数字，发送后 1 分钟内有效。
+                验证码为 6 位数字，发送后 3 分钟内有效。
                 {mode === "register" && " 若收件箱中没有，请检查垃圾邮件或广告邮件。"}
               </small>
             </label>
@@ -2252,8 +2252,10 @@ function Account() {
       <aside>
         <div className="profile-chip">
           <UserAvatar user={user} />
-          <strong>{user.role === "owner" ? "Admin" : user.nickname}</strong>
-          <small>{user.email}</small>
+          <div className="profile-chip-copy">
+            <strong>{user.role === "owner" ? "Admin" : user.nickname}</strong>
+            <small>{user.email}</small>
+          </div>
         </div>
         {[
           ["profile", "资料"],
@@ -2360,7 +2362,7 @@ function Profile({ user, refresh }) {
       <h1>个人资料</h1>
       <section className="panel avatar-editor" aria-labelledby="avatar-editor-title">
         <UserAvatar user={user} name={nickname} className="profile-avatar-preview" />
-        <div>
+        <div className="avatar-editor-copy">
           <h2 id="avatar-editor-title">个人头像</h2>
           <p>上传 PNG、JPEG 或 WebP 图片，文件不超过 0.5 MB。</p>
           <div className="action-row">

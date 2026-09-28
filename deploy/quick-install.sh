@@ -169,7 +169,7 @@ if ! owner_count="$(sqlite3 "$STATE_DIR/site.sqlite" "SELECT count(*) FROM users
   die "无法确认最高管理员状态；为避免覆盖账号，已停止初始化。"
 fi
 [[ "$owner_count" =~ ^[0-9]+$ ]] || die "最高管理员状态异常，未执行初始化。"
-if [[ "$owner_count" == "0" ]]; then
+if [[ "$owner_count" == "0" && ${SKIP_OWNER_INIT:-0} != "1" ]]; then
   printf '\n现在初始化最高管理员。密码输入不可见，且不会写入环境文件。\n'
   systemd-run --quiet --wait --collect --pty --uid="$APP_USER" --gid="$APP_USER" \
     --property="EnvironmentFile=$ENV_FILE" --working-directory="$APP_ROOT/current" \

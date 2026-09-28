@@ -4,6 +4,14 @@
 
 当前仓库是可部署源代码，不代表公网已经上线。域名、DNS、SMTP 和真实 TLS 证书仍需在目标服务器配置。目标系统按 **Ubuntu 24.04 LTS** 编写；“Ubuntu 24.02”不是 Ubuntu LTS 版本号，请在购机或重装前核对镜像名称。
 
+已有 Ubuntu 服务器从 Git 仓库更新并恢复最高管理员时，在非 root 的仓库克隆中先拉取代码，再运行一键修复。脚本沿用快速安装的备份与发布回滚，保留 `/var/lib/electronic-pancake` 中的数据库和附件；默认把预设的 QQ 站长邮箱绑定为最高管理员邮箱，生成随机新密码并只在当前终端显示一次，随后复用或启用 HTTPS 并验收：
+
+```sh
+git pull --ff-only origin master && sudo bash ./deploy/one-click-repair.sh
+```
+
+需要改用其他最高管理员邮箱时，运行 `sudo bash ./deploy/one-click-repair.sh --owner-email '<其他站长邮箱>'`。邮箱会以同目录原子替换方式同步写回权限为 `0600` 的 `/etc/electronic-pancake/app.env`；密码及其明文不会写入仓库、参数或环境文件，数据库只保存带随机盐的 scrypt 哈希。若 HTTPS 或最终验收失败，脚本仍会在退出前显示一次已经生效的新登录信息。
+
 服务器首次开站可按《服务器开站流程.md》的“最少命令的推荐流程”执行：发布脚本生成带逐文件哈希清单的 `digitalpancake.zip`，上传并解压到 `~/digitalpancake` 后，先运行 `deploy/quick-install.sh` 验包并建立仅限 SSH 隧道访问的预上线环境；确认域名解析生效和云安全组放行 80/443 后，再运行 `deploy/enable-https.sh` 开放正式 HTTPS，最后运行 `deploy/verify-server.sh` 验收。备案号 `陕ICP备2026027288` 已取得并预填在新发布包与快速安装配置中；脚本还预填 `digitalpancake.top`、`43.142.159.194` 和腾讯企业邮箱的非秘密参数，SMTP 密码与站长信息只在服务器隐藏输入，不进入仓库。
 
 ## Windows 本地运行
@@ -28,6 +36,7 @@ npm start
 npm run init-owner
 npm run test:api
 npm run test:profile-community
+npm run test:owner-recovery
 npm run test:ui
 ```
 

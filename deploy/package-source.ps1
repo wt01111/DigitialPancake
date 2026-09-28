@@ -29,7 +29,8 @@ $files = @(
     'src\photo-data.json', 'src\photography.css', 'src\Photos.jsx',
     'src\store.jsx', 'src\styles.css',
     'server\API.md', 'server\app.js', 'server\content-manifest.js', 'server\validate-content.js', 'server\db.js', 'server\index.js',
-    'server\init-owner.js', 'server\bind-owner-email.js', 'server\verify-smtp.js',
+    'server\init-owner.js', 'server\bind-owner-email.js', 'server\recover-owner.js',
+    'server\owner-recovery.js', 'server\verify-smtp.js',
     'server\security.js', 'server\seed\shop-seed.json',
     'server\seed\problems-official.json', 'server\seed\problems-official-files\README.md',
     'scripts\import-national-problems.mjs',
@@ -38,7 +39,7 @@ $files = @(
     'public\photos\pcb-1200.webp', 'public\photos\pcb-640.webp',
     'public\photos\soldering-1200.webp', 'public\photos\soldering-640.webp',
     'public\photos\stm32-1200.webp', 'public\photos\stm32-640.webp',
-    'tests\api.mjs', 'tests\auth-mail.mjs', 'tests\production-ui.mjs',
+    'tests\api.mjs', 'tests\auth-mail.mjs', 'tests\owner-recovery.mjs', 'tests\production-ui.mjs',
     'tests\production-integration.mjs', 'tests\production-e2e.mjs',
     'tests\community-e2e.mjs', 'tests\new-features-ui.mjs',
     'tests\persistence.mjs', 'tests\persistence-child.mjs', 'tests\real-data-ui.mjs',
@@ -51,7 +52,7 @@ $files = @(
     'deploy\nginx\electronic-pancake.conf',
     'deploy\nginx\electronic-pancake-staging.conf',
     'deploy\nginx\electronic-pancake-domain.conf', 'deploy\nginx\electronic-pancake-tls.conf',
-    'deploy\quick-install.sh', 'deploy\enable-https.sh', 'deploy\verify-server.sh', 'deploy\restore.sh',
+    'deploy\quick-install.sh', 'deploy\one-click-repair.sh', 'deploy\enable-https.sh', 'deploy\verify-server.sh', 'deploy\restore.sh',
     'deploy\package-source.ps1'
 )
 

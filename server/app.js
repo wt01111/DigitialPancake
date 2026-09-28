@@ -46,6 +46,8 @@ const sessionDays = Math.min(
   Math.max(1, Number.parseInt(process.env.SESSION_DAYS || "90", 10) || 90),
 );
 const sessionMaxAge = sessionDays * 864e5;
+const verificationCodeTtlSeconds = 180;
+const verificationCodeTtlMs = verificationCodeTtlSeconds * 1000;
 const uploadDir = resolve(
   root,
   process.env.UPLOAD_DIR || "server/private-uploads",
@@ -1012,7 +1014,11 @@ app.post(
           now(),
           createdCodeId,
         );
-        return res.json({ ok: true, expiresIn: 60, cooldownSeconds: 60 });
+        return res.json({
+          ok: true,
+          expiresIn: verificationCodeTtlSeconds,
+          cooldownSeconds: 60,
+        });
       }
       try {
         await mailer.sendMail({
@@ -1022,7 +1028,7 @@ app.post(
             purpose === "register"
               ? "电子煎饼注册验证码"
               : "电子煎饼密码重置验证码",
-          text: `验证码：${code}\n1 分钟内有效，请勿转发。`,
+          text: `验证码：${code}\n3 分钟内有效，请勿转发。`,
         });
       } catch {
         throw fail(503, "验证码邮件暂时无法发送，请稍后重试", "SMTP_UNAVAILABLE");
@@ -1041,10 +1047,14 @@ app.post(
       );
       run(
         "UPDATE verification_codes SET expires_at=? WHERE id=?",
-        new Date(Date.now() + 60_000).toISOString(),
+        new Date(Date.now() + verificationCodeTtlMs).toISOString(),
         createdCodeId,
       );
-      res.json({ ok: true, expiresIn: 60, cooldownSeconds: 60 });
+      res.json({
+        ok: true,
+        expiresIn: verificationCodeTtlSeconds,
+        cooldownSeconds: 60,
+      });
     } catch (e) {
       if (createdCodeId)
         run(

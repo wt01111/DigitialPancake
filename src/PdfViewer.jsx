@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Download, Minus, Plus } from "lucide-react";
 import * as pdfjs from "pdfjs-dist/build/pdf.mjs";
-import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?worker&url";
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 function PdfPage({ doc, number, scale, root, estimatedHeight }) {
   const holder = useRef(null), canvas = useRef(null), renderTask = useRef(null);
@@ -28,7 +28,7 @@ function PdfPage({ doc, number, scale, root, estimatedHeight }) {
 }
 export default function PdfViewer({ url, name }) {
   const stageRef = useRef(null), pageRefs = useRef(new Map()), documentRef = useRef(null);
-  const [root, setRoot] = useState(null), [pages, setPages] = useState(0), [naturalHeight, setNaturalHeight] = useState(842), [page, setPage] = useState(1), [scale, setScale] = useState(1), [loading, setLoading] = useState(true), [error, setError] = useState("");
+  const [root, setRoot] = useState(null), [pages, setPages] = useState(0), [naturalHeight, setNaturalHeight] = useState(842), [page, setPage] = useState(1), [scale, setScale] = useState(1), [loading, setLoading] = useState(true), [error, setError] = useState(false), [retry, setRetry] = useState(0);
   const setStage = useCallback((node) => { stageRef.current = node; setRoot(node); }, []);
   useEffect(() => {
     if (!root || !pages) return;
@@ -52,13 +52,13 @@ export default function PdfViewer({ url, name }) {
     setScale(Math.max(.4, Math.min(2.4, available / natural.width)));
   };
   useEffect(() => {
-    let live = true; setPage(1); setPages(0); setError(""); setLoading(true);
+    let live = true; setPage(1); setPages(0); setError(false); setLoading(true); pageRefs.current.clear();
     const task = pdfjs.getDocument({ url, withCredentials: true, disableAutoFetch: true, disableStream: true, rangeChunkSize: 65536, isEvalSupported: false });
-    task.promise.then(async (doc) => { if (!live) return doc.destroy(); documentRef.current = doc; const first = await doc.getPage(1); const natural = first.getViewport({ scale: 1 }); if (!live) return; setNaturalHeight(natural.height); setPages(doc.numPages); setLoading(false); requestAnimationFrame(() => fitWidth(doc)); }).catch((e) => { if (live) { setError(e.message || "PDF 加载失败"); setLoading(false); } });
+    task.promise.then(async (doc) => { if (!live) return doc.destroy(); documentRef.current = doc; const first = await doc.getPage(1); const natural = first.getViewport({ scale: 1 }); if (!live) return; setNaturalHeight(natural.height); setPages(doc.numPages); setLoading(false); requestAnimationFrame(() => fitWidth(doc)); }).catch(() => { if (live) { setError(true); setLoading(false); } });
     return () => { live = false; task.destroy(); documentRef.current = null; };
-  }, [url]);
+  }, [url, retry]);
   function go(value) { const next = Math.max(1, Math.min(pages, Number(value) || 1)); setPage(next); pageRefs.current.get(next)?.scrollIntoView({ behavior: "smooth", block: "start" }); }
-  if (error) return <div className="pdf-error" role="alert"><strong>预览失败</strong><p>{error}</p><a className="button primary" href={url}>下载后查看</a></div>;
+  if (error) return <div className="pdf-inline-reader" aria-label={`${name} PDF 阅读器`}><div className="pdf-error" role="alert"><strong>暂时无法在线预览这份 PDF</strong><p>请重试，或下载到设备后查看。</p><div className="pdf-error-actions"><button className="button primary" onClick={() => setRetry((value) => value + 1)}>重新加载</button><a className="button" href={url} download>下载 PDF</a></div></div></div>;
   return <div className="pdf-inline-reader" aria-label={`${name} PDF 阅读器`}>
     <div className="pdf-toolbar"><strong title={name}>{name}</strong><label>页码 <input type="number" min="1" max={pages || 1} value={page} onChange={(e) => go(e.target.value)} /> / {pages || "—"}</label><button aria-label="缩小" disabled={scale <= .4} onClick={() => setScale((s) => Math.max(.4, s - .2))}><Minus /></button><span>{Math.round(scale * 100)}%</span><button aria-label="放大" disabled={scale >= 2.4} onClick={() => setScale((s) => Math.min(2.4, s + .2))}><Plus /></button><button onClick={() => fitWidth()}>适合宽度</button><a href={url}><Download />下载 PDF</a></div>
     {loading ? <div className="pdf-loading">正在加载 PDF…</div> : <div className="pdf-continuous" ref={setStage}>{Array.from({ length: pages }, (_, i) => <div key={i + 1} ref={(node) => node ? pageRefs.current.set(i + 1, node) : pageRefs.current.delete(i + 1)}><PdfPage doc={documentRef.current} number={i + 1} scale={scale} root={root} estimatedHeight={`${Math.max(360, naturalHeight * scale + 46)}px`} /></div>)}</div>}

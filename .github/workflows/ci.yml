@@ -44,8 +44,25 @@ jobs:
       - run: npm run build
       - run: npm run validate:content
       - run: npm run test:api
+      - run: npm run test:integration
+      - run: npm run test:announcement
       - run: npm run test:profile-community
       - run: npm run test:persistence
       - run: npm run test:mail
+      - run: npm run test:owner-recovery
       - run: npm run test:e2e
       - run: npm run test:community
+      - name: Browser UI regressions
+        run: |
+          npm run preview > /tmp/electronic-pancake-preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid"' EXIT
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4173/ > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4173/ > /dev/null
+          PREVIEW_BASE=http://127.0.0.1:4173 npm run test:ui
+          PREVIEW_BASE=http://127.0.0.1:4173 npm run test:new-features-ui

@@ -2,7 +2,11 @@ import { chromium, expect } from "@playwright/test";
 import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
-const browser = await chromium.launch({ channel: "msedge", headless: true });
+const browser = await chromium.launch(
+  process.platform === "win32"
+    ? { channel: "msedge", headless: true }
+    : { headless: true },
+);
 const page = await browser.newPage({
   viewport: { width: 1280, height: 900 },
   locale: "zh-CN",
@@ -239,6 +243,28 @@ await admin.route("**/api/admin/accounts*", async (r) => {
     },
   });
 });
+await admin.goto(`${base}/account`);
+await expect(admin.getByRole("heading", { name: "个人头像" })).toBeVisible();
+const avatarEditorAlignment = await admin.locator(".avatar-editor").evaluate((editor) => {
+  const copy = editor.querySelector(".avatar-editor-copy").getBoundingClientRect();
+  const action = editor.querySelector(".action-row").getBoundingClientRect();
+  const button = editor.querySelector(".action-row > *").getBoundingClientRect();
+  return {
+    actionOffset: Math.abs(action.left - copy.left),
+    buttonOffset: Math.abs(button.left - copy.left),
+    buttonHeight: button.height,
+  };
+});
+assert.ok(avatarEditorAlignment.actionOffset < 2, "avatar actions should align with their explanatory copy");
+assert.ok(avatarEditorAlignment.buttonOffset < 2, "avatar upload should not float in the middle of the panel");
+assert.ok(avatarEditorAlignment.buttonHeight >= 44, "avatar upload target should be at least 44px high");
+const desktopProfileChipFits = await admin.locator(".profile-chip").evaluate((chip) => {
+  const outer = chip.getBoundingClientRect();
+  const copy = chip.querySelector(".profile-chip-copy").getBoundingClientRect();
+  return copy.left >= outer.left && copy.right <= outer.right + 0.5;
+});
+assert.equal(desktopProfileChipFits, true, "account identity should fit within the sidebar");
+await admin.screenshot({ path: "work/qa/account-profile-desktop.png", fullPage: true });
 await admin.goto(`${base}/problems/pdf-online`);
 await expect(admin.getByRole("heading", { name: "在线阅读" })).toBeVisible();
 await expect(admin.locator(".pdf-page")).toHaveCount(2);
@@ -321,10 +347,20 @@ await subordinate.getByLabel("公告标题").fill("移动端公告");
 await subordinate.getByLabel("公告内容").fill("检查公告操作按钮在窄屏下不会溢出。");
 assert.equal(await subordinate.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "announcement admin actions must not overflow a narrow viewport");
 await subordinate.screenshot({ path: "test-results/new-features-ui/announcement-admin-mobile.png", fullPage: true });
+await subordinate.goto(`${base}/account`);
+await expect(subordinate.getByRole("heading", { name: "个人头像" })).toBeVisible();
+assert.equal(await subordinate.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, "account profile must not overflow a 390px viewport");
+const mobileProfileChipFits = await subordinate.locator(".profile-chip").evaluate((chip) => {
+  const outer = chip.getBoundingClientRect();
+  const copy = chip.querySelector(".profile-chip-copy").getBoundingClientRect();
+  return copy.left >= outer.left && copy.right <= outer.right + 0.5;
+});
+assert.equal(mobileProfileChipFits, true, "account identity should remain inside its card on mobile");
+await subordinate.screenshot({ path: "test-results/new-features-ui/account-profile-mobile.png", fullPage: true });
 const authFlow = await browser.newPage({ viewport: { width: 390, height: 844 }, locale: "zh-CN" });
 await authFlow.route("**/api/bootstrap", (r) => r.fulfill({ json: { user: null, config: { registrationEnabled: true, maxUploadBytes: 52428800 } } }));
 let codeRequests = 0, resetPayload = null;
-await authFlow.route("**/api/auth/request-code", async (r) => { codeRequests += 1; await new Promise((resolve) => setTimeout(resolve, 150)); return r.fulfill({ json: { ok: true, expiresIn: 60, cooldownSeconds: 60 } }); });
+await authFlow.route("**/api/auth/request-code", async (r) => { codeRequests += 1; await new Promise((resolve) => setTimeout(resolve, 150)); return r.fulfill({ json: { ok: true, expiresIn: 180, cooldownSeconds: 60 } }); });
 await authFlow.route("**/api/auth/reset-password", (r) => { resetPayload = r.request().postDataJSON(); return r.fulfill({ json: { ok: true } }); });
 await authFlow.goto(`${base}/auth`);
 await authFlow.getByRole("button", { name: "注册" }).click();

@@ -23,6 +23,8 @@ trap cleanup EXIT INT TERM
 mkdir -p "$smoke_root/www/.well-known/acme-challenge" "$smoke_root/logs"
 printf 'smoke-index\n' >"$smoke_root/www/index.html"
 printf 'acme-probe\n' >"$smoke_root/www/.well-known/acme-challenge/smoke-token"
+mkdir -p "$smoke_root/www/assets"
+printf 'export const worker = true;\n' >"$smoke_root/www/assets/pdf.worker.mjs"
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
   -subj '/CN=digitalpancake.test' \
   -keyout "$smoke_root/key.pem" -out "$smoke_root/cert.pem" >/dev/null 2>&1
@@ -71,12 +73,17 @@ render_common "$project_root/deploy/nginx/electronic-pancake-staging.conf" |
 start_fragment "$smoke_root/staging.conf"
 ss -ltn | grep -Fq "127.0.0.1:$staging_port"
 curl --noproxy '*' --fail --silent "http://127.0.0.1:$staging_port/" | grep -Fq smoke-index
+curl --noproxy '*' --fail --silent --head "http://127.0.0.1:$staging_port/assets/pdf.worker.mjs" |
+  tr -d '\r' | grep -Eiq '^Content-Type: application/javascript(;|$)'
 stop_fragment
 
 render_common "$project_root/deploy/nginx/electronic-pancake-domain.conf" |
   sed -e "s/listen 80;/listen 127.0.0.1:$http_port;/" -e '/listen \[::\]:80;/d' \
   >"$smoke_root/domain.conf"
 start_fragment "$smoke_root/domain.conf"
+curl --noproxy '*' --fail --silent --head --resolve "digitalpancake.test:$http_port:127.0.0.1" \
+  "http://digitalpancake.test:$http_port/assets/pdf.worker.mjs" |
+  tr -d '\r' | grep -Eiq '^Content-Type: application/javascript(;|$)'
 curl --noproxy '*' --fail --silent --resolve "digitalpancake.test:$http_port:127.0.0.1" \
   "http://digitalpancake.test:$http_port/.well-known/acme-challenge/smoke-token" | grep -Fq acme-probe
 stop_fragment
@@ -97,6 +104,11 @@ curl --noproxy '*' --silent --head --resolve "digitalpancake.test:$http_port:127
   "http://digitalpancake.test:$http_port/check" | grep -Fiq 'Location: https://digitalpancake.test/check'
 curl --noproxy '*' --fail --silent --insecure --resolve "digitalpancake.test:$https_port:127.0.0.1" \
   "https://digitalpancake.test:$https_port/" | grep -Fq smoke-index
+curl --noproxy '*' --fail --silent --head --insecure --resolve "digitalpancake.test:$https_port:127.0.0.1" \
+  "https://digitalpancake.test:$https_port/assets/pdf.worker.mjs" |
+  tr -d '\r' | grep -Eiq '^Content-Type: application/javascript(;|$)'
 stop_fragment
+
+grep -Eq 'application/javascript mjs' "$project_root/deploy/nginx/electronic-pancake.conf"
 
 echo "PASS: isolated Nginx staging, ACME and TLS template smoke tests"
